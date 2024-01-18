@@ -21,7 +21,7 @@ const FORMAT_VERSION: u16 = 0;
 
 #[derive(Debug)]
 #[allow(dead_code)]
-struct ContigIndex {
+pub struct ContigIndex {
     tile_size: u32,  // Default: 16384
     bgz_files: Vec<BGZFile>,
     contig_count: u32,
@@ -654,7 +654,7 @@ impl ContigIndex {
 }
 
 
-fn prep_idx() {
+pub fn prep_idx(proj_dir: &String) -> (Vec<String>, String, ContigIndex, String) {
     // Using builder interface to support a custom help template
 //     let cli = Command::new("te_idx").help_template(
 //         "
@@ -686,7 +686,7 @@ fn prep_idx() {
     //     .unwrap();
 
     // Initial instantiation
-    let mut contig_index = ContigIndex {
+    let contig_index = ContigIndex {
         tile_size: 16384,
         bgz_files: Vec::new(),
         contig_count: 0,
@@ -700,7 +700,7 @@ fn prep_idx() {
     // TODO: Command line parameter
     // The full directory takes ~4.4 minutes to index
     // The minimal beds take ~57sec to index
-    let proj_dir = "hg38";
+    // let proj_dir = "hg38";
 
     // From the project directory several things can be assumed:
     //let file_list_path = "/home/rhubley/projects/Rust/te_idx/test/files.txt";
@@ -722,9 +722,10 @@ fn prep_idx() {
     } else {
         eprintln!("Error reading {} directory", bgz_dir);
     }
+    (filenames, bgz_dir, contig_index, index_file)
 }
 
-fn build_idx(filenames: Vec<String>, bgz_dir: String, contig_index: ContigIndex, index_file: String){
+pub fn build_idx(filenames: Vec<String>, bgz_dir: String, mut contig_index: ContigIndex, index_file: String){
     let mut fidx = 0;
     for filename in filenames {
         let bgz_file = format!("{}/{}", bgz_dir, filename);
@@ -769,7 +770,7 @@ fn build_idx(filenames: Vec<String>, bgz_dir: String, contig_index: ContigIndex,
 
 }
 
-fn search_idx(filenames: Vec<String>, bgz_dir: String, contig_index: ContigIndex, index_file: String){
+pub fn search_idx(filenames: Vec<String>, bgz_dir: String, mut contig_index: ContigIndex, index_file: String){
     println!("Loading index");
     contig_index.init_search(&index_file);
 

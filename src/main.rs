@@ -31,6 +31,9 @@ pub enum Commands {
         assembly: String,
     },
     Idx {
+        #[arg(short, long)]
+        proj_dir: String,
+
         // Build the index from the current hard-coded filename
         #[arg(short, long)]
         build: bool,
@@ -53,7 +56,17 @@ fn main() {
             outfile,
         }) => {
             bgzf_filter(infile, position, term, outfile).expect("Filter Failed");
-        }
+        },
+        Some(Commands::Idx{proj_dir, build, search}) => {
+            let (filenames, bgz_dir, contig_index, index_file) = idx::prep_idx(proj_dir);
+            if *build {
+                idx::build_idx(filenames, bgz_dir, contig_index, index_file)
+            }
+
+            else if *search {
+                idx::search_idx(filenames, bgz_dir, contig_index, index_file)
+            }
+        },
         None => {}
     }
 }
