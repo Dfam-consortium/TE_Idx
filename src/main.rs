@@ -1,3 +1,6 @@
+use std::num::ParseIntError;
+use std::path::Path;
+
 use clap::{Parser, Subcommand};
 
 use te_idx::bgzf_filter;
@@ -32,7 +35,7 @@ pub enum Commands {
     },
     Idx {
         #[arg(short, long)]
-        proj_dir: String,
+        assembly: String,
 
         // Build the index from the current hard-coded filename
         #[arg(short, long)]
@@ -40,8 +43,22 @@ pub enum Commands {
 
         // Search the index using a hard coded search range
         #[arg(short, long)]
-        search: bool,
+        search: Option<String>,
     },
+}
+
+fn parse_coordinates(coord_str: &str) -> Result<(u64, u64, u64), ParseIntError> {
+    let coords: Vec<u64> = coord_str.split('-').map(|e| 
+            match e.parse::<u64>(){
+                Ok(val) => val,
+                Err(e) => panic!("ERROR: Invalid Coordinates - {:?}", e)
+            }
+        ).collect();
+    if coords.len() != 3 {
+        panic!("ERROR: Invalid Coordinates: Need to be in the form of chrom-start-end")
+    } else {
+        return Ok((coords[0], coords[1], coords[2]))
+    }
 }
 
 fn main() {
@@ -81,15 +98,27 @@ fn main() {
             bgzf_filter(infile, position, term, outfile).expect("Filter Failed");
         }
         Some(Commands::Idx {
-            proj_dir,
+            assembly,
             build,
             search,
         }) => {
-            let (filenames, bgz_dir, contig_index, index_file) = idx::prep_idx(proj_dir);
+            let (filenames, bgz_dir, mut contig_index, index_file) = match idx::prep_idx(assembly){
+                Ok(res) => res,
+                Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e)
+            };
             if *build {
-                idx::build_idx(filenames, bgz_dir, contig_index, index_file)
-            } else if *search {
-                idx::search_idx(filenames, bgz_dir, contig_index, index_file)
+                idx::build_idx(&filenames, &bgz_dir, &mut contig_index, &index_file)
+            } 
+            if search.is_some() {
+                if !Path::new(&index_file).exists() {
+                    // idx::build_idx(filenames, bgz_dir, contig_index, index_file)
+                    panic!("Index {:?} does not exist. Run the build command first", &index_file)
+                }
+                let (q_contig, start, end) = match parse_coordinates(search.as_deref().unwrap()){
+                    Ok(res) => res,
+                    Err(e) => panic!("{:?}", e)
+                };
+                idx::search_idx(&filenames, &bgz_dir, &mut contig_index, &index_file, &q_contig.to_string() ,start, end)
             }
         }
         None => {}

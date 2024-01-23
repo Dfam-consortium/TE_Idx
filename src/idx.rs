@@ -2,6 +2,7 @@ use byteorder::{LittleEndian, ReadBytesExt};
 use noodles::bgzf;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::error::Error;
 use std::fs;
 use std::fs::File;
 use std::io;
@@ -136,7 +137,10 @@ impl ContigIndex {
     }
 
     fn init_search(&mut self, file_path: &str) {
-        let mut file = File::open(file_path).unwrap();
+        let mut file = match File::open(file_path){
+            Ok(file) => file,
+            Err(e) => panic!("Error Opening File - {:?}", e)
+        };
 
         // Read the magic number (6-bytes)
         let mut buffer = [0; 6];
@@ -343,13 +347,13 @@ impl ContigIndex {
     fn search(
         &mut self,
         i_file: &mut File,
-        bgz_dir: String,
-        q_contig: String,
+        bgz_dir: &String,
+        q_contig: &String,
         q_start: u64,
         q_end: u64,
     ) -> Result<Vec<ContigRange>, &'static str> {
         // TODO: Return if cannot identify contig
-        let q_contig_idx = *self.contig_lookup.get(&q_contig).unwrap();
+        let q_contig_idx = *self.contig_lookup.get(q_contig).unwrap();
 
         let results = Vec::new();
 
@@ -436,7 +440,6 @@ impl ContigIndex {
                     reader.read_line(&mut line).unwrap();
                     print!("{}", line);
                     hits += 1;
-                    //
                 }
             }
             if end_tile > start_tile {
@@ -685,7 +688,7 @@ impl ContigIndex {
     }
 }
 
-pub fn prep_idx(proj_dir: &String) -> (Vec<String>, String, ContigIndex, String) {
+pub fn prep_idx(proj_dir: &String) -> Result<(Vec<String>, String, ContigIndex, String), Box<dyn Error>> {
     // Initial instantiation
     let contig_index = ContigIndex {
         tile_size: 16384,
@@ -720,20 +723,20 @@ pub fn prep_idx(proj_dir: &String) -> (Vec<String>, String, ContigIndex, String)
     } else {
         eprintln!("Error reading {} directory", bgz_dir);
     }
-    (filenames, bgz_dir, contig_index, index_file)
+    Ok((filenames, bgz_dir, contig_index, index_file))
 }
 
 pub fn build_idx(
-    filenames: Vec<String>,
-    bgz_dir: String,
-    mut contig_index: ContigIndex,
-    index_file: String,
+    filenames: &Vec<String>,
+    bgz_dir: &String,
+    contig_index: &mut ContigIndex,
+    index_file: &String,
 ) {
     let mut fidx = 0;
     for filename in filenames {
         let bgz_file = format!("{}/{}", bgz_dir, filename);
         // Get metadata for the file
-        let metadata = fs::metadata(bgz_file.clone()).unwrap();
+        let metadata = fs::metadata(&bgz_file).unwrap();
         // Obtain modification time
         let modification_time = metadata.modified().unwrap();
         // Convert modification time to a more readable format
@@ -785,10 +788,13 @@ pub fn build_idx(
 }
 
 pub fn search_idx(
-    filenames: Vec<String>,
-    bgz_dir: String,
-    mut contig_index: ContigIndex,
-    index_file: String,
+    filenames: &Vec<String>,
+    bgz_dir: &String,
+    contig_index: &mut ContigIndex,
+    index_file: &String,
+    q_contig: &String,
+    start: u64,
+    end: u64
 ) {
     println!("Loading index");
     contig_index.init_search(&index_file);
@@ -830,5 +836,5 @@ pub fn search_idx(
 
     let mut i_file = File::open(index_file).unwrap();
     println!("Searching...");
-    let _ = contig_index.search(&mut i_file, bgz_dir, "2".to_string(), 54488623, 55428081);
+    let _ = contig_index.search(&mut i_file, &bgz_dir, &q_contig, start, end);
 }
