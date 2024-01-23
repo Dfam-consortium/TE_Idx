@@ -137,9 +137,9 @@ impl ContigIndex {
     }
 
     fn init_search(&mut self, file_path: &str) {
-        let mut file = match File::open(file_path){
+        let mut file = match File::open(file_path) {
             Ok(file) => file,
-            Err(e) => panic!("Error Opening File - {:?}", e)
+            Err(e) => panic!("Error Opening File - {:?}", e),
         };
 
         // Read the magic number (6-bytes)
@@ -688,7 +688,9 @@ impl ContigIndex {
     }
 }
 
-pub fn prep_idx(proj_dir: &String) -> Result<(Vec<String>, String, ContigIndex, String), Box<dyn Error>> {
+pub fn prep_idx(
+    proj_dir: &String,
+) -> Result<(Vec<String>, String, ContigIndex, String), Box<dyn Error>> {
     // Initial instantiation
     let contig_index = ContigIndex {
         tile_size: 16384,
@@ -794,7 +796,7 @@ pub fn search_idx(
     index_file: &String,
     q_contig: &String,
     start: u64,
-    end: u64
+    end: u64,
 ) {
     println!("Loading index");
     contig_index.init_search(&index_file);

@@ -44,7 +44,8 @@ pub fn bgzf_filter(
     Ok(())
 }
 
-pub fn read_family_assembly_annotations( // TODO
+pub fn read_family_assembly_annotations(
+    // TODO
     _id: &String,
     _assembly_id: &String,
     nrph: bool,
@@ -65,7 +66,8 @@ pub fn read_family_assembly_annotations( // TODO
     // return 200, gzip text of data values
 }
 
-pub fn read_annotations( // TODO
+pub fn read_annotations(
+    // TODO
     _assembly: &String,
     _chrom: &usize,
     _start: &usize,
@@ -101,7 +103,8 @@ pub fn read_annotations( // TODO
 
 pub fn find_family(_id: &String, assembly: &String) {
     let paths = read_dir(format!("{}/{}/{}", DATA_DIR, assembly, ASSEMBLY_DIR)).unwrap();
-    for path in paths { // TODO
+    for path in paths {
+        // TODO
         // if path.ends_with(format!("{}.bed.bgz", id)) {
         println!("Name: {}", path.unwrap().path().display())
         // }

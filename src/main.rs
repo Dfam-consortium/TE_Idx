@@ -48,30 +48,31 @@ pub enum Commands {
 }
 
 fn parse_coordinates(coord_str: &str) -> Result<(u64, u64, u64), ParseIntError> {
-    let coords: Vec<u64> = coord_str.split('-').map(|e| 
-            match e.parse::<u64>(){
-                Ok(val) => val,
-                Err(e) => panic!("ERROR: Invalid Coordinates - {:?}", e)
-            }
-        ).collect();
+    let coords: Vec<u64> = coord_str
+        .split('-')
+        .map(|e| match e.parse::<u64>() {
+            Ok(val) => val,
+            Err(e) => panic!("ERROR: Invalid Coordinates - {:?}", e),
+        })
+        .collect();
     if coords.len() != 3 {
         panic!("ERROR: Invalid Coordinates: Need to be in the form of chrom-start-end")
     } else {
-        return Ok((coords[0], coords[1], coords[2]))
+        return Ok((coords[0], coords[1], coords[2]));
     }
 }
 
 fn main() {
     let cli = Cli::parse(); // TODO update template
- // Using builder interface to support a custom help template
-    //     let cli = Command::new("te_idx").help_template(
-    //         "
-    // {before-help}{name} {version}
-    // {author-with-newline}{about-with-newline}
-    // Te_idx is a tool for indexing/searching Transposable Element annotation datasets.
-    // ...
-    // The index is based on the IGD linear binning approach with extensions for accessing
-    // metadata from compressed BED files (blocked gzip).
+                            // Using builder interface to support a custom help template
+                            //     let cli = Command::new("te_idx").help_template(
+                            //         "
+                            // {before-help}{name} {version}
+                            // {author-with-newline}{about-with-newline}
+                            // Te_idx is a tool for indexing/searching Transposable Element annotation datasets.
+                            // ...
+                            // The index is based on the IGD linear binning approach with extensions for accessing
+                            // metadata from compressed BED files (blocked gzip).
 
     // {usage-heading} {usage}
 
@@ -102,23 +103,34 @@ fn main() {
             build,
             search,
         }) => {
-            let (filenames, bgz_dir, mut contig_index, index_file) = match idx::prep_idx(assembly){
+            let (filenames, bgz_dir, mut contig_index, index_file) = match idx::prep_idx(assembly) {
                 Ok(res) => res,
-                Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e)
+                Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e),
             };
             if *build {
                 idx::build_idx(&filenames, &bgz_dir, &mut contig_index, &index_file)
-            } 
+            }
             if search.is_some() {
                 if !Path::new(&index_file).exists() {
                     // idx::build_idx(filenames, bgz_dir, contig_index, index_file)
-                    panic!("Index {:?} does not exist. Run the build command first", &index_file)
+                    panic!(
+                        "Index {:?} does not exist. Run the build command first",
+                        &index_file
+                    )
                 }
-                let (q_contig, start, end) = match parse_coordinates(search.as_deref().unwrap()){
+                let (q_contig, start, end) = match parse_coordinates(search.as_deref().unwrap()) {
                     Ok(res) => res,
-                    Err(e) => panic!("{:?}", e)
+                    Err(e) => panic!("{:?}", e),
                 };
-                idx::search_idx(&filenames, &bgz_dir, &mut contig_index, &index_file, &q_contig.to_string() ,start, end)
+                idx::search_idx(
+                    &filenames,
+                    &bgz_dir,
+                    &mut contig_index,
+                    &index_file,
+                    &q_contig.to_string(),
+                    start,
+                    end,
+                )
             }
         }
         None => {}
