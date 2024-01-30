@@ -1,12 +1,14 @@
 use noodles::bgzf;
-use std::fs::{read_dir, File};
+use std::fs::File;
 use std::io::{stdout, BufRead, Result, Write};
 use std::num::NonZeroUsize;
 use std::path::Path;
 use std::process::exit;
 
+mod idx;
+
 const DATA_DIR: &str = "./data";
-const ASSEMBLY_DIR: &str = "assembly_alignments";
+// const ASSEMBLY_DIR: &str = "assembly_alignments";
 // const BENCHMARK_DIR: &str = "./data/benchmark_alignments";
 // const SEQUENCE_DIR: &str = "./data/sequence";
 
@@ -75,9 +77,9 @@ pub fn read_family_assembly_annotations(id: &String, assembly_id: &String, nrph:
 
 pub fn read_annotations(
     assembly: &String,
-    chrom: &u32,
-    start: &u64,
-    end: &u64,
+    chrom: &String,
+    start: u64,
+    end: u64,
     family: &Option<String>,
     nrph: &bool,
 ) {
@@ -88,18 +90,29 @@ pub fn read_annotations(
         exit(1)
     }
 
-    println!(
-        "{}, {}, {}, {} ,{}",
-        chrom,
+    let (filenames, bgz_dir, mut contig_index, index_file) = match idx::prep_idx(&assembly_path) {
+        Ok(res) => res,
+        Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e),
+    };
+
+    if !Path::new(&index_file).exists() {
+        eprintln!("Assembly \"{}\" Is Not Indexed", assembly_path);
+        exit(1)
+    }
+
+    let results = idx::search_idx(
+        &filenames,
+        &bgz_dir,
+        &mut contig_index,
+        &index_file,
+        &chrom,
         start,
         end,
-        if family.is_some() {
-            family.as_ref().unwrap()
-        } else {
-            ""
-        },
-        nrph
-    )
+        family,
+        *nrph,
+    );
+    println!("results {:?}", results);
+    println!("results {:?}", results.unwrap().len())
     // find all annotations where either the start or end point is in between the 'start' and 'end' of the window.
     // attributes: ["family_accession", "seq_start", "seq_end", "strand", "ali_start", "ali_end", "model_start", "model_end", "hit_bit_score", "hit_evalue_score", "nrph_hit" sequenceModel.id],
     // if family_accession push where '$family_accession$': family_accession
@@ -112,12 +125,12 @@ pub fn read_annotations(
     // resolve response {offset: start, length: Math.abs(end - start), query: `${chrom}:${start}-${end}`, hits: nhmmerResults, tandem_repeats: trfResults} 200
 }
 
-pub fn find_family(_id: &String, assembly: &String) {
-    let paths = read_dir(format!("{}/{}/{}", DATA_DIR, assembly, ASSEMBLY_DIR)).unwrap();
-    for path in paths {
-        // TODO
-        // if path.ends_with(format!("{}.bed.bgz", id)) {
-        println!("Name: {}", path.unwrap().path().display())
-        // }
-    }
-}
+// pub fn find_family(_id: &String, assembly: &String) {
+//     let paths = read_dir(format!("{}/{}/{}", DATA_DIR, assembly, ASSEMBLY_DIR)).unwrap();
+//     for path in paths {
+//         // TODO
+//         // if path.ends_with(format!("{}.bed.bgz", id)) {
+//         println!("Name: {}", path.unwrap().path().display())
+//         // }
+//     }
+// }

@@ -4,7 +4,7 @@ use std::path::Path;
 use clap::{Parser, Subcommand};
 
 use te_idx::bgzf_filter;
-use te_idx::find_family;
+// use te_idx::find_family;
 use te_idx::read_annotations;
 use te_idx::read_family_assembly_annotations;
 
@@ -31,12 +31,12 @@ pub enum Commands {
         // outfile: String,
         outfile: Option<String>,
     },
-    FindFamily {
-        #[arg(long, short)]
-        id: String,
-        #[arg(long, short)]
-        assembly: String,
-    },
+    // FindFamily {
+    //     #[arg(long, short)]
+    //     id: String,
+    //     #[arg(long, short)]
+    //     assembly: String,
+    // },
     Idx {
         #[arg(short, long)]
         assembly: String,
@@ -48,12 +48,18 @@ pub enum Commands {
         // Search the index using a search range
         #[arg(short, long)]
         search: Option<String>,
+
+        #[arg(short, long)]
+        family: Option<String>,
+
+        #[arg(short, long)]
+        nrph: bool,
     },
     ReadAnnotations {
         #[arg(short, long)]
         assembly: String,
         #[arg(short, long)]
-        chrom: u32,
+        chrom: String,
         #[arg(short, long)]
         start: u64,
         #[arg(short, long)]
@@ -115,7 +121,7 @@ fn main() {
     //     );
 
     match &cli.command {
-        Some(Commands::FindFamily { id, assembly }) => find_family(id, assembly),
+        // Some(Commands::FindFamily { id, assembly }) => find_family(id, assembly),
         Some(Commands::BgzfFilter {
             infile,
             position,
@@ -128,6 +134,8 @@ fn main() {
             assembly,
             build,
             search,
+            family,
+            nrph,
         }) => {
             let (filenames, bgz_dir, mut contig_index, index_file) = match idx::prep_idx(assembly) {
                 Ok(res) => res,
@@ -147,7 +155,7 @@ fn main() {
                     Ok(res) => res,
                     Err(e) => panic!("{:?}", e),
                 };
-                idx::search_idx(
+                let _results = idx::search_idx(
                     &filenames,
                     &bgz_dir,
                     &mut contig_index,
@@ -155,7 +163,9 @@ fn main() {
                     &q_contig.to_string(),
                     start,
                     end,
-                )
+                    family,
+                    *nrph,
+                );
             }
         }
         Some(Commands::ReadAnnotations {
@@ -165,7 +175,7 @@ fn main() {
             end,
             family,
             nrph,
-        }) => read_annotations(assembly, chrom, start, end, family, nrph),
+        }) => read_annotations(assembly, chrom, *start, *end, family, nrph),
         Some(Commands::ReadFamilyAssemblyAnnotations {
             id,
             assembly_id,

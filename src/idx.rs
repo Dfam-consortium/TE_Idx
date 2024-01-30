@@ -56,7 +56,7 @@ impl ContigTile {
 
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd, Clone)]
 #[repr(C)]
-struct ContigRange {
+pub struct ContigRange {
     bed_idx: u32,  // Identifies the source BED file for this entry
     start_bp: u64, // region start bp (zero-based)
     end_bp: u64,   // region end bp (zero-based, half-open)
@@ -351,11 +351,29 @@ impl ContigIndex {
         q_contig: &String,
         q_start: u64,
         q_end: u64,
-    ) -> Result<Vec<ContigRange>, &'static str> {
+        q_family: &Option<String>,
+        q_nrph: bool,
+    ) -> Result<Vec<String>, Box<dyn Error>> {
+        fn filter_line(line: &String, q_family: &Option<String>, q_nrph: &bool) -> bool {
+            let fields = line.split_whitespace().collect::<Vec<&str>>();
+            if q_family.is_some() {
+                let acc: &str = fields[3].split(".").collect::<Vec<&str>>()[0];
+                if q_family.as_ref().unwrap() != acc {
+                    return false;
+                };
+            }
+            if *q_nrph == true {
+                if fields.last().unwrap() != &"1" {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         // TODO: Return if cannot identify contig
         let q_contig_idx = *self.contig_lookup.get(q_contig).unwrap();
 
-        let results = Vec::new();
+        let mut results: Vec<String> = Vec::new();
 
         // Determine the start/end tiles this range could possibly overlap
         let start_tile = (q_start / self.tile_size as u64) as usize;
@@ -367,7 +385,9 @@ impl ContigIndex {
         //   TODO: This should probably be an error as with having
         //         an end outside the index.
         if start_tile > self.tile_counts[q_contig_idx as usize] as usize {
-            return Ok(results);
+            let error_str = "Start Position Outside Of Indexed Size";
+            eprintln!("{}", error_str);
+            return Err(error_str.into());
         }
 
         // The end position is outside the indexed size of
@@ -438,8 +458,10 @@ impl ContigIndex {
                         .unwrap();
                     let mut line = String::new();
                     reader.read_line(&mut line).unwrap();
-                    print!("{}", line);
-                    hits += 1;
+                    if filter_line(&line, &q_family, &q_nrph) {
+                        results.push(line);
+                        hits += 1;
+                    }
                 }
             }
             if end_tile > start_tile {
@@ -477,8 +499,10 @@ impl ContigIndex {
                                         .unwrap();
                                     let mut line = String::new();
                                     reader.read_line(&mut line).unwrap();
-                                    print!("{}", line);
-                                    hits += 1;
+                                    if filter_line(&line, &q_family, &q_nrph) {
+                                        results.push(line);
+                                        hits += 1;
+                                    }
                                 } else {
                                     println!(
                                         "Breaking because {} >= {}",
@@ -535,6 +559,7 @@ impl ContigIndex {
     // ContigRanges starts at: 20+(Files*56)+(Contigs*44)+(Tiles*4)
     //
     // Save the ContigIndex to a binary file
+    #[allow(dead_code)]
     fn save_index(&self, file_path: &str) -> std::io::Result<()> {
         let fobj = File::create(file_path)?;
         let mut file = io::BufWriter::new(fobj);
@@ -688,6 +713,7 @@ impl ContigIndex {
     }
 }
 
+#[allow(dead_code)]
 pub fn prep_idx(
     proj_dir: &String,
 ) -> Result<(Vec<String>, String, ContigIndex, String), Box<dyn Error>> {
@@ -728,6 +754,7 @@ pub fn prep_idx(
     Ok((filenames, bgz_dir, contig_index, index_file))
 }
 
+#[allow(dead_code)]
 pub fn build_idx(
     filenames: &Vec<String>,
     bgz_dir: &String,
@@ -789,6 +816,7 @@ pub fn build_idx(
     let _ = contig_index.save_index(&index_file);
 }
 
+#[allow(dead_code)]
 pub fn search_idx(
     filenames: &Vec<String>,
     bgz_dir: &String,
@@ -797,7 +825,9 @@ pub fn search_idx(
     q_contig: &String,
     start: u64,
     end: u64,
-) {
+    family: &Option<String>,
+    nrph: bool,
+) -> Result<Vec<String>, Box<dyn Error>> {
     println!("Loading index");
     contig_index.init_search(&index_file);
 
@@ -838,5 +868,6 @@ pub fn search_idx(
 
     let mut i_file = File::open(index_file).unwrap();
     println!("Searching...");
-    let _ = contig_index.search(&mut i_file, &bgz_dir, &q_contig, start, end);
+    let results = contig_index.search(&mut i_file, &bgz_dir, &q_contig, start, end, family, nrph);
+    return results;
 }
