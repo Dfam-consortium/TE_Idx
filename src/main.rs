@@ -5,6 +5,8 @@ use clap::{Parser, Subcommand};
 
 use te_idx::bgzf_filter;
 use te_idx::find_family;
+use te_idx::read_annotations;
+use te_idx::read_family_assembly_annotations;
 
 mod idx;
 
@@ -23,9 +25,11 @@ pub enum Commands {
         #[arg(long, short)]
         position: usize,
         #[arg(long, short)]
-        term: String,
+        // term: String,
+        term: Option<String>,
         #[arg(long, short)]
-        outfile: String,
+        // outfile: String,
+        outfile: Option<String>,
     },
     FindFamily {
         #[arg(long, short)]
@@ -37,13 +41,35 @@ pub enum Commands {
         #[arg(short, long)]
         assembly: String,
 
-        // Build the index from the current hard-coded filename
+        // Boolean flag to build/rebuild index
         #[arg(short, long)]
         build: bool,
 
-        // Search the index using a hard coded search range
+        // Search the index using a search range
         #[arg(short, long)]
         search: Option<String>,
+    },
+    ReadAnnotations {
+        #[arg(short, long)]
+        assembly: String,
+        #[arg(short, long)]
+        chrom: u32,
+        #[arg(short, long)]
+        start: u64,
+        #[arg(short, long)]
+        end: u64,
+        #[arg(short, long)]
+        family: Option<String>,
+        #[arg(short, long)]
+        nrph: bool,
+    },
+    ReadFamilyAssemblyAnnotations {
+        #[arg(short, long)]
+        id: u64,
+        #[arg(short, long)]
+        assembly_id: String,
+        #[arg(short, long)]
+        nrph: bool,
     },
 }
 
@@ -112,7 +138,6 @@ fn main() {
             }
             if search.is_some() {
                 if !Path::new(&index_file).exists() {
-                    // idx::build_idx(filenames, bgz_dir, contig_index, index_file)
                     panic!(
                         "Index {:?} does not exist. Run the build command first",
                         &index_file
@@ -133,6 +158,19 @@ fn main() {
                 )
             }
         }
+        Some(Commands::ReadAnnotations {
+            assembly,
+            chrom,
+            start,
+            end,
+            family,
+            nrph,
+        }) => read_annotations(assembly, chrom, start, end, family, nrph),
+        Some(Commands::ReadFamilyAssemblyAnnotations {
+            id,
+            assembly_id,
+            nrph,
+        }) => read_family_assembly_annotations(id, assembly_id, nrph),
         None => {}
     }
 }
