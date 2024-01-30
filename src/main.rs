@@ -65,7 +65,7 @@ pub enum Commands {
     },
     ReadFamilyAssemblyAnnotations {
         #[arg(short, long)]
-        id: u64,
+        id: String,
         #[arg(short, long)]
         assembly_id: String,
         #[arg(short, long)]

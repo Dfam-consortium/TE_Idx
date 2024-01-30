@@ -50,28 +50,27 @@ pub fn bgzf_filter(
     Ok(())
 }
 
-pub fn read_family_assembly_annotations(id: &u64, assembly_id: &String, nrph: &bool) {
+pub fn read_family_assembly_annotations(id: &String, assembly_id: &String, nrph: &bool) {
     let assembly_path: String = format!("{}/{}", &DATA_DIR, &assembly_id);
     if !Path::new(&assembly_path).exists() {
         eprintln!("Assembly \"{}\" Does Not Exist", assembly_path);
         exit(1)
     }
-    let fam_file: String = format!("{}/{}.bed.bgz", &assembly_path, &id);
+    let fam_file: String = format!("{}/assembly_alignments/{}.bed.bgz", &assembly_path, &id);
     if !Path::new(&fam_file).exists() {
         eprintln!("Family {} Not Found In Assembly {}", id, assembly_path);
         exit(1)
     }
 
-    // if *nrph {
-    //     let outfile = format!("{}/{}.nrph.bed.bgz", &assembly_path, &id);
-    //     let position: usize = 13;
-    //     match bgzf_filter(&fam_file, &position,&String::from("1"), &outfile){
-    //         Ok(()) => exit(0),
-    //         Err(err) => {eprintln!("Error Filtering File: {} - {}", fam_file, err); exit(1)}
-    //     }
-    // } else {
-    //     exit(0)
-    // }
+    let position: usize = 13;
+    let term: Option<String> = if *nrph { Some("1".to_string()) } else { None };
+    match bgzf_filter(&fam_file, &position, &term, &None) {
+        Ok(()) => exit(0),
+        Err(err) => {
+            eprintln!("Error Filtering File: {} - {}", fam_file, err);
+            exit(1)
+        }
+    }
 }
 
 pub fn read_annotations(
