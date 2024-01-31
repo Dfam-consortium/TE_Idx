@@ -5,6 +5,7 @@ use std::io::{stdout, BufRead, Result, Write};
 use std::num::NonZeroUsize;
 use std::path::Path;
 use std::process::exit;
+use serde::{Deserialize, Serialize};
 
 mod idx;
 
@@ -78,7 +79,7 @@ pub fn read_family_assembly_annotations(id: &String, assembly_id: &String, nrph:
 
 #[derive(Debug)]
 #[allow(dead_code)]
-
+#[derive(Serialize, Deserialize)]
 struct Annotation {
     family_accession: String,
     seq_start: String,
@@ -129,7 +130,6 @@ pub fn read_annotations(
         family,
         *nrph,
     );
-    println!("results {:?}", &results.as_ref().unwrap().len());
 
     let mut field_map = HashMap::new();
     field_map.insert("family_accession", 3);
@@ -176,7 +176,19 @@ pub fn read_annotations(
             };
         }
     };
+    match serde_json::to_string(&formatted) {
+        Err(e) => {
+            eprintln!("Error Converting Results to JSON - {e}");
+            exit(1);
+        }
+        Ok(json_str) => {
+            let mut writer = bgzf::Writer::new(stdout());
+            writer.write_all(json_str.as_bytes()).expect("Unable to write line");
+            exit(0)
+        }
+    }
 }
+
 // pub fn find_family(_id: &String, assembly: &String) {
 //     let paths = read_dir(format!("{}/{}/{}", DATA_DIR, assembly, ASSEMBLY_DIR)).unwrap();
 //     for path in paths {
