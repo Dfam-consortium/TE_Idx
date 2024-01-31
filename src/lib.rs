@@ -1,4 +1,5 @@
 use noodles::bgzf;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{stdout, BufRead, Result, Write};
 use std::num::NonZeroUsize;
@@ -75,6 +76,23 @@ pub fn read_family_assembly_annotations(id: &String, assembly_id: &String, nrph:
     }
 }
 
+#[derive(Debug)]
+#[allow(dead_code)]
+
+struct Annotation {
+    family_accession: String,
+    seq_start: String,
+    seq_end: String,
+    strand: String,
+    // ali_start: String,
+    // ali_end: String,
+    model_start: String,
+    model_end: String,
+    hit_bit_score: String,
+    hit_evalue_score: String,
+    nrph_hit: String,
+    chrom: String,
+}
 pub fn read_annotations(
     assembly: &String,
     chrom: &String,
@@ -111,20 +129,54 @@ pub fn read_annotations(
         family,
         *nrph,
     );
-    println!("results {:?}", results);
-    println!("results {:?}", results.unwrap().len())
-    // find all annotations where either the start or end point is in between the 'start' and 'end' of the window.
-    // attributes: ["family_accession", "seq_start", "seq_end", "strand", "ali_start", "ali_end", "model_start", "model_end", "hit_bit_score", "hit_evalue_score", "nrph_hit" sequenceModel.id],
-    // if family_accession push where '$family_accession$': family_accession
-    // if nrph push nrph_hit: 1
+    println!("results {:?}", &results.as_ref().unwrap().len());
 
-    // collect nhmmerResults Accumulate accessions whose names and types we need to retrieve
-    // Retrieve the names and types of all matched families
-    // query trfs
+    let mut field_map = HashMap::new();
+    field_map.insert("family_accession", 3);
+    field_map.insert("seq_start", 1);
+    field_map.insert("seq_end", 2);
+    field_map.insert("strand", 5);
+    // field_map.insert("ali_start", 4);
+    // field_map.insert("ali_end", 4);
+    field_map.insert("model_start", 7);
+    field_map.insert("model_end", 8);
+    field_map.insert("hit_bit_score", 4);
+    field_map.insert("hit_evalue_score", 6);
+    field_map.insert("nrph_hit", 12);
+    field_map.insert("chrom", 0);
 
-    // resolve response {offset: start, length: Math.abs(end - start), query: `${chrom}:${start}-${end}`, hits: nhmmerResults, tandem_repeats: trfResults} 200
+    let mut formatted = Vec::<Annotation>::new();
+    match &results {
+        Err(e) => {
+            eprintln!("Index Search Failed - {}", e);
+            exit(1);
+        }
+        Ok(l) if l.as_slice().is_empty() => {
+            println!("No Results Found");
+            exit(0);
+        }
+        Ok(l) => {
+            for i in 0..l.len() {
+                let fields = l[i].split_whitespace().collect::<Vec<&str>>();
+                let annotation = Annotation{
+                    family_accession: fields[*field_map.get("family_accession").unwrap()].to_string(),
+                    seq_start: fields[*field_map.get("seq_start").unwrap()].to_string(),
+                    seq_end: fields[*field_map.get("seq_end").unwrap()].to_string(),
+                    strand: fields[*field_map.get("strand").unwrap()].to_string(),
+                    // ali_start: fields[*field_map.get("ali_start").unwrap()].to_string(),
+                    // ali_end: fields[*field_map.get("ali_end").unwrap()].to_string(),
+                    model_start: fields[*field_map.get("model_start").unwrap()].to_string(),
+                    model_end: fields[*field_map.get("model_end").unwrap()].to_string(),
+                    hit_bit_score: fields[*field_map.get("hit_bit_score").unwrap()].to_string(),
+                    hit_evalue_score: fields[*field_map.get("hit_evalue_score").unwrap()].to_string(),
+                    nrph_hit: fields[*field_map.get("nrph_hit").unwrap()].to_string(),
+                    chrom: fields[*field_map.get("chrom").unwrap()].to_string(),
+                };
+                formatted.push(annotation)
+            };
+        }
+    };
 }
-
 // pub fn find_family(_id: &String, assembly: &String) {
 //     let paths = read_dir(format!("{}/{}/{}", DATA_DIR, assembly, ASSEMBLY_DIR)).unwrap();
 //     for path in paths {
