@@ -155,7 +155,7 @@ fn main() {
                     Ok(res) => res,
                     Err(e) => panic!("{:?}", e),
                 };
-                let _results = idx::search_idx(
+                let results = idx::search_idx(
                     &filenames,
                     &bgz_dir,
                     &mut contig_index,
@@ -165,7 +165,9 @@ fn main() {
                     end,
                     family,
                     *nrph,
+                    false,
                 );
+                println!("{:?}", results);
             }
         }
         Some(Commands::ReadAnnotations {

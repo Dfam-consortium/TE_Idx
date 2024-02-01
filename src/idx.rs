@@ -1,4 +1,5 @@
 use byteorder::{LittleEndian, ReadBytesExt};
+use log::{debug, error, info, warn, Level, LevelFilter, Metadata, Record};
 use noodles::bgzf;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -10,6 +11,22 @@ use std::io::prelude::*;
 use std::io::{Seek, SeekFrom};
 use std::time::SystemTime;
 
+static MY_LOGGER: MyLogger = MyLogger;
+
+struct MyLogger;
+
+impl log::Log for MyLogger {
+    fn enabled(&self, metadata: &Metadata) -> bool {
+        metadata.level() <= Level::Info
+    }
+
+    fn log(&self, record: &Record) {
+        if self.enabled(record.metadata()) {
+            println!("{} - {}", record.level(), record.args());
+        }
+    }
+    fn flush(&self) {}
+}
 // Magic number for this index format (6-bytes)
 const MAGIC_NUMBER: &[u8] = b"#R_IDX";
 
@@ -146,13 +163,13 @@ impl ContigIndex {
         let mut buffer = [0; 6];
         file.read_exact(&mut buffer).unwrap();
         if buffer != MAGIC_NUMBER {
-            println!("Magic number did not match.");
+            warn!("Magic number did not match.");
         }
 
         // Read the file format version (2-bytes, little-endian)
         let f_ver = read_u16_from_file(&mut file).unwrap();
         if f_ver != FORMAT_VERSION {
-            println!(
+            warn!(
                 "Incompatible file version {}, expected {}",
                 f_ver, FORMAT_VERSION
             );
@@ -160,15 +177,15 @@ impl ContigIndex {
 
         // Read the tile_size used in this index (u32, little-endian)
         self.tile_size = read_u32_from_file(&mut file).unwrap();
-        println!("Round trip tile size = {}", self.tile_size);
+        info!("Round trip tile size = {}", self.tile_size);
 
         // Read the contig count in this index (u32, little-endian)
         self.contig_count = read_u32_from_file(&mut file).unwrap();
-        println!("Contig count = {}", self.contig_count);
+        info!("Contig count = {}", self.contig_count);
 
         // Read the file count in this index (u32, little-endian)
         let file_count = read_u32_from_file(&mut file).unwrap();
-        println!("File count = {}", file_count);
+        info!("File count = {}", file_count);
 
         // Read the tile counts (tile_counts[contig], u32, little-endian)
         self.tile_counts = vec![0; self.contig_count as usize];
@@ -277,7 +294,7 @@ impl ContigIndex {
         let range_count = self.range_counts[contig as usize][tile as usize];
         let mut buffer = vec![0; (28 * range_count) as usize];
         let byte_pos = self.range_data_index[contig as usize][tile as usize];
-        println!(
+        info!(
             "read_tile: expecting {} ranges, byte_pos {}",
             range_count, byte_pos
         );
@@ -386,7 +403,7 @@ impl ContigIndex {
         //         an end outside the index.
         if start_tile > self.tile_counts[q_contig_idx as usize] as usize {
             let error_str = "Start Position Outside Of Indexed Size";
-            eprintln!("{}", error_str);
+            error!("{}", error_str);
             return Err(error_str.into());
         }
 
@@ -396,7 +413,7 @@ impl ContigIndex {
         // ranges since the start position is overlapping.
         end_tile = end_tile.min((self.tile_counts[q_contig_idx as usize] - 1) as usize);
 
-        println!(
+        info!(
             "Query: {}:{}-{}  tiles:{} to {}",
             q_contig, q_start, q_end, start_tile, end_tile
         );
@@ -407,7 +424,7 @@ impl ContigIndex {
         //         than read record by record as they did.
 
         let mut range_count = self.range_counts[q_contig_idx as usize][start_tile as usize];
-        println!("search: range_count {}", range_count);
+        info!("search: range_count {}", range_count);
         if range_count > 0 {
             let range_data = self
                 .read_tile(i_file, q_contig_idx, start_tile)
@@ -504,7 +521,7 @@ impl ContigIndex {
                                         hits += 1;
                                     }
                                 } else {
-                                    println!(
+                                    info!(
                                         "Breaking because {} >= {}",
                                         range_data[r_idx as usize].start_bp, q_end
                                     );
@@ -517,7 +534,7 @@ impl ContigIndex {
                 }
             }
         }
-        println!("Total overlaps: {}", hits);
+        info!("Total overlaps: {}", hits);
         Ok(results)
     }
 
@@ -658,7 +675,7 @@ impl ContigIndex {
 
         // For each contig write the number of tiles it contains to the file
         for contig in &self.contigs {
-            println!("contig: {} = {}", contig.name, contig.contig_tiles.len());
+            info!("contig: {} = {}", contig.name, contig.contig_tiles.len());
             file.write_all(&(contig.contig_tiles.len() as u32).to_le_bytes())?;
         }
 
@@ -749,7 +766,7 @@ pub fn prep_idx(
             }
         }
     } else {
-        eprintln!("Error reading {} directory", bgz_dir);
+        error!("Error reading {} directory", bgz_dir);
     }
     Ok((filenames, bgz_dir, contig_index, index_file))
 }
@@ -774,7 +791,7 @@ pub fn build_idx(
             .unwrap();
         // Obtain file size
         let file_size = metadata.len();
-        println!(
+        info!(
             "Indexing {} : {} mod_time={:?}, bytes={}",
             fidx, bgz_file, mod_time, file_size
         );
@@ -792,7 +809,6 @@ pub fn build_idx(
         let mut virt_pos = u64::from(reader.virtual_position());
         while reader.read_line(&mut line).unwrap() > 0 {
             let fields: Vec<&str> = line.trim_end().split('\t').collect();
-            //println!("Fields: {:?}", fields);
 
             contig_index.add_contig_range(
                 fields[0],
@@ -827,8 +843,16 @@ pub fn search_idx(
     end: u64,
     family: &Option<String>,
     nrph: bool,
+    prod: bool,
 ) -> Result<Vec<String>, Box<dyn Error>> {
-    println!("Loading index");
+    log::set_logger(&MY_LOGGER).unwrap();
+    if prod {
+        log::set_max_level(LevelFilter::Warn);
+    } else {
+        log::set_max_level(LevelFilter::Info);
+    }
+
+    debug!("Loading index");
     contig_index.init_search(&index_file);
 
     // Sanity checking index vs file system
@@ -838,7 +862,7 @@ pub fn search_idx(
     }
     for ifile in &contig_index.bgz_files {
         if !f_lookup.contains(&ifile.name) {
-            println!("It appears that {} has been deleted from the alignments folder since the index was created!", ifile.name);
+            warn!("It appears that {} has been deleted from the alignments folder since the index was created!", ifile.name);
         } else {
             f_lookup.remove(&ifile.name);
             let bgz_file = format!("{}/{}", bgz_dir, ifile.name);
@@ -853,21 +877,21 @@ pub fn search_idx(
             // Obtain file size
             let file_size = metadata.len();
             if file_size != ifile.bytes {
-                println!("It appears that {} has been modified since the index was created. Byte size difference index={}, file={}", ifile.name, ifile.bytes, file_size);
+                warn!("It appears that {} has been modified since the index was created. Byte size difference index={}, file={}", ifile.name, ifile.bytes, file_size);
             } else if mod_time.as_secs_f64() != ifile.mod_time {
-                println!("It appears that {} has been modified since the index was created. Modification time difference index={:?}, file={:?}", ifile.name, ifile.mod_time, mod_time);
+                warn!("It appears that {} has been modified since the index was created. Modification time difference index={:?}, file={:?}", ifile.name, ifile.mod_time, mod_time);
             }
         }
     }
     for fsfile in &f_lookup {
-        println!(
+        warn!(
             "It appears that {} has been added since the index was created!",
             fsfile
         );
     }
 
     let mut i_file = File::open(index_file).unwrap();
-    println!("Searching...");
+    debug!("Searching...");
     let results = contig_index.search(&mut i_file, &bgz_dir, &q_contig, start, end, family, nrph);
     return results;
 }

@@ -129,6 +129,7 @@ pub fn read_annotations(
         end,
         family,
         *nrph,
+        true,
     );
 
     let mut field_map = HashMap::new();
