@@ -1,11 +1,11 @@
 use noodles::bgzf;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{stdout, BufRead, Result, Write};
 use std::num::NonZeroUsize;
 use std::path::Path;
 use std::process::exit;
-use serde::{Deserialize, Serialize};
 
 mod idx;
 
@@ -158,8 +158,9 @@ pub fn read_annotations(
         Ok(l) => {
             for i in 0..l.len() {
                 let fields = l[i].split_whitespace().collect::<Vec<&str>>();
-                let annotation = Annotation{
-                    family_accession: fields[*field_map.get("family_accession").unwrap()].to_string(),
+                let annotation = Annotation {
+                    family_accession: fields[*field_map.get("family_accession").unwrap()]
+                        .to_string(),
                     seq_start: fields[*field_map.get("seq_start").unwrap()].to_string(),
                     seq_end: fields[*field_map.get("seq_end").unwrap()].to_string(),
                     strand: fields[*field_map.get("strand").unwrap()].to_string(),
@@ -168,12 +169,13 @@ pub fn read_annotations(
                     model_start: fields[*field_map.get("model_start").unwrap()].to_string(),
                     model_end: fields[*field_map.get("model_end").unwrap()].to_string(),
                     hit_bit_score: fields[*field_map.get("hit_bit_score").unwrap()].to_string(),
-                    hit_evalue_score: fields[*field_map.get("hit_evalue_score").unwrap()].to_string(),
+                    hit_evalue_score: fields[*field_map.get("hit_evalue_score").unwrap()]
+                        .to_string(),
                     nrph_hit: fields[*field_map.get("nrph_hit").unwrap()].to_string(),
                     chrom: fields[*field_map.get("chrom").unwrap()].to_string(),
                 };
                 formatted.push(annotation)
-            };
+            }
         }
     };
     match serde_json::to_string(&formatted) {
@@ -182,8 +184,9 @@ pub fn read_annotations(
             exit(1);
         }
         Ok(json_str) => {
-            let mut writer = bgzf::Writer::new(stdout());
-            writer.write_all(json_str.as_bytes()).expect("Unable to write line");
+            stdout()
+                .write_all(json_str.as_bytes())
+                .expect("Unable to write line");
             exit(0)
         }
     }

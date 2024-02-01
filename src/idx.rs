@@ -354,7 +354,6 @@ impl ContigIndex {
         q_family: &Option<String>,
         q_nrph: bool,
     ) -> Result<Vec<String>, Box<dyn Error>> {
-        
         fn filter_line(line: &String, q_family: &Option<String>, q_nrph: &bool) -> bool {
             let fields = line.split_whitespace().collect::<Vec<&str>>();
             if q_family.is_some() {
