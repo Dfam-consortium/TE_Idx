@@ -1,11 +1,12 @@
 use noodles::bgzf;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::{stdout, BufRead, Result, Write};
+use std::fs::{File, create_dir_all};
+use std::io::{stdout, BufRead, Result, Write, BufReader};
 use std::num::NonZeroUsize;
 use std::path::Path;
 use std::process::exit;
+use tempfile::tempfile;
 
 mod idx;
 
@@ -45,7 +46,7 @@ pub fn bgzf_filter(
         let linestr = line.unwrap();
         let mut fields: Vec<_> = linestr.split_whitespace().collect();
         if term.is_none() || fields.get(position - 1).unwrap() == term.as_ref().unwrap() {
-            fields.truncate(9);
+            fields.truncate(9); // TODO readjust this!
             writer
                 .write_all(format!("{}\n", fields.join("\t")).as_bytes())
                 .expect("Unable to write line");
@@ -193,12 +194,61 @@ pub fn read_annotations(
     }
 }
 
-// pub fn find_family(_id: &String, assembly: &String) {
-//     let paths = read_dir(format!("{}/{}/{}", DATA_DIR, assembly, ASSEMBLY_DIR)).unwrap();
-//     for path in paths {
-//         // TODO
-//         // if path.ends_with(format!("{}.bed.bgz", id)) {
-//         println!("Name: {}", path.unwrap().path().display())
-//         // }
-//     }
-// }
+pub fn prep_beds(in_tsv: &String) -> Result<()>{
+    if !Path::new(&in_tsv).exists() {
+        eprintln!("Input TSV \"{}\" Not Found", &in_tsv);
+        exit(1)
+    }
+
+    let chunks: Vec<_> = in_tsv.split("-").collect();
+    let assembly = chunks[0];
+    let acc_order = chunks[1] == "byacc";
+    let bench = chunks[2] == "bench_region.tsv";
+
+    if !acc_order {
+        eprintln!("Input TSV \"{}\" Not In Accession Order", &in_tsv);
+        exit(1)
+    }
+
+    let assemly_dir = format!("{}/{}", &DATA_DIR, &assembly);
+    let algin_dir = format!("{}/{}", &assemly_dir, "assembly_alignments");
+    let bench_dir = format!("{}/{}", &assemly_dir, "benchmark_alignments");
+    let seq_dir = format!("{}/{}", &assemly_dir, "sequences");
+    if !Path::new(&assemly_dir).exists() {
+        create_dir_all(&assemly_dir)?;
+        create_dir_all(&algin_dir)?;
+        create_dir_all(&bench_dir)?;
+        create_dir_all(&seq_dir)?;
+    }
+
+    let target_dir = if bench {bench_dir} else {algin_dir};
+
+    let worker_count: NonZeroUsize = match NonZeroUsize::new(5) {
+        Some(n) => n,
+        None => unreachable!(),
+    };
+
+    let in_f = File::open(in_tsv).expect("Could Not Open Input File");
+    let lines = BufReader::new(in_f).lines();
+    let mut current_acc = "".to_string();
+    let mut out_f = tempfile()?;
+    let mut  out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count,out_f,);
+    let mut ctr = 0;
+    for line in lines.filter_map(|res| res.ok()) {
+        if !& line.starts_with('#') {
+            let fields: Vec<_> = line.split_whitespace().collect();
+            if fields[3] != current_acc {
+                current_acc = fields[3].to_string();
+                out_f = File::create(format!("{target_dir}/{current_acc}.bed.gz", )).expect("Could Not Open Output File");
+                out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count,out_f,);
+                println!("{}", current_acc)
+            };
+
+            ctr += 1;
+            if ctr > 1500000 { exit(0)};
+            out_writer.write_all(line.as_bytes()).expect("Unable to write line");
+        }  
+    }
+
+    Ok(())
+}

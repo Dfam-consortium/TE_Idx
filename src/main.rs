@@ -4,7 +4,7 @@ use std::path::Path;
 use clap::{Parser, Subcommand};
 
 use te_idx::bgzf_filter;
-// use te_idx::find_family;
+use te_idx::prep_beds;
 use te_idx::read_annotations;
 use te_idx::read_family_assembly_annotations;
 
@@ -31,12 +31,6 @@ pub enum Commands {
         // outfile: String,
         outfile: Option<String>,
     },
-    // FindFamily {
-    //     #[arg(long, short)]
-    //     id: String,
-    //     #[arg(long, short)]
-    //     assembly: String,
-    // },
     Idx {
         #[arg(short, long)]
         assembly: String,
@@ -54,6 +48,10 @@ pub enum Commands {
 
         #[arg(short, long)]
         nrph: bool,
+    },
+    PrepBeds {
+        #[arg(short, long)]
+        in_tsv: String,
     },
     ReadAnnotations {
         #[arg(short, long)]
@@ -170,6 +168,11 @@ fn main() {
                 println!("{:?}", results);
             }
         }
+        Some(Commands::PrepBeds { in_tsv}) => {
+            match prep_beds(in_tsv){
+                Ok(()) => println!("Bed Files Created"),
+                Err(e) => panic!("{:?}", e),
+            }},
         Some(Commands::ReadAnnotations {
             assembly,
             chrom,
