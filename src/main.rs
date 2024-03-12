@@ -168,11 +168,10 @@ fn main() {
                 println!("{:?}", results);
             }
         }
-        Some(Commands::PrepBeds { in_tsv}) => {
-            match prep_beds(in_tsv){
-                Ok(()) => println!("Bed Files Created"),
-                Err(e) => panic!("{:?}", e),
-            }},
+        Some(Commands::PrepBeds { in_tsv }) => match prep_beds(in_tsv) {
+            Ok(()) => println!("Bed Files Created"),
+            Err(e) => panic!("{:?}", e),
+        },
         Some(Commands::ReadAnnotations {
             assembly,
             chrom,

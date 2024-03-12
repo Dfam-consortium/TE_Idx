@@ -1,8 +1,8 @@
 use noodles::bgzf;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fs::{File, create_dir_all};
-use std::io::{stdout, BufRead, Result, Write, BufReader};
+use std::fs::{create_dir_all, File};
+use std::io::{stdout, BufRead, BufReader, Result, Write};
 use std::num::NonZeroUsize;
 use std::path::Path;
 use std::process::exit;
@@ -10,7 +10,7 @@ use tempfile::tempfile;
 
 mod idx;
 
-const DATA_DIR: &str = "./data";
+const DATA_DIR: &str = "/home/agray/te_idx/data";
 // const ASSEMBLY_DIR: &str = "assembly_alignments";
 // const BENCHMARK_DIR: &str = "./data/benchmark_alignments";
 // const SEQUENCE_DIR: &str = "./data/sequence";
@@ -41,11 +41,13 @@ pub fn bgzf_filter(
         None => Box::new(bgzf::Writer::new(stdout())),
     };
 
-    for line in reader.lines() {
-        // TODO replace unwrap with match
-        let linestr = line.unwrap();
-        let mut fields: Vec<_> = linestr.split_whitespace().collect();
-        if term.is_none() || fields.get(position - 1).unwrap() == term.as_ref().unwrap() {
+    for line in reader.lines().filter_map(|res| res.ok()) {
+        let mut fields: Vec<_> = line.split_whitespace().collect();
+        if term.is_none()
+            || (fields.len() >= position - 1
+                && term.is_some()
+                && fields.get(position - 1).unwrap() == term.as_ref().unwrap())
+        {
             fields.truncate(9); // TODO readjust this!
             writer
                 .write_all(format!("{}\n", fields.join("\t")).as_bytes())
@@ -194,7 +196,7 @@ pub fn read_annotations(
     }
 }
 
-pub fn prep_beds(in_tsv: &String) -> Result<()>{
+pub fn prep_beds(in_tsv: &String) -> Result<()> {
     if !Path::new(&in_tsv).exists() {
         eprintln!("Input TSV \"{}\" Not Found", &in_tsv);
         exit(1)
@@ -221,7 +223,7 @@ pub fn prep_beds(in_tsv: &String) -> Result<()>{
         create_dir_all(&seq_dir)?;
     }
 
-    let target_dir = if bench {bench_dir} else {algin_dir};
+    let target_dir = if bench { bench_dir } else { algin_dir };
 
     let worker_count: NonZeroUsize = match NonZeroUsize::new(5) {
         Some(n) => n,
@@ -232,22 +234,26 @@ pub fn prep_beds(in_tsv: &String) -> Result<()>{
     let lines = BufReader::new(in_f).lines();
     let mut current_acc = "".to_string();
     let mut out_f = tempfile()?;
-    let mut  out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count,out_f,);
+    let mut out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
     let mut ctr = 0;
     for line in lines.filter_map(|res| res.ok()) {
-        if !& line.starts_with('#') {
+        if !&line.starts_with('#') {
             let fields: Vec<_> = line.split_whitespace().collect();
             if fields[3] != current_acc {
                 current_acc = fields[3].to_string();
-                out_f = File::create(format!("{target_dir}/{current_acc}.bed.gz", )).expect("Could Not Open Output File");
-                out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count,out_f,);
-                println!("{}", current_acc)
+                out_f = File::create(format!("{target_dir}/{current_acc}.bed.bgz",))
+                    .expect("Could Not Open Output File");
+                out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
             };
 
-            ctr += 1;
-            if ctr > 1500000 { exit(0)};
-            out_writer.write_all(line.as_bytes()).expect("Unable to write line");
-        }  
+            ctr += 1; // TODO rm
+            if ctr > 1500000 {
+                exit(0)
+            };
+            out_writer
+                .write_all(format!("{line}\n").as_bytes())
+                .expect("Unable to write line");
+        }
     }
 
     Ok(())
