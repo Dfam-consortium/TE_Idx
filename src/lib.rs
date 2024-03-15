@@ -57,7 +57,7 @@ pub fn bgzf_filter(
     Ok(())
 }
 
-pub fn read_family_assembly_annotations(id: &String, assembly_id: &String, nrph: &bool) {
+pub fn read_family_assembly_annotations(id: &String, assembly_id: &String, nrph: &bool, outfile: &Option<String>) {
     let assembly_path: String = format!("{}/{}", &DATA_DIR, &assembly_id);
     if !Path::new(&assembly_path).exists() {
         eprintln!("Assembly \"{}\" Does Not Exist", assembly_path);
@@ -71,7 +71,7 @@ pub fn read_family_assembly_annotations(id: &String, assembly_id: &String, nrph:
 
     let position: usize = 13;
     let term: Option<String> = if *nrph { Some("1".to_string()) } else { None };
-    match bgzf_filter(&fam_file, &position, &term, &None) {
+    match bgzf_filter(&fam_file, &position, &term, outfile) {
         Ok(()) => exit(0),
         Err(err) => {
             eprintln!("Error Filtering File: {} - {}", fam_file, err);

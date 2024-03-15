@@ -25,10 +25,8 @@ pub enum Commands {
         #[arg(long, short)]
         position: usize,
         #[arg(long, short)]
-        // term: String,
         term: Option<String>,
         #[arg(long, short)]
-        // outfile: String,
         outfile: Option<String>,
     },
     Idx {
@@ -74,6 +72,8 @@ pub enum Commands {
         assembly_id: String,
         #[arg(short, long)]
         nrph: bool,
+        #[arg(long, short)]
+        outfile: Option<String>,
     },
 }
 
@@ -184,7 +184,8 @@ fn main() {
             id,
             assembly_id,
             nrph,
-        }) => read_family_assembly_annotations(id, assembly_id, nrph),
+            outfile
+        }) => read_family_assembly_annotations(id, assembly_id, nrph, outfile),
         None => {}
     }
 }
