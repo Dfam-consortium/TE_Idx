@@ -1,7 +1,7 @@
 use noodles::bgzf;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fs::{create_dir_all, File};
+use std::fs::{create_dir_all, File, OpenOptions};
 use std::io::{stdout, BufRead, BufReader, Result, Write};
 use std::num::NonZeroUsize;
 use std::path::Path;
@@ -32,11 +32,10 @@ pub fn bgzf_filter(
     };
     let in_f = File::open(infile).expect("Could Not Open Input File");
     let reader = bgzf::MultithreadedReader::with_worker_count(worker_count, in_f);
-
     let mut writer: Box<dyn Write> = match outfile {
         Some(outfile) => Box::new(bgzf::MultithreadedWriter::with_worker_count(
             worker_count,
-            File::create(outfile).expect("Could Not Open Output File"),
+            OpenOptions::new().create(true).append(true).open(&outfile)?,
         )),
         None => Box::new(bgzf::Writer::new(stdout())),
     };
@@ -48,7 +47,7 @@ pub fn bgzf_filter(
                 && term.is_some()
                 && fields.get(position - 1).unwrap() == term.as_ref().unwrap())
         {
-            fields.truncate(9); // TODO readjust this!
+            fields.truncate(14); // TODO readjust this!
             writer
                 .write_all(format!("{}\n", fields.join("\t")).as_bytes())
                 .expect("Unable to write line");
