@@ -34,7 +34,10 @@ pub fn bgzf_filter(
     let mut writer: Box<dyn Write> = match outfile {
         Some(outfile) => Box::new(bgzf::MultithreadedWriter::with_worker_count(
             worker_count,
-            OpenOptions::new().create(true).append(true).open(&outfile)?,
+            OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&outfile)?,
         )),
         None => Box::new(bgzf::Writer::new(stdout())),
     };
@@ -55,7 +58,72 @@ pub fn bgzf_filter(
     Ok(())
 }
 
-pub fn read_family_assembly_annotations(id: &String, assembly_id: &String, nrph: &bool, outfile: &Option<String>) {
+pub fn prep_beds(in_tsv: &String) -> Result<()> {
+    if !Path::new(&in_tsv).exists() {
+        eprintln!("Input TSV \"{}\" Not Found", &in_tsv);
+        exit(1)
+    }
+
+    let chunks: Vec<_> = in_tsv.split("-").collect();
+    let assembly = chunks[0];
+    let acc_order = chunks[1] == "byacc";
+    let bench = chunks[2] == "bench_region.tsv";
+
+    if !acc_order {
+        eprintln!("Input TSV \"{}\" Not In Accession Order", &in_tsv);
+        exit(1)
+    }
+
+    let assemly_dir = format!("{}/{}", &DATA_DIR, &assembly);
+    let algin_dir = format!("{}/{}", &assemly_dir, "assembly_alignments");
+    let bench_dir = format!("{}/{}", &assemly_dir, "benchmark_alignments");
+    let seq_dir = format!("{}/{}", &assemly_dir, "sequences");
+    if !Path::new(&assemly_dir).exists() {
+        create_dir_all(&assemly_dir)?;
+        create_dir_all(&algin_dir)?;
+        create_dir_all(&bench_dir)?;
+        create_dir_all(&seq_dir)?;
+    }
+
+    let target_dir = if bench { bench_dir } else { algin_dir };
+
+    let worker_count: NonZeroUsize = match NonZeroUsize::new(10) {
+        Some(n) => n,
+        None => unreachable!(),
+    };
+
+    let in_f = File::open(in_tsv).expect("Could Not Open Input File");
+    let lines = BufReader::new(in_f).lines();
+    let mut current_acc = "".to_string();
+    let mut out_f = tempfile()?;
+    let mut out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
+    for line in lines.filter_map(|res| res.ok()) {
+        if !&line.starts_with('#') {
+            let fields: Vec<_> = line.split_whitespace().collect();
+            if fields[3] != current_acc {
+                current_acc = fields[3].to_string();
+                out_f = File::create(format!("{target_dir}/{current_acc}.bed.bgz",))
+                    .expect("Could Not Open Output File");
+                out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
+                println!("{}", current_acc);
+            };
+
+            out_writer
+                .write_all(format!("{line}\n").as_bytes())
+                .expect("Unable to write line");
+        }
+    }
+
+    Ok(())
+}
+
+// API Service Subprocesses ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+pub fn read_family_assembly_annotations(
+    id: &String,
+    assembly_id: &String,
+    nrph: &bool,
+    outfile: &Option<String>,
+) {
     let assembly_path: String = format!("{}/{}", &DATA_DIR, &assembly_id);
     if !Path::new(&assembly_path).exists() {
         eprintln!("Assembly \"{}\" Does Not Exist", assembly_path);
@@ -83,11 +151,11 @@ pub fn read_family_assembly_annotations(id: &String, assembly_id: &String, nrph:
 #[derive(Serialize, Deserialize)]
 struct Annotation {
     chrom: String,
-    seq_start: String, 
-    seq_end: String, 
-    family_accession: String, 
-    hit_bit_score: String, 
-    strand: String, 
+    seq_start: String,
+    seq_end: String,
+    family_accession: String,
+    hit_bit_score: String,
+    strand: String,
     ali_start: String,
     ali_end: String,
     model_start: String,
@@ -137,8 +205,6 @@ pub fn read_annotations(
         true,
     );
 
-    println!("{:?}", results);
-
     let mut formatted = Vec::<Annotation>::new();
     match &results {
         Err(e) => {
@@ -182,68 +248,4 @@ pub fn read_annotations(
             exit(0)
         }
     }
-}
-
-pub fn prep_beds(in_tsv: &String) -> Result<()> {
-    if !Path::new(&in_tsv).exists() {
-        eprintln!("Input TSV \"{}\" Not Found", &in_tsv);
-        exit(1)
-    }
-
-    let chunks: Vec<_> = in_tsv.split("-").collect();
-    let assembly = chunks[0];
-    let acc_order = chunks[1] == "byacc";
-    let bench = chunks[2] == "bench_region.tsv";
-
-    if !acc_order {
-        eprintln!("Input TSV \"{}\" Not In Accession Order", &in_tsv);
-        exit(1)
-    }
-
-    let assemly_dir = format!("{}/{}", &DATA_DIR, &assembly);
-    let algin_dir = format!("{}/{}", &assemly_dir, "assembly_alignments");
-    let bench_dir = format!("{}/{}", &assemly_dir, "benchmark_alignments");
-    let seq_dir = format!("{}/{}", &assemly_dir, "sequences");
-    if !Path::new(&assemly_dir).exists() {
-        create_dir_all(&assemly_dir)?;
-        create_dir_all(&algin_dir)?;
-        create_dir_all(&bench_dir)?;
-        create_dir_all(&seq_dir)?;
-    }
-
-    let target_dir = if bench { bench_dir } else { algin_dir };
-
-    let worker_count: NonZeroUsize = match NonZeroUsize::new(10) {
-        Some(n) => n,
-        None => unreachable!(),
-    };
-
-    let in_f = File::open(in_tsv).expect("Could Not Open Input File");
-    let lines = BufReader::new(in_f).lines();
-    let mut current_acc = "".to_string();
-    let mut out_f = tempfile()?;
-    let mut out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
-    // let mut ctr = 0;
-    for line in lines.filter_map(|res| res.ok()) {
-        if !&line.starts_with('#') {
-            let fields: Vec<_> = line.split_whitespace().collect();
-            if fields[3] != current_acc {
-                current_acc = fields[3].to_string();
-                out_f = File::create(format!("{target_dir}/{current_acc}.bed.bgz",))
-                    .expect("Could Not Open Output File");
-                out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
-                println!("{}", current_acc);
-            };
-
-            // ctr += 1; // TODO rm
-            // if ctr > 1500000 {
-            //     exit(0)
-            // };
-            out_writer
-                .write_all(format!("{line}\n").as_bytes())
-                .expect("Unable to write line");
-        }
-    }
-
-    Ok(())
 }

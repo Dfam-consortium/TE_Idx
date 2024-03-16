@@ -184,7 +184,7 @@ fn main() {
             id,
             assembly_id,
             nrph,
-            outfile
+            outfile,
         }) => read_family_assembly_annotations(id, assembly_id, nrph, outfile),
         None => {}
     }
