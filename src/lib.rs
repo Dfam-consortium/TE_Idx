@@ -1,6 +1,5 @@
 use noodles::bgzf;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::fs::{create_dir_all, File, OpenOptions};
 use std::io::{stdout, BufRead, BufReader, Result, Write};
 use std::num::NonZeroUsize;
@@ -83,18 +82,22 @@ pub fn read_family_assembly_annotations(id: &String, assembly_id: &String, nrph:
 #[allow(dead_code)]
 #[derive(Serialize, Deserialize)]
 struct Annotation {
-    family_accession: String,
-    seq_start: String,
-    seq_end: String,
-    strand: String,
-    // ali_start: String,
-    // ali_end: String,
+    chrom: String,
+    seq_start: String, 
+    seq_end: String, 
+    family_accession: String, 
+    hit_bit_score: String, 
+    strand: String, 
+    ali_start: String,
+    ali_end: String,
     model_start: String,
     model_end: String,
-    hit_bit_score: String,
     hit_evalue_score: String,
     nrph_hit: String,
-    chrom: String,
+    // divergence: String,
+    // family_name: String,
+    // cigar: String,
+    // caf: String,
 }
 pub fn read_annotations(
     assembly: &String,
@@ -134,19 +137,7 @@ pub fn read_annotations(
         true,
     );
 
-    let mut field_map = HashMap::new();
-    field_map.insert("family_accession", 3);
-    field_map.insert("seq_start", 1);
-    field_map.insert("seq_end", 2);
-    field_map.insert("strand", 5);
-    // field_map.insert("ali_start", 4);
-    // field_map.insert("ali_end", 4);
-    field_map.insert("model_start", 7);
-    field_map.insert("model_end", 8);
-    field_map.insert("hit_bit_score", 4);
-    field_map.insert("hit_evalue_score", 6);
-    field_map.insert("nrph_hit", 12);
-    field_map.insert("chrom", 0);
+    println!("{:?}", results);
 
     let mut formatted = Vec::<Annotation>::new();
     match &results {
@@ -162,20 +153,18 @@ pub fn read_annotations(
             for i in 0..l.len() {
                 let fields = l[i].split_whitespace().collect::<Vec<&str>>();
                 let annotation = Annotation {
-                    family_accession: fields[*field_map.get("family_accession").unwrap()]
-                        .to_string(),
-                    seq_start: fields[*field_map.get("seq_start").unwrap()].to_string(),
-                    seq_end: fields[*field_map.get("seq_end").unwrap()].to_string(),
-                    strand: fields[*field_map.get("strand").unwrap()].to_string(),
-                    // ali_start: fields[*field_map.get("ali_start").unwrap()].to_string(),
-                    // ali_end: fields[*field_map.get("ali_end").unwrap()].to_string(),
-                    model_start: fields[*field_map.get("model_start").unwrap()].to_string(),
-                    model_end: fields[*field_map.get("model_end").unwrap()].to_string(),
-                    hit_bit_score: fields[*field_map.get("hit_bit_score").unwrap()].to_string(),
-                    hit_evalue_score: fields[*field_map.get("hit_evalue_score").unwrap()]
-                        .to_string(),
-                    nrph_hit: fields[*field_map.get("nrph_hit").unwrap()].to_string(),
-                    chrom: fields[*field_map.get("chrom").unwrap()].to_string(),
+                    family_accession: fields[3].to_string(),
+                    seq_start: fields[1].to_string(),
+                    seq_end: fields[2].to_string(),
+                    strand: fields[5].to_string(),
+                    ali_start: fields[6].to_string(),
+                    ali_end: fields[7].to_string(),
+                    model_start: fields[8].to_string(),
+                    model_end: fields[9].to_string(),
+                    hit_bit_score: fields[4].to_string(),
+                    hit_evalue_score: fields[10].to_string(),
+                    nrph_hit: fields[11].to_string(),
+                    chrom: fields[0].to_string(),
                 };
                 formatted.push(annotation)
             }
@@ -224,7 +213,7 @@ pub fn prep_beds(in_tsv: &String) -> Result<()> {
 
     let target_dir = if bench { bench_dir } else { algin_dir };
 
-    let worker_count: NonZeroUsize = match NonZeroUsize::new(5) {
+    let worker_count: NonZeroUsize = match NonZeroUsize::new(10) {
         Some(n) => n,
         None => unreachable!(),
     };
@@ -234,7 +223,7 @@ pub fn prep_beds(in_tsv: &String) -> Result<()> {
     let mut current_acc = "".to_string();
     let mut out_f = tempfile()?;
     let mut out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
-    let mut ctr = 0;
+    // let mut ctr = 0;
     for line in lines.filter_map(|res| res.ok()) {
         if !&line.starts_with('#') {
             let fields: Vec<_> = line.split_whitespace().collect();
@@ -243,12 +232,13 @@ pub fn prep_beds(in_tsv: &String) -> Result<()> {
                 out_f = File::create(format!("{target_dir}/{current_acc}.bed.bgz",))
                     .expect("Could Not Open Output File");
                 out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
+                println!("{}", current_acc);
             };
 
-            ctr += 1; // TODO rm
-            if ctr > 1500000 {
-                exit(0)
-            };
+            // ctr += 1; // TODO rm
+            // if ctr > 1500000 {
+            //     exit(0)
+            // };
             out_writer
                 .write_all(format!("{line}\n").as_bytes())
                 .expect("Unable to write line");
