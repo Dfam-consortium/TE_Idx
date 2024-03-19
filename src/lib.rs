@@ -150,24 +150,24 @@ pub fn read_family_assembly_annotations(
 #[allow(dead_code)]
 #[derive(Serialize, Deserialize)]
 struct Annotation {
-    chrom: String,
+    family_accession: String,
     seq_start: String,
     seq_end: String,
-    family_accession: String,
-    hit_bit_score: String,
     strand: String,
     ali_start: String,
     ali_end: String,
     model_start: String,
     model_end: String,
+    hit_bit_score: String,
     hit_evalue_score: String,
     nrph_hit: String,
+    seq_id :String
     // divergence: String,
     // family_name: String,
     // cigar: String,
     // caf: String,
 }
-pub fn read_annotations(
+pub fn nhmmer_query(
     assembly: &String,
     chrom: &String,
     start: u64,
@@ -223,14 +223,14 @@ pub fn read_annotations(
                     seq_start: fields[1].to_string(),
                     seq_end: fields[2].to_string(),
                     strand: fields[5].to_string(),
-                    ali_start: fields[6].to_string(),
-                    ali_end: fields[7].to_string(),
-                    model_start: fields[8].to_string(),
-                    model_end: fields[9].to_string(),
+                    ali_start: fields[7].to_string(),
+                    ali_end: fields[8].to_string(),
+                    model_start: fields[9].to_string(),
+                    model_end: fields[10].to_string(),
                     hit_bit_score: fields[4].to_string(),
-                    hit_evalue_score: fields[10].to_string(),
-                    nrph_hit: fields[11].to_string(),
-                    chrom: fields[0].to_string(),
+                    hit_evalue_score: fields[11].to_string(),
+                    nrph_hit: fields[12].to_string(),
+                    seq_id: fields[0].to_string(),
                 };
                 formatted.push(annotation)
             }

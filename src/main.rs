@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
 
 use te_idx::bgzf_filter;
 use te_idx::prep_beds;
-use te_idx::read_annotations;
+use te_idx::nhmmer_query;
 use te_idx::read_family_assembly_annotations;
 
 mod idx;
@@ -51,7 +51,7 @@ pub enum Commands {
         #[arg(short, long)]
         in_tsv: String,
     },
-    ReadAnnotations {
+    NhmmerQuery {
         #[arg(short, long)]
         assembly: String,
         #[arg(short, long)]
@@ -172,14 +172,14 @@ fn main() {
             Ok(()) => println!("Bed Files Created"),
             Err(e) => panic!("{:?}", e),
         },
-        Some(Commands::ReadAnnotations {
+        Some(Commands::NhmmerQuery {
             assembly,
             chrom,
             start,
             end,
             family,
             nrph,
-        }) => read_annotations(assembly, chrom, *start, *end, family, nrph),
+        }) => nhmmer_query(assembly, chrom, *start, *end, family, nrph),
         Some(Commands::ReadFamilyAssemblyAnnotations {
             id,
             assembly_id,
