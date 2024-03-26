@@ -161,11 +161,10 @@ struct Annotation {
     hit_bit_score: String,
     hit_evalue_score: String,
     nrph_hit: String,
-    seq_id :String
-    // divergence: String,
-    // family_name: String,
-    // cigar: String,
-    // caf: String,
+    seq_id: String, // divergence: String,
+                    // family_name: String,
+                    // cigar: String,
+                    // caf: String,
 }
 pub fn nhmmer_query(
     assembly: &String,
@@ -248,4 +247,73 @@ pub fn nhmmer_query(
             exit(0)
         }
     }
+}
+
+pub fn trf_query(assembly: &String, chrom: &String, start: u64, end: u64) -> Result<()> {
+    // TODO this method just iterates through all the mask annotations. would be faster to index
+    let maskfile = format!("{}/{}/masks/mask.csv.gz", &DATA_DIR, assembly);
+    if !Path::new(&maskfile).exists() {
+        println!("{} Not Found", &maskfile);
+        std::process::exit(1)
+    }
+
+    let worker_count: NonZeroUsize = match NonZeroUsize::new(5) {
+        Some(n) => n,
+        None => unreachable!(),
+    };
+    let in_f = File::open(maskfile).expect("Could Not Open Input File");
+    let reader = bgzf::MultithreadedReader::with_worker_count(worker_count, in_f);
+    let mut writer = bgzf::Writer::new(stdout());
+    // seq_accession: 0 seq_start: 1 seq_end: 2 repeat_str: 3 repeat_length: 4
+    for line in reader.lines().filter_map(|res| res.ok()) {
+        let fields: Vec<_> = line.split(",").collect();
+        let row_start: u64 = fields[1]
+            // .replace("\"", "")
+            .parse()
+            .expect("Problem with start value");
+        let row_end: u64 = fields[2]
+            // .replace("\"", "")
+            .parse()
+            .expect("Problem with end value");
+        if &fields[0].replace("\"", "") == chrom
+            && ((row_start >= start && row_start <= end)
+                || (row_end <= end && row_end >= start)
+                || (row_start < start && row_end > end))
+        {
+            stdout()
+                .write_all(format!("{}\n", line).as_bytes())
+                .expect("Unable to write line");
+        }
+    }
+    Ok(())
+}
+
+pub fn seq_query(assembly: &String, chrom: &String) -> Result<()> {
+    let seqfile = format!("{}/{}/sequences/sequence.csv.gz", &DATA_DIR, assembly);
+    if !Path::new(&seqfile).exists() {
+        println!("{} Not Found", &seqfile);
+        std::process::exit(1)
+    }
+
+    let worker_count: NonZeroUsize = match NonZeroUsize::new(5) {
+        Some(n) => n,
+        None => unreachable!(),
+    };
+    let in_f = File::open(seqfile).expect("Could Not Open Input File");
+    let reader = bgzf::MultithreadedReader::with_worker_count(worker_count, in_f);
+    let mut writer = bgzf::Writer::new(stdout());
+
+    let chrom_id: String = "chr".to_owned() + chrom;
+    // accession: 0, id: 1, description: 2, length: 3, updated: 4, created: 5, is_genomic: 6
+    for line in reader.lines().filter_map(|res| res.ok()) {
+        let fields: Vec<_> = line.split(",").collect();
+        let seq_id = fields[1];
+
+        if seq_id == chrom || seq_id == &chrom_id {
+            stdout()
+                .write_all(format!("{}\n", fields[0]).as_bytes())
+                .expect("Unable to write line");
+        }
+    }
+    Ok(())
 }

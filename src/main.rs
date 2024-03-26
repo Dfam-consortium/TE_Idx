@@ -4,9 +4,11 @@ use std::path::Path;
 use clap::{Parser, Subcommand};
 
 use te_idx::bgzf_filter;
-use te_idx::prep_beds;
 use te_idx::nhmmer_query;
+use te_idx::prep_beds;
 use te_idx::read_family_assembly_annotations;
+use te_idx::seq_query;
+use te_idx::trf_query;
 
 mod idx;
 
@@ -64,6 +66,22 @@ pub enum Commands {
         family: Option<String>,
         #[arg(short, long)]
         nrph: bool,
+    },
+    TrfQuery {
+        #[arg(short, long)]
+        assembly: String,
+        #[arg(short, long)]
+        chrom: String,
+        #[arg(short, long)]
+        start: u64,
+        #[arg(short, long)]
+        end: u64,
+    },
+    SeqQuery {
+        #[arg(short, long)]
+        assembly: String,
+        #[arg(short, long)]
+        chrom: String,
     },
     ReadFamilyAssemblyAnnotations {
         #[arg(short, long)]
@@ -180,6 +198,15 @@ fn main() {
             family,
             nrph,
         }) => nhmmer_query(assembly, chrom, *start, *end, family, nrph),
+        Some(Commands::TrfQuery {
+            assembly,
+            chrom,
+            start,
+            end,
+        }) => trf_query(assembly, chrom, *start, *end).expect("Mask Read Failed"),
+        Some(Commands::SeqQuery { assembly, chrom }) => {
+            seq_query(assembly, chrom).expect("Seq Read Failed")
+        }
         Some(Commands::ReadFamilyAssemblyAnnotations {
             id,
             assembly_id,

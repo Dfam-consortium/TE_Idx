@@ -730,7 +730,7 @@ impl ContigIndex {
     }
 }
 
-#[allow(dead_code)]
+// #[allow(dead_code)]
 pub fn prep_idx(
     proj_dir: &String,
 ) -> Result<(Vec<String>, String, ContigIndex, String), Box<dyn Error>> {
