@@ -42,7 +42,8 @@ pub fn bgzf_filter(
         None => Box::new(bgzf::Writer::new(stdout())),
     };
 
-    for line in reader.lines().filter_map(|res| res.ok()) {
+    for result in reader.lines() {
+        let line = result?;
         let mut fields: Vec<_> = line.split_whitespace().collect();
         if term.is_none()
             || (fields.len() >= position - 1
@@ -97,7 +98,8 @@ pub fn prep_beds(in_tsv: &String) -> Result<()> {
     let mut current_acc = "".to_string();
     let mut out_f = tempfile()?;
     let mut out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
-    for line in lines.filter_map(|res| res.ok()) {
+    for result in lines {
+        let line = result?;
         if !&line.starts_with('#') {
             let fields: Vec<_> = line.split_whitespace().collect();
             if fields[3] != current_acc {
@@ -150,7 +152,7 @@ pub fn read_family_assembly_annotations(
 #[allow(dead_code)]
 #[derive(Serialize, Deserialize)]
 struct Annotation {
-    family_accession: String,
+    accession: String,
     seq_start: String,
     seq_end: String,
     strand: String,
@@ -158,13 +160,14 @@ struct Annotation {
     ali_end: String,
     model_start: String,
     model_end: String,
-    hit_bit_score: String,
-    hit_evalue_score: String,
-    nrph_hit: String,
-    seq_id: String, // divergence: String,
-                    // family_name: String,
-                    // cigar: String,
-                    // caf: String,
+    bit_score: String,
+    e_value: String,
+    sequence: String,
+    // nrph_hit: String,
+    // divergence: String,
+    // family_name: String,
+    // cigar: String,
+    // caf: String,
 }
 pub fn nhmmer_query(
     assembly: &String,
@@ -218,18 +221,17 @@ pub fn nhmmer_query(
             for i in 0..l.len() {
                 let fields = l[i].split_whitespace().collect::<Vec<&str>>();
                 let annotation = Annotation {
-                    family_accession: fields[3].to_string(),
-                    seq_start: fields[1].to_string(),
-                    seq_end: fields[2].to_string(),
+                    accession: fields[3].to_string(),
+                    bit_score: fields[4].to_string(),
+                    e_value: fields[11].to_string(),
+                    model_start: fields[9].to_string(),
+                    model_end: fields[10].to_string(),
                     strand: fields[5].to_string(),
                     ali_start: fields[7].to_string(),
                     ali_end: fields[8].to_string(),
-                    model_start: fields[9].to_string(),
-                    model_end: fields[10].to_string(),
-                    hit_bit_score: fields[4].to_string(),
-                    hit_evalue_score: fields[11].to_string(),
-                    nrph_hit: fields[12].to_string(),
-                    seq_id: fields[0].to_string(),
+                    seq_start: fields[1].to_string(),
+                    seq_end: fields[2].to_string(),
+                    sequence: fields[0].to_string(),
                 };
                 formatted.push(annotation)
             }
@@ -249,6 +251,14 @@ pub fn nhmmer_query(
     }
 }
 
+#[derive(Serialize, Deserialize)]
+struct MaskHit {
+    sequence: String,
+    seq_start: String,
+    seq_end: String,
+    repeat_str: String,
+    repeat_length: String,
+}
 pub fn trf_query(assembly: &String, chrom: &String, start: u64, end: u64) -> Result<()> {
     // TODO this method just iterates through all the mask annotations. would be faster to index
     let maskfile = format!("{}/{}/masks/mask.csv.gz", &DATA_DIR, assembly);
@@ -263,26 +273,38 @@ pub fn trf_query(assembly: &String, chrom: &String, start: u64, end: u64) -> Res
     };
     let in_f = File::open(maskfile).expect("Could Not Open Input File");
     let reader = bgzf::MultithreadedReader::with_worker_count(worker_count, in_f);
-    let mut writer = bgzf::Writer::new(stdout());
+    let mut formatted = Vec::<MaskHit>::new();
+
     // seq_accession: 0 seq_start: 1 seq_end: 2 repeat_str: 3 repeat_length: 4
-    for line in reader.lines().filter_map(|res| res.ok()) {
+    for result in reader.lines() {
+        let line = result?;
         let fields: Vec<_> = line.split(",").collect();
-        let row_start: u64 = fields[1]
-            // .replace("\"", "")
-            .parse()
-            .expect("Problem with start value");
-        let row_end: u64 = fields[2]
-            // .replace("\"", "")
-            .parse()
-            .expect("Problem with end value");
-        if &fields[0].replace("\"", "") == chrom
+        let row_start: u64 = fields[1].parse().expect("Problem with start value");
+        let row_end: u64 = fields[2].parse().expect("Problem with end value");
+        if &fields[0] == chrom
             && ((row_start >= start && row_start <= end)
                 || (row_end <= end && row_end >= start)
                 || (row_start < start && row_end > end))
         {
-            stdout()
-                .write_all(format!("{}\n", line).as_bytes())
-                .expect("Unable to write line");
+            formatted.push(MaskHit {
+                sequence: fields[0].to_string(),
+                seq_start: fields[1].to_string(),
+                seq_end: fields[2].to_string(),
+                repeat_str: fields[3].to_string(),
+                repeat_length: fields[4].to_string(),
+            })
+        }
+        match serde_json::to_string(&formatted) {
+            Err(e) => {
+                eprintln!("Error Converting Results to JSON - {e}");
+                exit(1);
+            }
+            Ok(json_str) => {
+                stdout()
+                    .write_all(json_str.as_bytes())
+                    .expect("Unable to write line");
+                exit(0)
+            }
         }
     }
     Ok(())
@@ -301,11 +323,11 @@ pub fn seq_query(assembly: &String, chrom: &String) -> Result<()> {
     };
     let in_f = File::open(seqfile).expect("Could Not Open Input File");
     let reader = bgzf::MultithreadedReader::with_worker_count(worker_count, in_f);
-    let mut writer = bgzf::Writer::new(stdout());
 
     let chrom_id: String = "chr".to_owned() + chrom;
     // accession: 0, id: 1, description: 2, length: 3, updated: 4, created: 5, is_genomic: 6
-    for line in reader.lines().filter_map(|res| res.ok()) {
+    for result in reader.lines() {
+        let line = result?;
         let fields: Vec<_> = line.split(",").collect();
         let seq_id = fields[1];
 
