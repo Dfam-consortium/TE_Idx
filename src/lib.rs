@@ -339,3 +339,34 @@ pub fn seq_query(assembly: &String, chrom: &String) -> Result<()> {
     }
     Ok(())
 }
+
+pub fn coverage_query(assembly: &String, fam: &String) -> Result<()> {
+    let covfile = format!("{}/{}/coverage/coverage_data.tsv.gz", &DATA_DIR, assembly);
+    if !Path::new(&covfile).exists() {
+        println!("{} Not Found", &covfile);
+        std::process::exit(1)
+    }
+
+    let worker_count: NonZeroUsize = match NonZeroUsize::new(5) {
+        Some(n) => n,
+        None => unreachable!(),
+    };
+    let in_f = File::open(covfile).expect("Could Not Open Input File");
+    let reader = bgzf::MultithreadedReader::with_worker_count(worker_count, in_f);
+    // family_accession: 0, reversed: 1, forward: 2, nrph: 3, num_full: 4, num_full_nrph: 5, num_rev: 6, karyotype: 7
+    for result in reader.lines() {
+        let line = result?;
+        let fields: Vec<_> = line.split("\t").collect();
+        if fields[0] == fam {
+            stdout()
+            .write_all(format!("{}\n", fields[7]).as_bytes())
+            .expect("Unable to write line");
+        }
+    }
+    Ok(())
+}
+
+pub fn percent_id_query(){
+    // family_accession,threshold,graph_json,max_insert,num_seqs
+    todo!()
+}
