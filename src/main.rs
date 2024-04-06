@@ -9,7 +9,7 @@ use te_idx::prep_beds;
 use te_idx::read_family_assembly_annotations;
 use te_idx::seq_query;
 use te_idx::trf_query;
-use te_idx::coverage_query;
+use te_idx::process_json;
 
 mod idx;
 
@@ -94,12 +94,13 @@ pub enum Commands {
         #[arg(long, short)]
         outfile: Option<String>,
     },
-    CoverageQuery {
+    ProcessJSON {
         #[arg(short, long)]
-        assembly: String,
+        in_file: String,
+
         #[arg(short, long)]
-        fam: String,
-    }
+        key: String,
+    },
 }
 
 fn parse_coordinates(coord_str: &str) -> Result<(u64, u64, u64), ParseIntError> {
@@ -220,9 +221,10 @@ fn main() {
             nrph,
             outfile,
         }) => read_family_assembly_annotations(id, assembly_id, nrph, outfile),
-        Some(Commands::CoverageQuery { assembly, fam }) => {
-            coverage_query(assembly, fam).expect("Coverage Read Failed")
-        }
+        Some(Commands::ProcessJSON {
+            in_file,
+            key
+        }) => process_json(in_file, key).expect("JSON Parse Failed"),
         None => {}
     }
 }

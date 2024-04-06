@@ -1,18 +1,46 @@
 use noodles::bgzf;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fs::{create_dir_all, File, OpenOptions};
 use std::io::{stdout, BufRead, BufReader, Result, Write};
 use std::num::NonZeroUsize;
 use std::path::Path;
 use std::process::exit;
 use tempfile::tempfile;
+use serde_json::{json, Value};
+
 
 mod idx;
 
 const DATA_DIR: &str = "/home/agray/te_idx/data";
-// const ASSEMBLY_DIR: &str = "assembly_alignments";
-// const BENCHMARK_DIR: &str = "./data/benchmark_alignments";
-// const SEQUENCE_DIR: &str = "./data/sequence";
+const ASSEMBLY_DIR: &str = "assembly_alignments";
+const BENCHMARK_DIR: &str = "benchmark_alignments";
+// const MASKS_DIR: &str = "masks";
+// const MOD_LEN_DIR: &str = "model_lengths";
+const SEQUENCE_DIR: &str = "sequences";
+
+
+// .bed fields => seq_id 0, seq_start 1, seq_end 2, family_accession 3, hit_bit_score 4, strand 5, ali_start 6, ali_end 7,
+//                model_start 8, model_end 9, hit_evalue_score 10, nrph_hit 11, divergence 12, family_name 13, cigar 14, caf 15
+
+// fam-annotations => sequence name 0, model accession 1, model name 2, bit score 3, e-value 4, hmm start 5, hmm end 6,
+//                   hmm length 7, strand 8, alignment start 9, alignment end 10, envelope start 11, envelope end 12, sequence length 13
+
+// .bed to fam-annotations:
+// 0->0, from seq file
+// 3->1
+// 13->2
+// 4->3
+// 10->4
+// 8->5
+// 9->6
+// 3->7 from family table
+// 5->8
+// 1->9
+// 2->10
+// 6->11
+// 7->12
+// 0->13 from seq file
 
 pub fn bgzf_filter(
     infile: &String,
@@ -75,12 +103,12 @@ pub fn prep_beds(in_tsv: &String) -> Result<()> {
         exit(1)
     }
 
-    let assemly_dir = format!("{}/{}", &DATA_DIR, &assembly);
-    let algin_dir = format!("{}/{}", &assemly_dir, "assembly_alignments");
-    let bench_dir = format!("{}/{}", &assemly_dir, "benchmark_alignments");
-    let seq_dir = format!("{}/{}", &assemly_dir, "sequences");
-    if !Path::new(&assemly_dir).exists() {
-        create_dir_all(&assemly_dir)?;
+    let db_dir = format!("{}/{}", &DATA_DIR, &assembly);
+    let algin_dir = format!("{}/{}", &db_dir, &ASSEMBLY_DIR);
+    let bench_dir = format!("{}/{}", &db_dir, &BENCHMARK_DIR);
+    let seq_dir = format!("{}/{}", &db_dir, &SEQUENCE_DIR);
+    if !Path::new(&db_dir).exists() {
+        create_dir_all(&db_dir)?;
         create_dir_all(&algin_dir)?;
         create_dir_all(&bench_dir)?;
         create_dir_all(&seq_dir)?;
@@ -131,7 +159,7 @@ pub fn read_family_assembly_annotations(
         eprintln!("Assembly \"{}\" Does Not Exist", assembly_path);
         exit(1)
     }
-    let fam_file: String = format!("{}/assembly_alignments/{}.bed.bgz", &assembly_path, &id);
+    let fam_file: String = format!("{}/{}/{}.bed.bgz", &assembly_path, &ASSEMBLY_DIR, &id);
     if !Path::new(&fam_file).exists() {
         eprintln!("Family {} Not Found In Assembly {}", id, assembly_path);
         exit(1)
@@ -311,7 +339,7 @@ pub fn trf_query(assembly: &String, chrom: &String, start: u64, end: u64) -> Res
 }
 
 pub fn seq_query(assembly: &String, chrom: &String) -> Result<()> {
-    let seqfile = format!("{}/{}/sequences/sequence.csv.gz", &DATA_DIR, assembly);
+    let seqfile = format!("{}/{}/{}/sequence.csv.gz", &DATA_DIR, assembly, &SEQUENCE_DIR);
     if !Path::new(&seqfile).exists() {
         println!("{} Not Found", &seqfile);
         std::process::exit(1)
@@ -340,33 +368,34 @@ pub fn seq_query(assembly: &String, chrom: &String) -> Result<()> {
     Ok(())
 }
 
-pub fn coverage_query(assembly: &String, fam: &String) -> Result<()> {
-    let covfile = format!("{}/{}/coverage/coverage_data.tsv.gz", &DATA_DIR, assembly);
-    if !Path::new(&covfile).exists() {
-        println!("{} Not Found", &covfile);
+pub fn process_json(in_file: &String, key: &String) -> Result<()> {
+    if !Path::new(&in_file).exists() {
+        println!("{} Not Found", &in_file);
         std::process::exit(1)
     }
+    let in_f = File::open(in_file).expect("Could Not Open Input File");
 
-    let worker_count: NonZeroUsize = match NonZeroUsize::new(5) {
-        Some(n) => n,
-        None => unreachable!(),
-    };
-    let in_f = File::open(covfile).expect("Could Not Open Input File");
-    let reader = bgzf::MultithreadedReader::with_worker_count(worker_count, in_f);
-    // family_accession: 0, reversed: 1, forward: 2, nrph: 3, num_full: 4, num_full_nrph: 5, num_rev: 6, karyotype: 7
-    for result in reader.lines() {
-        let line = result?;
-        let fields: Vec<_> = line.split("\t").collect();
-        if fields[0] == fam {
-            stdout()
-            .write_all(format!("{}\n", fields[7]).as_bytes())
-            .expect("Unable to write line");
+    let in_data: Value = serde_json::from_reader(in_f)?;
+
+    
+
+    let mut out_data = HashMap::new();
+    if let Some(items) = in_data[2]["data"].as_array() {
+        for item in items {
+            let mut new_item = item.clone().as_object().unwrap().to_owned();
+            new_item.remove(key);
+            out_data.insert(item[key].to_string().replace("\"", ""), new_item);
         }
     }
-    Ok(())
-}
+    let json = json!({
+        "assembly": in_data[1]["name"],
+        "version": in_data[0]["version"],
+        "data": out_data
+    });
 
-pub fn percent_id_query(){
-    // family_accession,threshold,graph_json,max_insert,num_seqs
-    todo!()
+    let output = serde_json::to_string(&json)?;
+    stdout()// TODO maybe change to file output
+        .write_all(format!("{}\n", output).as_bytes())
+        .expect("Unable to write JSON");
+    Ok(())
 }
