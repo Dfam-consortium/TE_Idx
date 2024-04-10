@@ -733,6 +733,7 @@ impl ContigIndex {
 // #[allow(dead_code)]
 pub fn prep_idx(
     proj_dir: &String,
+    data_type: &String,
 ) -> Result<(Vec<String>, String, ContigIndex, String), Box<dyn Error>> {
     // Initial instantiation
     let contig_index = ContigIndex {
@@ -751,8 +752,8 @@ pub fn prep_idx(
     // The minimal beds take ~57sec to index
 
     // From the project directory several things can be assumed:
-    let index_file = format!("{}/te_idx.dat", proj_dir);
-    let bgz_dir = format!("{}/assembly_alignments", proj_dir);
+    let index_file = format!("{}/{}_idx.dat", proj_dir, data_type);
+    let bgz_dir = format!("{}/{}", proj_dir, data_type);
 
     let mut filenames: Vec<String> = Vec::new();
     if let Ok(entries) = fs::read_dir(bgz_dir.clone()) {

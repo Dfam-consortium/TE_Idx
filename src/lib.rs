@@ -1,5 +1,6 @@
 use noodles::bgzf;
 use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::fs::{create_dir_all, File, OpenOptions};
 use std::io::{stdout, BufRead, BufReader, Result, Write};
@@ -7,18 +8,15 @@ use std::num::NonZeroUsize;
 use std::path::Path;
 use std::process::exit;
 use tempfile::tempfile;
-use serde_json::{json, Value};
-
 
 mod idx;
 
-const DATA_DIR: &str = "/home/agray/te_idx/data";
-const ASSEMBLY_DIR: &str = "assembly_alignments";
-const BENCHMARK_DIR: &str = "benchmark_alignments";
-// const MASKS_DIR: &str = "masks";
-// const MOD_LEN_DIR: &str = "model_lengths";
-const SEQUENCE_DIR: &str = "sequences";
-
+pub const DATA_DIR: &'static str = "/home/agray/te_idx/data";
+pub const ASSEMBLY_DIR: &'static str = "assembly_alignments";
+pub const BENCHMARK_DIR: &'static str = "benchmark_alignments";
+pub const MASKS_DIR: &'static str = "masks";
+// pub const MOD_LEN_DIR: &'static str = "model_lengths";
+pub const SEQUENCE_DIR: &'static str = "sequences";
 
 // .bed fields => seq_id 0, seq_start 1, seq_end 2, family_accession 3, hit_bit_score 4, strand 5, ali_start 6, ali_end 7,
 //                model_start 8, model_end 9, hit_evalue_score 10, nrph_hit 11, divergence 12, family_name 13, cigar 14, caf 15
@@ -87,34 +85,36 @@ pub fn bgzf_filter(
     Ok(())
 }
 
-pub fn prep_beds(in_tsv: &String) -> Result<()> {
+pub fn prep_beds(assembly: &String, in_tsv: &String, data_type: &String) -> Result<()> {
     if !Path::new(&in_tsv).exists() {
         eprintln!("Input TSV \"{}\" Not Found", &in_tsv);
         exit(1)
     }
 
-    let chunks: Vec<_> = in_tsv.split("-").collect();
-    let assembly = chunks[0];
-    let acc_order = chunks[1] == "byacc";
-    let bench = chunks[2] == "bench_region.tsv";
-
-    if !acc_order {
-        eprintln!("Input TSV \"{}\" Not In Accession Order", &in_tsv);
-        exit(1)
-    }
+    // TODO try to establish this a different way?
+    // if !acc_order {
+    //     eprintln!("Input TSV \"{}\" Not In Accession Order", &in_tsv);
+    //     exit(1)
+    // }
 
     let db_dir = format!("{}/{}", &DATA_DIR, &assembly);
-    let algin_dir = format!("{}/{}", &db_dir, &ASSEMBLY_DIR);
-    let bench_dir = format!("{}/{}", &db_dir, &BENCHMARK_DIR);
-    let seq_dir = format!("{}/{}", &db_dir, &SEQUENCE_DIR);
+    let target_dir = format!("{}/{}", &db_dir, &data_type);
     if !Path::new(&db_dir).exists() {
         create_dir_all(&db_dir)?;
-        create_dir_all(&algin_dir)?;
-        create_dir_all(&bench_dir)?;
-        create_dir_all(&seq_dir)?;
     }
 
-    let target_dir = if bench { bench_dir } else { algin_dir };
+    if !Path::new(&target_dir).exists() {
+        create_dir_all(&target_dir)?;
+    }
+
+    // TODO this is ugly, rework with a dictionary
+    let mut acc_idx: usize = 3;
+    if data_type == ASSEMBLY_DIR || data_type == BENCHMARK_DIR {
+        acc_idx = 3;
+    }
+    if data_type == MASKS_DIR || data_type == SEQUENCE_DIR {
+        acc_idx = 0;
+    }
 
     let worker_count: NonZeroUsize = match NonZeroUsize::new(10) {
         Some(n) => n,
@@ -130,8 +130,8 @@ pub fn prep_beds(in_tsv: &String) -> Result<()> {
         let line = result?;
         if !&line.starts_with('#') {
             let fields: Vec<_> = line.split_whitespace().collect();
-            if fields[3] != current_acc {
-                current_acc = fields[3].to_string();
+            if fields[acc_idx] != current_acc {
+                current_acc = fields[acc_idx].to_string();
                 out_f = File::create(format!("{target_dir}/{current_acc}.bed.bgz",))
                     .expect("Could Not Open Output File");
                 out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
@@ -212,10 +212,11 @@ pub fn nhmmer_query(
         exit(1)
     }
 
-    let (filenames, bgz_dir, mut contig_index, index_file) = match idx::prep_idx(&assembly_path) {
-        Ok(res) => res,
-        Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e),
-    };
+    let (filenames, bgz_dir, mut contig_index, index_file) =
+        match idx::prep_idx(&assembly_path, &"assembly".to_string()) {
+            Ok(res) => res,
+            Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e),
+        };
 
     if !Path::new(&index_file).exists() {
         eprintln!("Assembly \"{}\" Is Not Indexed", assembly_path);
@@ -339,7 +340,10 @@ pub fn trf_query(assembly: &String, chrom: &String, start: u64, end: u64) -> Res
 }
 
 pub fn seq_query(assembly: &String, chrom: &String) -> Result<()> {
-    let seqfile = format!("{}/{}/{}/sequence.csv.gz", &DATA_DIR, assembly, &SEQUENCE_DIR);
+    let seqfile = format!(
+        "{}/{}/{}/sequence.csv.gz",
+        &DATA_DIR, assembly, &SEQUENCE_DIR
+    );
     if !Path::new(&seqfile).exists() {
         println!("{} Not Found", &seqfile);
         std::process::exit(1)
@@ -377,8 +381,6 @@ pub fn process_json(in_file: &String, key: &String) -> Result<()> {
 
     let in_data: Value = serde_json::from_reader(in_f)?;
 
-    
-
     let mut out_data = HashMap::new();
     if let Some(items) = in_data[2]["data"].as_array() {
         for item in items {
@@ -394,7 +396,7 @@ pub fn process_json(in_file: &String, key: &String) -> Result<()> {
     });
 
     let output = serde_json::to_string(&json)?;
-    stdout()// TODO maybe change to file output
+    stdout() // TODO maybe change to file output
         .write_all(format!("{}\n", output).as_bytes())
         .expect("Unable to write JSON");
     Ok(())

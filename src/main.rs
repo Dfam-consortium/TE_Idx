@@ -1,17 +1,22 @@
 use std::num::ParseIntError;
 use std::path::Path;
 
+use clap::builder::PossibleValuesParser;
 use clap::{Parser, Subcommand};
 
 use te_idx::bgzf_filter;
 use te_idx::nhmmer_query;
 use te_idx::prep_beds;
+use te_idx::process_json;
 use te_idx::read_family_assembly_annotations;
 use te_idx::seq_query;
 use te_idx::trf_query;
-use te_idx::process_json;
 
 mod idx;
+
+use te_idx::{ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR};
+
+const INDEX_DATA_TYPES: [&str; 3] = [ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR];
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -36,6 +41,10 @@ pub enum Commands {
         #[arg(short, long)]
         assembly: String,
 
+        #[arg(short, long)]
+        #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
+        data_type: String,
+
         // Boolean flag to build/rebuild index
         #[arg(short, long)]
         build: bool,
@@ -52,7 +61,14 @@ pub enum Commands {
     },
     PrepBeds {
         #[arg(short, long)]
+        assembly: String,
+
+        #[arg(short, long)]
         in_tsv: String,
+
+        #[arg(short, long)]
+        #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
+        data_type: String,
     },
     NhmmerQuery {
         #[arg(short, long)]
@@ -156,15 +172,17 @@ fn main() {
         }
         Some(Commands::Idx {
             assembly,
+            data_type,
             build,
             search,
             family,
             nrph,
         }) => {
-            let (filenames, bgz_dir, mut contig_index, index_file) = match idx::prep_idx(assembly) {
-                Ok(res) => res,
-                Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e),
-            };
+            let (filenames, bgz_dir, mut contig_index, index_file) =
+                match idx::prep_idx(assembly, data_type) {
+                    Ok(res) => res,
+                    Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e),
+                };
             if *build {
                 idx::build_idx(&filenames, &bgz_dir, &mut contig_index, &index_file)
             }
@@ -194,8 +212,12 @@ fn main() {
                 println!("{:?}", results);
             }
         }
-        Some(Commands::PrepBeds { in_tsv }) => match prep_beds(in_tsv) {
-            Ok(()) => println!("Bed Files Created"),
+        Some(Commands::PrepBeds {
+            assembly,
+            in_tsv,
+            data_type,
+        }) => match prep_beds(assembly, in_tsv, data_type) {
+            Ok(()) => println!("Bed Files Created - {}", data_type),
             Err(e) => panic!("{:?}", e),
         },
         Some(Commands::NhmmerQuery {
@@ -221,10 +243,9 @@ fn main() {
             nrph,
             outfile,
         }) => read_family_assembly_annotations(id, assembly_id, nrph, outfile),
-        Some(Commands::ProcessJSON {
-            in_file,
-            key
-        }) => process_json(in_file, key).expect("JSON Parse Failed"),
+        Some(Commands::ProcessJSON { in_file, key }) => {
+            process_json(in_file, key).expect("JSON Parse Failed")
+        }
         None => {}
     }
 }
