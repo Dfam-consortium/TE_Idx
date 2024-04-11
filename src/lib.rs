@@ -91,12 +91,6 @@ pub fn prep_beds(assembly: &String, in_tsv: &String, data_type: &String) -> Resu
         exit(1)
     }
 
-    // TODO try to establish this a different way?
-    // if !acc_order {
-    //     eprintln!("Input TSV \"{}\" Not In Accession Order", &in_tsv);
-    //     exit(1)
-    // }
-
     let db_dir = format!("{}/{}", &DATA_DIR, &assembly);
     let target_dir = format!("{}/{}", &db_dir, &data_type);
     if !Path::new(&db_dir).exists() {
@@ -131,6 +125,7 @@ pub fn prep_beds(assembly: &String, in_tsv: &String, data_type: &String) -> Resu
         if !&line.starts_with('#') {
             let fields: Vec<_> = line.split_whitespace().collect();
             if fields[acc_idx] != current_acc {
+                // assume accession order TODO confirm this
                 current_acc = fields[acc_idx].to_string();
                 out_f = File::create(format!("{target_dir}/{current_acc}.bed.bgz",))
                     .expect("Could Not Open Output File");
@@ -289,54 +284,74 @@ struct MaskHit {
     repeat_length: String,
 }
 pub fn trf_query(assembly: &String, chrom: &String, start: u64, end: u64) -> Result<()> {
-    // TODO this method just iterates through all the mask annotations. would be faster to index
-    let maskfile = format!("{}/{}/masks/mask.csv.gz", &DATA_DIR, assembly);
-    if !Path::new(&maskfile).exists() {
-        println!("{} Not Found", &maskfile);
-        std::process::exit(1)
+    // TODO DRY this with nhmmer_query, no need to have both similar methods
+
+    let assembly_path: String = format!("{}/{}", &DATA_DIR, &assembly);
+    // confirm assembly_id and ensure that it accessable
+    if !Path::new(&assembly_path).exists() {
+        eprintln!("Assembly \"{}\" Does Not Exist", assembly_path);
+        exit(1)
     }
 
-    let worker_count: NonZeroUsize = match NonZeroUsize::new(5) {
-        Some(n) => n,
-        None => unreachable!(),
-    };
-    let in_f = File::open(maskfile).expect("Could Not Open Input File");
-    let reader = bgzf::MultithreadedReader::with_worker_count(worker_count, in_f);
-    let mut formatted = Vec::<MaskHit>::new();
+    let (filenames, bgz_dir, mut contig_index, index_file) =
+        match idx::prep_idx(&assembly_path, &"masks".to_string()) {
+            Ok(res) => res,
+            Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e),
+        };
 
+    if !Path::new(&index_file).exists() {
+        eprintln!("Assembly \"{}\" Is Not Indexed", assembly_path);
+        exit(1)
+    }
+
+    let results = idx::search_idx(
+        &filenames,
+        &bgz_dir,
+        &mut contig_index,
+        &index_file,
+        &chrom,
+        start,
+        end,
+        &None,
+        false,
+        true
+    );
     // seq_accession: 0 seq_start: 1 seq_end: 2 repeat_str: 3 repeat_length: 4
-    for result in reader.lines() {
-        let line = result?;
-        let fields: Vec<_> = line.split(",").collect();
-        let row_start: u64 = fields[1].parse().expect("Problem with start value");
-        let row_end: u64 = fields[2].parse().expect("Problem with end value");
-        if &fields[0] == chrom
-            && ((row_start >= start && row_start <= end)
-                || (row_end <= end && row_end >= start)
-                || (row_start < start && row_end > end))
-        {
-            formatted.push(MaskHit {
-                sequence: fields[0].to_string(),
-                seq_start: fields[1].to_string(),
-                seq_end: fields[2].to_string(),
-                repeat_str: fields[3].to_string(),
-                repeat_length: fields[4].to_string(),
-            })
+    let mut formatted = Vec::<MaskHit>::new();
+    match &results {
+        Err(e) => {
+            eprintln!("Index Search Failed - {}", e);
+            exit(1);
         }
-        match serde_json::to_string(&formatted) {
-            Err(e) => {
-                eprintln!("Error Converting Results to JSON - {e}");
-                exit(1);
-            }
-            Ok(json_str) => {
-                stdout()
-                    .write_all(json_str.as_bytes())
-                    .expect("Unable to write line");
-                exit(0)
+        Ok(l) if l.as_slice().is_empty() => {
+            println!("No Results Found");
+            exit(0);
+        }
+        Ok(l) => {
+            for i in 0..l.len() {
+                let fields = l[i].split_whitespace().collect::<Vec<&str>>();
+                formatted.push(MaskHit {
+                    sequence: fields[0].to_string(),
+                    seq_start: fields[1].to_string(),
+                    seq_end: fields[2].to_string(),
+                    repeat_str: fields[3].to_string(),
+                    repeat_length: fields[4].to_string(),
+                })
             }
         }
     }
-    Ok(())
+    match serde_json::to_string(&formatted) {
+        Err(e) => {
+            eprintln!("Error Converting Results to JSON - {e}");
+            exit(1);
+        }
+        Ok(json_str) => {
+            stdout()
+                .write_all(json_str.as_bytes())
+                .expect("Unable to write line");
+            exit(0)
+        }
+    }
 }
 
 pub fn seq_query(assembly: &String, chrom: &String) -> Result<()> {
