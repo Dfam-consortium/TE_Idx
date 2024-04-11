@@ -14,7 +14,7 @@ use te_idx::trf_query;
 
 mod idx;
 
-use te_idx::{ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR};
+use te_idx::{ASSEMBLY_DIR, BENCHMARK_DIR, DATA_DIR, MASKS_DIR};
 
 const INDEX_DATA_TYPES: [&str; 3] = [ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR];
 
@@ -179,7 +179,7 @@ fn main() {
             nrph,
         }) => {
             let (filenames, bgz_dir, mut contig_index, index_file) =
-                match idx::prep_idx(assembly, data_type) {
+                match idx::prep_idx(&format!("{}/{}", &DATA_DIR, &assembly), data_type) {
                     Ok(res) => res,
                     Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e),
                 };

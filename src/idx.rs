@@ -9,6 +9,8 @@ use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 use std::io::{Seek, SeekFrom};
+use std::path::Path;
+use std::process::exit;
 use std::time::SystemTime;
 
 static MY_LOGGER: MyLogger = MyLogger;
@@ -754,21 +756,30 @@ pub fn prep_idx(
     // From the project directory several things can be assumed:
     let index_file = format!("{}/{}_idx.dat", proj_dir, data_type);
     let bgz_dir = format!("{}/{}", proj_dir, data_type);
-
-    let mut filenames: Vec<String> = Vec::new();
-    if let Ok(entries) = fs::read_dir(bgz_dir.clone()) {
-        for entry in entries {
-            if let Ok(entry) = entry {
-                if let Some(file_name) = entry.file_name().to_str() {
-                    if file_name.ends_with(".bgz") {
-                        filenames.push(file_name.to_string());
-                    }
-                }
-            }
-        }
-    } else {
-        error!("Error reading {} directory", bgz_dir);
+    if !Path::new(&bgz_dir).exists() {
+        eprintln!(
+            "Directory \"{}\" Does Not Exist - Aborting Indexing",
+            &bgz_dir
+        );
+        exit(1)
     }
+
+    // let mut filenames: Vec<String> = Vec::new();
+    let entries = fs::read_dir(&bgz_dir)?;
+    let filenames: Vec<String> = entries
+        .filter_map(|entry| {
+            let path = entry.ok()?.path();
+            if path.is_file() {
+                path.file_name()?
+                    .to_str()
+                    .filter(|s| s.ends_with(".bgz"))
+                    .map(|s| s.to_owned())
+            } else {
+                None
+            }
+        })
+        .collect();
+
     Ok((filenames, bgz_dir, contig_index, index_file))
 }
 
@@ -796,6 +807,8 @@ pub fn build_idx(
             "Indexing {} : {} mod_time={:?}, bytes={}",
             fidx, bgz_file, mod_time, file_size
         );
+
+        // TODO: validate that the file is in BED format before including it
         contig_index.bgz_files.push(BGZFile {
             name: filename.clone(),
             mod_time: mod_time.as_secs_f64(),
@@ -805,12 +818,10 @@ pub fn build_idx(
         let mut reader = File::open(bgz_file).map(bgzf::Reader::new).unwrap();
         let mut line = String::new();
 
-        // TODO: validate that the file is in BED format before including it
-
         let mut virt_pos = u64::from(reader.virtual_position());
-        while reader.read_line(&mut line).unwrap() > 0 {
-            let fields: Vec<&str> = line.trim_end().split('\t').collect();
 
+        while reader.read_line(&mut line).unwrap() > 0 {
+            let fields: Vec<&str> = line.trim_end().split_whitespace().collect();
             contig_index.add_contig_range(
                 fields[0],
                 fidx,
