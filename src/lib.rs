@@ -2,7 +2,7 @@ use noodles::bgzf;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::HashMap;
-use std::fs::{create_dir_all, File, OpenOptions};
+use std::fs::{create_dir_all, read_to_string, File, OpenOptions};
 use std::io::{stdout, BufRead, BufReader, Result, Write};
 use std::num::NonZeroUsize;
 use std::path::Path;
@@ -314,7 +314,7 @@ pub fn trf_query(assembly: &String, chrom: &String, start: u64, end: u64) -> Res
         end,
         &None,
         false,
-        true
+        true,
     );
     // seq_accession: 0 seq_start: 1 seq_end: 2 repeat_str: 3 repeat_length: 4
     let mut formatted = Vec::<MaskHit>::new();
@@ -354,37 +354,30 @@ pub fn trf_query(assembly: &String, chrom: &String, start: u64, end: u64) -> Res
     }
 }
 
-pub fn seq_query(assembly: &String, chrom: &String) -> Result<()> {
-    let seqfile = format!(
-        "{}/{}/{}/sequence.csv.gz",
-        &DATA_DIR, assembly, &SEQUENCE_DIR
+pub fn json_query(
+    assembly: &String,
+    data_type: &String,
+    key: &String,
+    target: &String,
+) -> Result<String> {
+    let target_file = format!(
+        "{}/{}/{}/{}-{}-processed.json",
+        &DATA_DIR, &assembly, &data_type, &assembly, &data_type
     );
-    if !Path::new(&seqfile).exists() {
-        println!("{} Not Found", &seqfile);
+    if !Path::new(&target_file).exists() {
+        println!("{} Not Found", &target_file);
         std::process::exit(1)
     }
 
-    let worker_count: NonZeroUsize = match NonZeroUsize::new(5) {
-        Some(n) => n,
-        None => unreachable!(),
-    };
-    let in_f = File::open(seqfile).expect("Could Not Open Input File");
-    let reader = bgzf::MultithreadedReader::with_worker_count(worker_count, in_f);
+    let in_str = read_to_string(&target_file).expect("JSON was not well-formatted");
+    let in_data: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
 
-    let chrom_id: String = "chr".to_owned() + chrom;
-    // accession: 0, id: 1, description: 2, length: 3, updated: 4, created: 5, is_genomic: 6
-    for result in reader.lines() {
-        let line = result?;
-        let fields: Vec<_> = line.split(",").collect();
-        let seq_id = fields[1];
-
-        if seq_id == chrom || seq_id == &chrom_id {
-            stdout()
-                .write_all(format!("{}\n", fields[0]).as_bytes())
-                .expect("Unable to write line");
-        }
-    }
-    Ok(())
+    let val = in_data
+        .get("data")
+        .and_then(|data| data.get(key).and_then(|item| item.get(target)))
+        .expect("Key Target Pair Not Found");
+    let ret = val.as_str().expect("asd");
+    return Ok(ret.to_string());
 }
 
 pub fn process_json(in_file: &String, key: &String) -> Result<()> {

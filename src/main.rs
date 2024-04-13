@@ -5,11 +5,11 @@ use clap::builder::PossibleValuesParser;
 use clap::{Parser, Subcommand};
 
 use te_idx::bgzf_filter;
+use te_idx::json_query;
 use te_idx::nhmmer_query;
 use te_idx::prep_beds;
 use te_idx::process_json;
 use te_idx::read_family_assembly_annotations;
-use te_idx::seq_query;
 use te_idx::trf_query;
 
 mod idx;
@@ -94,11 +94,18 @@ pub enum Commands {
         #[arg(short, long)]
         end: u64,
     },
-    SeqQuery {
+    JsonQuery {
         #[arg(short, long)]
         assembly: String,
+
         #[arg(short, long)]
-        chrom: String,
+        data_type: String,
+
+        #[arg(short, long)]
+        key: String,
+
+        #[arg(short, long)]
+        target: String,
     },
     ReadFamilyAssemblyAnnotations {
         #[arg(short, long)]
@@ -234,8 +241,14 @@ fn main() {
             start,
             end,
         }) => trf_query(assembly, chrom, *start, *end).expect("Mask Read Failed"),
-        Some(Commands::SeqQuery { assembly, chrom }) => {
-            seq_query(assembly, chrom).expect("Seq Read Failed")
+        Some(Commands::JsonQuery {
+            assembly,
+            data_type,
+            key,
+            target,
+        }) => {
+            let ans = json_query(assembly, data_type, key, target).expect("JSON Read Failed");
+            println!("{}", ans)
         }
         Some(Commands::ReadFamilyAssemblyAnnotations {
             id,
