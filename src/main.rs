@@ -5,13 +5,11 @@ use clap::builder::PossibleValuesParser;
 use clap::{Parser, Subcommand};
 
 use te_idx::bgzf_filter;
+use te_idx::idx_query;
 use te_idx::json_query;
-use te_idx::nhmmer_query;
 use te_idx::prep_beds;
 use te_idx::process_json;
 use te_idx::read_family_assembly_annotations;
-use te_idx::trf_query;
-
 mod idx;
 
 use te_idx::{ASSEMBLY_DIR, BENCHMARK_DIR, DATA_DIR, MASKS_DIR};
@@ -70,9 +68,18 @@ pub enum Commands {
         #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
         data_type: String,
     },
-    NhmmerQuery {
+    ProcessJSON {
+        #[arg(short, long)]
+        in_file: String,
+
+        #[arg(short, long)]
+        key: String,
+    },
+    IdxQuery {
         #[arg(short, long)]
         assembly: String,
+        #[arg(short, long)]
+        data_type: String,
         #[arg(short, long)]
         chrom: String,
         #[arg(short, long)]
@@ -83,16 +90,6 @@ pub enum Commands {
         family: Option<String>,
         #[arg(short, long)]
         nrph: bool,
-    },
-    TrfQuery {
-        #[arg(short, long)]
-        assembly: String,
-        #[arg(short, long)]
-        chrom: String,
-        #[arg(short, long)]
-        start: u64,
-        #[arg(short, long)]
-        end: u64,
     },
     JsonQuery {
         #[arg(short, long)]
@@ -116,13 +113,6 @@ pub enum Commands {
         nrph: bool,
         #[arg(long, short)]
         outfile: Option<String>,
-    },
-    ProcessJSON {
-        #[arg(short, long)]
-        in_file: String,
-
-        #[arg(short, long)]
-        key: String,
     },
 }
 
@@ -227,20 +217,15 @@ fn main() {
             Ok(()) => println!("Bed Files Created - {}", data_type),
             Err(e) => panic!("{:?}", e),
         },
-        Some(Commands::NhmmerQuery {
+        Some(Commands::IdxQuery {
             assembly,
+            data_type,
             chrom,
             start,
             end,
             family,
             nrph,
-        }) => nhmmer_query(assembly, chrom, *start, *end, family, nrph),
-        Some(Commands::TrfQuery {
-            assembly,
-            chrom,
-            start,
-            end,
-        }) => trf_query(assembly, chrom, *start, *end).expect("Mask Read Failed"),
+        }) => idx_query(assembly, data_type, chrom, *start, *end, family, nrph),
         Some(Commands::JsonQuery {
             assembly,
             data_type,

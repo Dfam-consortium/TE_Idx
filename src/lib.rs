@@ -40,6 +40,95 @@ pub const SEQUENCE_DIR: &'static str = "sequences";
 // 7->12
 // 0->13 from seq file
 
+trait Formattable {
+    fn to_json(&self) -> serde_json::Value;
+}
+
+#[derive(Serialize, Deserialize)]
+struct Annotation {
+    accession: String,
+    seq_start: String,
+    seq_end: String,
+    strand: String,
+    ali_start: String,
+    ali_end: String,
+    model_start: String,
+    model_end: String,
+    bit_score: String,
+    e_value: String,
+    sequence: String,
+    // nrph_hit: String,
+    // divergence: String,
+    // family_name: String,
+    // cigar: String,
+    // caf: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct MaskHit {
+    sequence: String,
+    seq_start: String,
+    seq_end: String,
+    repeat_str: String,
+    repeat_length: String,
+}
+
+impl Formattable for MaskHit {
+    fn to_json(&self) -> serde_json::Value {
+        json!({
+            "sequence": self.sequence,
+            "seq_start": self.seq_start,
+            "seq_end": self.seq_end,
+            "repeat_str": self.repeat_str,
+            "repeat_length": self.repeat_length,
+        })
+    }
+}
+
+impl Formattable for Annotation {
+    fn to_json(&self) -> serde_json::Value {
+        json!({
+            "accession": self.accession,
+            "seq_start": self.seq_start,
+            "seq_end": self.seq_end,
+            "strand": self.strand,
+            "ali_start": self.ali_start,
+            "ali_end": self.ali_end,
+            "model_start": self.model_start,
+            "model_end": self.model_end,
+            "bit_score": self.bit_score,
+            "e_value": self.e_value,
+            "sequence": self.sequence,
+        })
+    }
+}
+
+fn build_annotation(fields: Vec<&str>) -> Box<dyn Formattable> {
+    Box::new(Annotation {
+        accession: fields[3].to_string(),
+        bit_score: fields[4].to_string(),
+        e_value: fields[11].to_string(),
+        model_start: fields[9].to_string(),
+        model_end: fields[10].to_string(),
+        strand: fields[5].to_string(),
+        ali_start: fields[7].to_string(),
+        ali_end: fields[8].to_string(),
+        seq_start: fields[1].to_string(),
+        seq_end: fields[2].to_string(),
+        sequence: fields[0].to_string(),
+    })
+}
+
+fn build_mask(fields: Vec<&str>) -> Box<dyn Formattable> {
+    Box::new(MaskHit {
+        sequence: fields[0].to_string(),
+        seq_start: fields[1].to_string(),
+        seq_end: fields[2].to_string(),
+        repeat_str: fields[3].to_string(),
+        repeat_length: fields[4].to_string(),
+    })
+}
+
 pub fn bgzf_filter(
     infile: &String,
     position: &usize,
@@ -101,14 +190,13 @@ pub fn prep_beds(assembly: &String, in_tsv: &String, data_type: &String) -> Resu
         create_dir_all(&target_dir)?;
     }
 
-    // TODO this is ugly, rework with a dictionary
-    let mut acc_idx: usize = 3;
-    if data_type == ASSEMBLY_DIR || data_type == BENCHMARK_DIR {
-        acc_idx = 3;
-    }
-    if data_type == MASKS_DIR || data_type == SEQUENCE_DIR {
-        acc_idx = 0;
-    }
+    let acc_idx: usize = match data_type.as_str() {
+        ASSEMBLY_DIR => 3,
+        BENCHMARK_DIR => 3,
+        MASKS_DIR => 0,
+        SEQUENCE_DIR => 0,
+        _ => panic!("Invalid Data Type")
+    };
 
     let worker_count: NonZeroUsize = match NonZeroUsize::new(10) {
         Some(n) => n,
@@ -142,6 +230,36 @@ pub fn prep_beds(assembly: &String, in_tsv: &String, data_type: &String) -> Resu
     Ok(())
 }
 
+pub fn process_json(in_file: &String, key: &String) -> Result<()> {
+    if !Path::new(&in_file).exists() {
+        println!("{} Not Found", &in_file);
+        std::process::exit(1)
+    }
+    let in_f = File::open(in_file).expect("Could Not Open Input File");
+
+    let in_data: Value = serde_json::from_reader(in_f)?;
+
+    let mut out_data = HashMap::new();
+    if let Some(items) = in_data[2]["data"].as_array() {
+        for item in items {
+            let mut new_item = item.clone().as_object().unwrap().to_owned();
+            new_item.remove(key);
+            out_data.insert(item[key].to_string().replace("\"", ""), new_item);
+        }
+    }
+    let json = json!({
+        "assembly": in_data[1]["name"],
+        "version": in_data[0]["version"],
+        "data": out_data
+    });
+
+    let output = serde_json::to_string(&json)?;
+    stdout() // TODO maybe change to file output
+        .write_all(format!("{}\n", output).as_bytes())
+        .expect("Unable to write JSON");
+    Ok(())
+}
+
 // API Service Subprocesses ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pub fn read_family_assembly_annotations(
     id: &String,
@@ -171,29 +289,9 @@ pub fn read_family_assembly_annotations(
     }
 }
 
-#[derive(Debug)]
-#[allow(dead_code)]
-#[derive(Serialize, Deserialize)]
-struct Annotation {
-    accession: String,
-    seq_start: String,
-    seq_end: String,
-    strand: String,
-    ali_start: String,
-    ali_end: String,
-    model_start: String,
-    model_end: String,
-    bit_score: String,
-    e_value: String,
-    sequence: String,
-    // nrph_hit: String,
-    // divergence: String,
-    // family_name: String,
-    // cigar: String,
-    // caf: String,
-}
-pub fn nhmmer_query(
+pub fn idx_query(
     assembly: &String,
+    data_type: &String,
     chrom: &String,
     start: u64,
     end: u64,
@@ -208,13 +306,16 @@ pub fn nhmmer_query(
     }
 
     let (filenames, bgz_dir, mut contig_index, index_file) =
-        match idx::prep_idx(&assembly_path, &"assembly".to_string()) {
+        match idx::prep_idx(&assembly_path, &data_type) {
             Ok(res) => res,
             Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e),
         };
 
     if !Path::new(&index_file).exists() {
-        eprintln!("Assembly \"{}\" Is Not Indexed", assembly_path);
+        eprintln!(
+            "Assembly \"{}\" Is Not Indexed For {}",
+            assembly_path, &data_type
+        );
         exit(1)
     }
 
@@ -231,7 +332,12 @@ pub fn nhmmer_query(
         true,
     );
 
-    let mut formatted = Vec::<Annotation>::new();
+    let formatter = match data_type.as_str() {
+        ASSEMBLY_DIR => build_annotation,
+        MASKS_DIR => build_mask,
+        _ => panic!("Invalid formatter type"),
+    };
+    let mut formatted = Vec::new();
     match &results {
         Err(e) => {
             eprintln!("Index Search Failed - {}", e);
@@ -244,102 +350,10 @@ pub fn nhmmer_query(
         Ok(l) => {
             for i in 0..l.len() {
                 let fields = l[i].split_whitespace().collect::<Vec<&str>>();
-                let annotation = Annotation {
-                    accession: fields[3].to_string(),
-                    bit_score: fields[4].to_string(),
-                    e_value: fields[11].to_string(),
-                    model_start: fields[9].to_string(),
-                    model_end: fields[10].to_string(),
-                    strand: fields[5].to_string(),
-                    ali_start: fields[7].to_string(),
-                    ali_end: fields[8].to_string(),
-                    seq_start: fields[1].to_string(),
-                    seq_end: fields[2].to_string(),
-                    sequence: fields[0].to_string(),
-                };
-                formatted.push(annotation)
+                formatted.push(formatter(fields).to_json());
             }
         }
     };
-    match serde_json::to_string(&formatted) {
-        Err(e) => {
-            eprintln!("Error Converting Results to JSON - {e}");
-            exit(1);
-        }
-        Ok(json_str) => {
-            stdout()
-                .write_all(json_str.as_bytes())
-                .expect("Unable to write line");
-            exit(0)
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-struct MaskHit {
-    sequence: String,
-    seq_start: String,
-    seq_end: String,
-    repeat_str: String,
-    repeat_length: String,
-}
-pub fn trf_query(assembly: &String, chrom: &String, start: u64, end: u64) -> Result<()> {
-    // TODO DRY this with nhmmer_query, no need to have both similar methods
-
-    let assembly_path: String = format!("{}/{}", &DATA_DIR, &assembly);
-    // confirm assembly_id and ensure that it accessable
-    if !Path::new(&assembly_path).exists() {
-        eprintln!("Assembly \"{}\" Does Not Exist", assembly_path);
-        exit(1)
-    }
-
-    let (filenames, bgz_dir, mut contig_index, index_file) =
-        match idx::prep_idx(&assembly_path, &"masks".to_string()) {
-            Ok(res) => res,
-            Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e),
-        };
-
-    if !Path::new(&index_file).exists() {
-        eprintln!("Assembly \"{}\" Is Not Indexed", assembly_path);
-        exit(1)
-    }
-
-    let results = idx::search_idx(
-        &filenames,
-        &bgz_dir,
-        &mut contig_index,
-        &index_file,
-        &chrom,
-        start,
-        end,
-        &None,
-        false,
-        true,
-    );
-    // seq_accession: 0 seq_start: 1 seq_end: 2 repeat_str: 3 repeat_length: 4
-    let mut formatted = Vec::<MaskHit>::new();
-    match &results {
-        Err(e) => {
-            eprintln!("Index Search Failed - {}", e);
-            exit(1);
-        }
-        Ok(l) if l.as_slice().is_empty() => {
-            println!("No Results Found");
-            exit(0);
-        }
-        Ok(l) => {
-            for i in 0..l.len() {
-                let fields = l[i].split_whitespace().collect::<Vec<&str>>();
-                formatted.push(MaskHit {
-                    sequence: fields[0].to_string(),
-                    seq_start: fields[1].to_string(),
-                    seq_end: fields[2].to_string(),
-                    repeat_str: fields[3].to_string(),
-                    repeat_length: fields[4].to_string(),
-                })
-            }
-        }
-    }
     match serde_json::to_string(&formatted) {
         Err(e) => {
             eprintln!("Error Converting Results to JSON - {e}");
@@ -369,7 +383,7 @@ pub fn json_query(
         std::process::exit(1)
     }
 
-    let in_str = read_to_string(&target_file).expect("JSON was not well-formatted");
+    let in_str = read_to_string(&target_file).expect("Could Not Read String");
     let in_data: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
 
     let val = in_data
@@ -378,34 +392,4 @@ pub fn json_query(
         .expect("Key Target Pair Not Found");
     let ret = val.as_str().expect("asd");
     return Ok(ret.to_string());
-}
-
-pub fn process_json(in_file: &String, key: &String) -> Result<()> {
-    if !Path::new(&in_file).exists() {
-        println!("{} Not Found", &in_file);
-        std::process::exit(1)
-    }
-    let in_f = File::open(in_file).expect("Could Not Open Input File");
-
-    let in_data: Value = serde_json::from_reader(in_f)?;
-
-    let mut out_data = HashMap::new();
-    if let Some(items) = in_data[2]["data"].as_array() {
-        for item in items {
-            let mut new_item = item.clone().as_object().unwrap().to_owned();
-            new_item.remove(key);
-            out_data.insert(item[key].to_string().replace("\"", ""), new_item);
-        }
-    }
-    let json = json!({
-        "assembly": in_data[1]["name"],
-        "version": in_data[0]["version"],
-        "data": out_data
-    });
-
-    let output = serde_json::to_string(&json)?;
-    stdout() // TODO maybe change to file output
-        .write_all(format!("{}\n", output).as_bytes())
-        .expect("Unable to write JSON");
-    Ok(())
 }
