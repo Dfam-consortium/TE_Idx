@@ -11,12 +11,24 @@ use tempfile::tempfile;
 
 mod idx;
 
-pub const DATA_DIR: &'static str = "/home/agray/te_idx/data";
+pub const DATA_DIR: &'static str = "/home/agray/te_idx/data"; // TODO replace with config
+pub const EXPORT_DIR: &'static str = "/home/agray/te_idx/exports"; // TODO replace with config
+
 pub const ASSEMBLY_DIR: &'static str = "assembly_alignments";
 pub const BENCHMARK_DIR: &'static str = "benchmark_alignments";
 pub const MASKS_DIR: &'static str = "masks";
 pub const MOD_LEN_DIR: &'static str = "model_lengths";
 pub const SEQUENCE_DIR: &'static str = "sequences";
+
+const DATA_ELEMENTS: [&str; 5] = [
+    ASSEMBLY_DIR,
+    BENCHMARK_DIR,
+    MASKS_DIR,
+    MOD_LEN_DIR,
+    SEQUENCE_DIR,
+];
+pub const INDEX_DATA_TYPES: [&str; 3] = [ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR];
+pub const JSON_DATA_TYPES: [&str; 2] = [MOD_LEN_DIR, SEQUENCE_DIR];
 
 // .bed fields => seq_id 0, seq_start 1, seq_end 2, family_accession 3, hit_bit_score 4, strand 5, ali_start 6, ali_end 7,
 //                model_start 8, model_end 9, hit_evalue_score 10, nrph_hit 11, divergence 12, family_name 13, cigar 14, caf 15
@@ -136,7 +148,7 @@ pub fn bgzf_filter(
     outfile: &Option<String>,
 ) -> Result<()> {
     if !Path::new(&infile).exists() {
-        println!("{} Not Found", &infile);
+        eprintln!("{} Not Found", &infile);
         std::process::exit(1)
     }
 
@@ -174,6 +186,7 @@ pub fn bgzf_filter(
     Ok(())
 }
 
+// Setup Methods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pub fn prep_beds(assembly: &String, in_tsv: &String, data_type: &String) -> Result<()> {
     if !Path::new(&in_tsv).exists() {
         eprintln!("Input TSV \"{}\" Not Found", &in_tsv);
@@ -218,7 +231,7 @@ pub fn prep_beds(assembly: &String, in_tsv: &String, data_type: &String) -> Resu
                 out_f = File::create(format!("{target_dir}/{current_acc}.bed.bgz",))
                     .expect("Could Not Open Output File");
                 out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
-                println!("{}", current_acc);
+                // println!("{}", current_acc);
             };
 
             out_writer
@@ -232,7 +245,7 @@ pub fn prep_beds(assembly: &String, in_tsv: &String, data_type: &String) -> Resu
 
 pub fn process_json(in_file: &String, key: &String, outfile: &Option<String>) -> Result<()> {
     if !Path::new(&in_file).exists() {
-        println!("{} Not Found", &in_file);
+        eprintln!("{} Not Found", &in_file);
         std::process::exit(1)
     }
     let in_f = File::open(in_file).expect("Could Not Open Input File");
@@ -264,7 +277,112 @@ pub fn process_json(in_file: &String, key: &String, outfile: &Option<String>) ->
     Ok(())
 }
 
-// API Service Subprocesses ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+pub fn prepare_assembly(assembly: &String) -> Result<()> {
+    if !Path::new(&DATA_DIR).exists() {
+        eprintln!("{} Not Found", &DATA_DIR);
+        std::process::exit(1)
+    }
+    if !Path::new(&EXPORT_DIR).exists() {
+        eprintln!("{} Not Found", &EXPORT_DIR);
+        std::process::exit(1)
+    }
+
+    let export_dir = format!("{}/{}", &EXPORT_DIR, &assembly);
+    let data_dir = format!("{}/{}", &DATA_DIR, &assembly);
+    if !Path::new(&export_dir).exists() {
+        eprintln!("Assembly Export Not Found - {}", &export_dir);
+        std::process::exit(1)
+    }
+    if !Path::new(&data_dir).exists() {
+        println!(
+            "Target Assembly Directory Not Found, Creating {},",
+            &data_dir
+        );
+        create_dir_all(&data_dir)?;
+    }
+
+    fn file_to_source(s: &str) -> Option<&'static str> {
+        match s {
+            ASSEMBLY_DIR => Some("-byacc-full_region.tsv"),
+            BENCHMARK_DIR => Some("-byacc-bench_region.tsv"),
+            MASKS_DIR => Some("-mask.tsv"),
+            MOD_LEN_DIR => Some("-model_lengths.json"),
+            SEQUENCE_DIR => Some("-sequence.json"),
+            _ => None,
+        }
+    }
+    let mut planner = HashMap::new();
+    for element in DATA_ELEMENTS {
+        let source = format!(
+            "{}/{}{}",
+            export_dir,
+            &assembly,
+            file_to_source(&element).unwrap().to_string()
+        );
+        let target = format!("{}/{}", &data_dir, &element);
+
+        let have_source = Path::new(&source).exists();
+        let have_target =
+            Path::new(&target).exists() && !Path::new(&target).read_dir()?.next().is_none();
+        let needed = have_source && !have_target;
+
+        let info = HashMap::from([
+            ("source", source),
+            ("target", target),
+            ("needed", needed.to_string()),
+        ]);
+        planner.insert(element, info);
+    }
+
+    for element in DATA_ELEMENTS {
+        if matches!(
+            planner
+                .get(element)
+                .unwrap()
+                .get("needed")
+                .unwrap()
+                .as_str(),
+            "true"
+        ) {
+            println!("Preparing {}: ", element);
+            let target = planner.get(element).unwrap().get("target").unwrap();
+            if !Path::new(target).exists() {
+                println!("   Target Directory Not Found, Creating {},", &target);
+                create_dir_all(&target)?;
+            }
+            let source = planner.get(element).unwrap().get("source").unwrap();
+            if source.ends_with(".json") {
+                let key = match element {
+                    MOD_LEN_DIR => "family_accession",
+                    SEQUENCE_DIR => "accession",
+                    _ => "accession",
+                };
+                let outfile = format!(
+                    "{}/{}-{}{}",
+                    target,
+                    assembly,
+                    "processed",
+                    file_to_source(element).unwrap().to_string()
+                );
+                process_json(source, &key.to_string(), &Some(outfile))
+                    .expect(&format!("Processing {} JSON Failed", element));
+            } else if source.ends_with(".tsv") {
+                println!("   Splitting And Compressing BED Files For {}", element);
+                prep_beds(assembly, source, &element.to_string()).expect("BED File Prep Failed");
+                println!("   Indexing {}", element);
+                let (filenames, bgz_dir, mut contig_index, index_file) =
+                    idx::prep_idx(&data_dir, &element.to_string()).expect("Index Prep Failed");
+                idx::build_idx(&filenames, &bgz_dir, &mut contig_index, &index_file)
+                    .expect("Indexing Failed")
+            } else {
+                eprintln!("Source type not recognized - {}", source)
+            }
+        }
+    }
+    Ok(())
+}
+
+// API Service Subprocesses ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pub fn read_family_assembly_annotations(
     id: &String,
     assembly_id: &String,
@@ -379,11 +497,11 @@ pub fn json_query(
     target: &String,
 ) -> Result<String> {
     let target_file = format!(
-        "{}/{}/{}/{}-{}-processed.json",
+        "{}/{}/{}/{}-processed-{}.json",
         &DATA_DIR, &assembly, &data_type, &assembly, &data_type
     );
     if !Path::new(&target_file).exists() {
-        println!("{} Not Found", &target_file);
+        eprintln!("{} Not Found", &target_file);
         std::process::exit(1)
     }
 

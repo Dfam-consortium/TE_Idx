@@ -5,14 +5,12 @@ use te_idx::bgzf_filter;
 use te_idx::idx_query;
 use te_idx::json_query;
 use te_idx::prep_beds;
+use te_idx::prepare_assembly;
 use te_idx::process_json;
 use te_idx::read_family_assembly_annotations;
 mod idx;
 
-use te_idx::{ASSEMBLY_DIR, BENCHMARK_DIR, DATA_DIR, MASKS_DIR, MOD_LEN_DIR, SEQUENCE_DIR};
-
-const INDEX_DATA_TYPES: [&str; 3] = [ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR];
-const JSON_DATA_TYPES: [&str; 2] = [MOD_LEN_DIR, SEQUENCE_DIR];
+use te_idx::{DATA_DIR, INDEX_DATA_TYPES, JSON_DATA_TYPES};
 
 #[derive(Parser)]
 #[command(author, version, about)]
@@ -72,6 +70,12 @@ pub enum Commands {
         /// Optional: Output file. If not provided, will print to stdout
         #[arg(long, short)]
         outfile: Option<String>,
+    },
+    /// Given an assembly name, check for and process all present exports
+    PrepareAssembly {
+        /// Name of assembly/assembly folder
+        #[arg(short, long, verbatim_doc_comment)]
+        assembly: String,
     },
     /// Search indexed BED files for all hits within a range
     IdxQuery {
@@ -196,6 +200,8 @@ fn main() {
             key,
             outfile,
         }) => process_json(in_file, key, outfile).expect("JSON Parse Failed"),
+        Some(Commands::PrepareAssembly { assembly }) => prepare_assembly(assembly)
+            .expect(format!("Assembly Prep for {} Failed", &assembly).as_str()),
         None => {}
     }
 }
