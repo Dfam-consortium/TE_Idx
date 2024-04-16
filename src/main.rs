@@ -12,12 +12,13 @@ use te_idx::process_json;
 use te_idx::read_family_assembly_annotations;
 mod idx;
 
-use te_idx::{ASSEMBLY_DIR, BENCHMARK_DIR, DATA_DIR, MASKS_DIR};
+use te_idx::{ASSEMBLY_DIR, BENCHMARK_DIR, DATA_DIR, MASKS_DIR, MOD_LEN_DIR, SEQUENCE_DIR};
 
 const INDEX_DATA_TYPES: [&str; 3] = [ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR];
+const JSON_DATA_TYPES: [&str; 2] = [MOD_LEN_DIR, SEQUENCE_DIR];
 
 #[derive(Parser)]
-#[command(author, version, about, long_about = None)]
+#[command(author, version, about)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Option<Commands>,
@@ -25,92 +26,121 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
+    /// Search an individual .bed.bgz file for matches in a specified column
     BgzfFilter {
-        #[arg(long, short)]
+        /// Path to .bed.bgz file to be searched. Assumed to be CSV/TSV
+        #[arg(long, short, verbatim_doc_comment)]
         infile: String,
-        #[arg(long, short)]
+        /// Column number to be searched. 1-indexed
+        #[arg(long, short, verbatim_doc_comment)]
         position: usize,
-        #[arg(long, short)]
+        /// Term to be searched for. If absent, all rows will be returned
+        #[arg(long, short, verbatim_doc_comment)]
         term: Option<String>,
+        /// Path to file to save filtered data. Should end in .bed.bgz
+        #[arg(long, short, verbatim_doc_comment)]
+        outfile: Option<String>,
+    },
+    /// Build and/or Search Index file for grouped .bed.bgz files
+    Idx {
+        /// Name of assembly/assembly folder
+        #[arg(short, long, verbatim_doc_comment)]
+        assembly: String,
+        /// Type of data to be indexed/searched
+        #[arg(short, long, verbatim_doc_comment)]
+        #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
+        data_type: String,
+        /// Trigger index build
+        #[arg(short, long, verbatim_doc_comment)]
+        build: bool,
+        /// Search index. Must take the form: Chrom-Start-End
+        #[arg(short, long, verbatim_doc_comment)]
+        search: Option<String>,
+        /// Optional: Only return hits matching accession
+        #[arg(short, long, verbatim_doc_comment)]
+        family: Option<String>,
+        /// Optional: Only return NRPH hits
+        #[arg(short, long, verbatim_doc_comment)]
+        nrph: bool,
+    },
+    /// Split TSV files into compressed BED files by accession
+    PrepBeds {
+        /// Name of assembly/assembly folder
+        #[arg(short, long, verbatim_doc_comment)]
+        assembly: String,
+        /// Input file from buildFullRegion.py. Should be in accession order
+        #[arg(short, long, verbatim_doc_comment)]
+        in_tsv: String,
+        /// Type of data to be prepped
+        #[arg(short, long, verbatim_doc_comment)]
+        #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
+        data_type: String,
+    },
+    /// Convert JSON exports from PHPMyAdmin to a useable JSON file
+    ProcessJSON {
+        /// Input JSON file, exported from PHPMyAdmin
+        #[arg(short, long, verbatim_doc_comment)]
+        in_file: String,
+        /// Key attribute, such as accession, to be used in the new map
+        #[arg(short, long, verbatim_doc_comment)]
+        key: String,
+        /// Optional: Output file. If not provided, will print to stdout
         #[arg(long, short)]
         outfile: Option<String>,
     },
-    Idx {
-        #[arg(short, long)]
-        assembly: String,
-
-        #[arg(short, long)]
-        #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
-        data_type: String,
-
-        // Boolean flag to build/rebuild index
-        #[arg(short, long)]
-        build: bool,
-
-        // Search the index using a search range
-        #[arg(short, long)]
-        search: Option<String>,
-
-        #[arg(short, long)]
-        family: Option<String>,
-
-        #[arg(short, long)]
-        nrph: bool,
-    },
-    PrepBeds {
-        #[arg(short, long)]
-        assembly: String,
-
-        #[arg(short, long)]
-        in_tsv: String,
-
-        #[arg(short, long)]
-        #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
-        data_type: String,
-    },
-    ProcessJSON {
-        #[arg(short, long)]
-        in_file: String,
-
-        #[arg(short, long)]
-        key: String,
-    },
+    /// Search indexed BED files for all hits within a range
     IdxQuery {
-        #[arg(short, long)]
+        /// Name of assembly/assembly folder
+        #[arg(short, long, verbatim_doc_comment)]
         assembly: String,
-        #[arg(short, long)]
+        /// Type of data to be searched
+        #[arg(short, long, verbatim_doc_comment)]
+        #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
         data_type: String,
-        #[arg(short, long)]
+        /// chromosome number/accession
+        #[arg(short, long, verbatim_doc_comment)]
         chrom: String,
-        #[arg(short, long)]
+        /// start position
+        #[arg(short, long, verbatim_doc_comment)]
         start: u64,
-        #[arg(short, long)]
+        /// end position
+        #[arg(short, long, verbatim_doc_comment)]
         end: u64,
-        #[arg(short, long)]
+        /// Optional: Only return hits matching accession
+        #[arg(short, long, verbatim_doc_comment)]
         family: Option<String>,
-        #[arg(short, long)]
+        /// Only return NRPH hits
+        #[arg(short, long, verbatim_doc_comment)]
         nrph: bool,
     },
+    /// Retrieve information from a processed JSON file
     JsonQuery {
-        #[arg(short, long)]
+        /// Name of assembly/assembly folder
+        #[arg(short, long, verbatim_doc_comment)]
         assembly: String,
-
-        #[arg(short, long)]
+        /// Type of data to be searched
+        #[arg(short, long, verbatim_doc_comment)]
+        #[clap(value_parser = PossibleValuesParser::new(JSON_DATA_TYPES), required(true))]
         data_type: String,
-
-        #[arg(short, long)]
+        /// Key value to search by
+        #[arg(short, long, verbatim_doc_comment)]
         key: String,
-
-        #[arg(short, long)]
+        /// Target Attribute to return
+        #[arg(short, long, verbatim_doc_comment)]
         target: String,
     },
+    /// Read all or NRPH only family annotations for an assembly
     ReadFamilyAssemblyAnnotations {
-        #[arg(short, long)]
+        /// Family Accession
+        #[arg(short, long, verbatim_doc_comment)]
         id: String,
-        #[arg(short, long)]
+        /// Name of assembly/assembly folder
+        #[arg(short, long, verbatim_doc_comment)]
         assembly_id: String,
-        #[arg(short, long)]
+        /// Only Return NRPH hits
+        #[arg(short, long, verbatim_doc_comment)]
         nrph: bool,
+        /// Optional: Output file
         #[arg(long, short)]
         outfile: Option<String>,
     },
@@ -132,33 +162,9 @@ fn parse_coordinates(coord_str: &str) -> Result<(u64, u64, u64), ParseIntError> 
 }
 
 fn main() {
-    let cli = Cli::parse(); // TODO update template
-                            // Using builder interface to support a custom help template
-                            //     let cli = Command::new("te_idx").help_template(
-                            //         "
-                            // {before-help}{name} {version}
-                            // {author-with-newline}{about-with-newline}
-                            // Te_idx is a tool for indexing/searching Transposable Element annotation datasets.
-                            // ...
-                            // The index is based on the IGD linear binning approach with extensions for accessing
-                            // metadata from compressed BED files (blocked gzip).
-
-    // {usage-heading} {usage}
-
-    //   Examples:
-
-    //     # Build the index
-    //     ./te_idx --build
-
-    //     # Search the index
-    //     ./te_idx --search
-
-    // {all-args}{after-help}
-    // ",
-    //     );
+    let cli = Cli::parse();
 
     match &cli.command {
-        // Some(Commands::FindFamily { id, assembly }) => find_family(id, assembly),
         Some(Commands::BgzfFilter {
             infile,
             position,
@@ -241,9 +247,11 @@ fn main() {
             nrph,
             outfile,
         }) => read_family_assembly_annotations(id, assembly_id, nrph, outfile),
-        Some(Commands::ProcessJSON { in_file, key }) => {
-            process_json(in_file, key).expect("JSON Parse Failed")
-        }
+        Some(Commands::ProcessJSON {
+            in_file,
+            key,
+            outfile,
+        }) => process_json(in_file, key, outfile).expect("JSON Parse Failed"),
         None => {}
     }
 }

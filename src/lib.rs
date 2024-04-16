@@ -15,7 +15,7 @@ pub const DATA_DIR: &'static str = "/home/agray/te_idx/data";
 pub const ASSEMBLY_DIR: &'static str = "assembly_alignments";
 pub const BENCHMARK_DIR: &'static str = "benchmark_alignments";
 pub const MASKS_DIR: &'static str = "masks";
-// pub const MOD_LEN_DIR: &'static str = "model_lengths";
+pub const MOD_LEN_DIR: &'static str = "model_lengths";
 pub const SEQUENCE_DIR: &'static str = "sequences";
 
 // .bed fields => seq_id 0, seq_start 1, seq_end 2, family_accession 3, hit_bit_score 4, strand 5, ali_start 6, ali_end 7,
@@ -195,7 +195,7 @@ pub fn prep_beds(assembly: &String, in_tsv: &String, data_type: &String) -> Resu
         BENCHMARK_DIR => 3,
         MASKS_DIR => 0,
         SEQUENCE_DIR => 0,
-        _ => panic!("Invalid Data Type")
+        _ => panic!("Invalid Data Type"),
     };
 
     let worker_count: NonZeroUsize = match NonZeroUsize::new(10) {
@@ -230,7 +230,7 @@ pub fn prep_beds(assembly: &String, in_tsv: &String, data_type: &String) -> Resu
     Ok(())
 }
 
-pub fn process_json(in_file: &String, key: &String) -> Result<()> {
+pub fn process_json(in_file: &String, key: &String, outfile: &Option<String>) -> Result<()> {
     if !Path::new(&in_file).exists() {
         println!("{} Not Found", &in_file);
         std::process::exit(1)
@@ -254,7 +254,11 @@ pub fn process_json(in_file: &String, key: &String) -> Result<()> {
     });
 
     let output = serde_json::to_string(&json)?;
-    stdout() // TODO maybe change to file output
+    let mut writer: Box<dyn Write> = match outfile {
+        Some(outfile) => Box::new(File::create(&outfile).expect("Could Not Open Output File")),
+        None => Box::new(stdout()),
+    };
+    writer
         .write_all(format!("{}\n", output).as_bytes())
         .expect("Unable to write JSON");
     Ok(())
