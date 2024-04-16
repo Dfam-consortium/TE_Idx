@@ -1,6 +1,3 @@
-use std::num::ParseIntError;
-use std::path::Path;
-
 use clap::builder::PossibleValuesParser;
 use clap::{Parser, Subcommand};
 
@@ -41,8 +38,8 @@ pub enum Commands {
         #[arg(long, short, verbatim_doc_comment)]
         outfile: Option<String>,
     },
-    /// Build and/or Search Index file for grouped .bed.bgz files
-    Idx {
+    /// Build file for grouped .bed.bgz files
+    BuildIdx {
         /// Name of assembly/assembly folder
         #[arg(short, long, verbatim_doc_comment)]
         assembly: String,
@@ -50,18 +47,6 @@ pub enum Commands {
         #[arg(short, long, verbatim_doc_comment)]
         #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
         data_type: String,
-        /// Trigger index build
-        #[arg(short, long, verbatim_doc_comment)]
-        build: bool,
-        /// Search index. Must take the form: Chrom-Start-End
-        #[arg(short, long, verbatim_doc_comment)]
-        search: Option<String>,
-        /// Optional: Only return hits matching accession
-        #[arg(short, long, verbatim_doc_comment)]
-        family: Option<String>,
-        /// Optional: Only return NRPH hits
-        #[arg(short, long, verbatim_doc_comment)]
-        nrph: bool,
     },
     /// Split TSV files into compressed BED files by accession
     PrepBeds {
@@ -146,21 +131,6 @@ pub enum Commands {
     },
 }
 
-fn parse_coordinates(coord_str: &str) -> Result<(u64, u64, u64), ParseIntError> {
-    let coords: Vec<u64> = coord_str
-        .split('-')
-        .map(|e| match e.parse::<u64>() {
-            Ok(val) => val,
-            Err(e) => panic!("ERROR: Invalid Coordinates - {:?}", e),
-        })
-        .collect();
-    if coords.len() != 3 {
-        panic!("ERROR: Invalid Coordinates: Need to be in the form of chrom-start-end")
-    } else {
-        return Ok((coords[0], coords[1], coords[2]));
-    }
-}
-
 fn main() {
     let cli = Cli::parse();
 
@@ -173,47 +143,20 @@ fn main() {
         }) => {
             bgzf_filter(infile, position, term, outfile).expect("Filter Failed");
         }
-        Some(Commands::Idx {
+        Some(Commands::BuildIdx {
             assembly,
             data_type,
-            build,
-            search,
-            family,
-            nrph,
         }) => {
             let (filenames, bgz_dir, mut contig_index, index_file) =
                 match idx::prep_idx(&format!("{}/{}", &DATA_DIR, &assembly), data_type) {
                     Ok(res) => res,
-                    Err(e) => panic!("Search Prep Failed, Index may not exist - {:?}", e),
+                    Err(e) => panic!(
+                        "Search Prep Failed, Assembly or Data Type May Not Exist - {:?}",
+                        e
+                    ),
                 };
-            if *build {
-                idx::build_idx(&filenames, &bgz_dir, &mut contig_index, &index_file)
-            }
-            if search.is_some() {
-                if !Path::new(&index_file).exists() {
-                    panic!(
-                        "Index {:?} does not exist. Run the build command first",
-                        &index_file
-                    )
-                }
-                let (q_contig, start, end) = match parse_coordinates(search.as_deref().unwrap()) {
-                    Ok(res) => res,
-                    Err(e) => panic!("{:?}", e),
-                };
-                let results = idx::search_idx(
-                    &filenames,
-                    &bgz_dir,
-                    &mut contig_index,
-                    &index_file,
-                    &q_contig.to_string(),
-                    start,
-                    end,
-                    family,
-                    *nrph,
-                    false,
-                );
-                println!("{:?}", results);
-            }
+            idx::build_idx(&filenames, &bgz_dir, &mut contig_index, &index_file)
+                .expect("Indexing Failed")
         }
         Some(Commands::PrepBeds {
             assembly,
@@ -231,7 +174,8 @@ fn main() {
             end,
             family,
             nrph,
-        }) => idx_query(assembly, data_type, chrom, *start, *end, family, nrph),
+        }) => idx_query(assembly, data_type, chrom, *start, *end, family, nrph)
+            .expect("Index Query Failed"),
         Some(Commands::JsonQuery {
             assembly,
             data_type,

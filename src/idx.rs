@@ -789,7 +789,7 @@ pub fn build_idx(
     bgz_dir: &String,
     contig_index: &mut ContigIndex,
     index_file: &String,
-) {
+) -> Result<(), Box<dyn Error>> {
     let mut fidx = 0;
     for filename in filenames {
         let bgz_file = format!("{}/{}", bgz_dir, filename);
@@ -842,6 +842,7 @@ pub fn build_idx(
     }
 
     let _ = contig_index.save_index(&index_file);
+    Ok(())
 }
 
 #[allow(dead_code)]

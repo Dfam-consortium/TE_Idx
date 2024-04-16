@@ -301,7 +301,7 @@ pub fn idx_query(
     end: u64,
     family: &Option<String>,
     nrph: &bool,
-) {
+) -> Result<()> {
     let assembly_path: String = format!("{}/{}", &DATA_DIR, &assembly);
     // confirm assembly_id and ensure that it accessable
     if !Path::new(&assembly_path).exists() {
