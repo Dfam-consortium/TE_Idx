@@ -15,10 +15,15 @@ pub const DATA_DIR: &'static str = "/home/agray/te_idx/data"; // TODO replace wi
 pub const EXPORT_DIR: &'static str = "/home/agray/te_idx/exports"; // TODO replace with config
 
 pub const ASSEMBLY_DIR: &'static str = "assembly_alignments";
+pub const ASSEMBLY_FILE: &'static str = "-byacc-full_region.tsv";
 pub const BENCHMARK_DIR: &'static str = "benchmark_alignments";
+pub const BENCHMARK_FILE: &'static str = "-byacc-bench_region.tsv";
 pub const MASKS_DIR: &'static str = "masks";
+pub const MASKS_FILE: &'static str = "-mask.tsv";
 pub const MOD_LEN_DIR: &'static str = "model_lengths";
+pub const MOD_LEN_FILE: &'static str = "-model_lengths.json";
 pub const SEQUENCE_DIR: &'static str = "sequences";
+pub const SEQUENCE_FILE: &'static str = "-sequence.json";
 
 const DATA_ELEMENTS: [&str; 5] = [
     ASSEMBLY_DIR,
@@ -141,11 +146,37 @@ fn build_mask(fields: Vec<&str>) -> Box<dyn Formattable> {
     })
 }
 
+fn download_format<'a>(
+    fields: &Vec<&'a str>,
+    seq_name: &'a str,
+    hmm_len: &'a str,
+    seq_len: &'a str,
+) -> Vec<&'a str> {
+    let mut fmtted: Vec<&str> = Vec::with_capacity(fields.len());
+    fmtted[0] = seq_name;
+    fmtted[1] = fields[3];
+    fmtted[2] = fields[13];
+    fmtted[3] = fields[4];
+    fmtted[4] = fields[10];
+    fmtted[5] = fields[8];
+    fmtted[6] = fields[9];
+    fmtted[7] = hmm_len;
+    fmtted[8] = fields[5];
+    fmtted[9] = fields[1];
+    fmtted[10] = fields[2];
+    fmtted[11] = fields[6];
+    fmtted[12] = fields[12];
+    fmtted[13] = seq_len;
+
+    return fmtted;
+}
+
 pub fn bgzf_filter(
     infile: &String,
     position: &usize,
     term: &Option<String>,
     outfile: &Option<String>,
+    dl_fmt: bool,
 ) -> Result<()> {
     if !Path::new(&infile).exists() {
         eprintln!("{} Not Found", &infile);
@@ -169,6 +200,34 @@ pub fn bgzf_filter(
         None => Box::new(bgzf::Writer::new(stdout())),
     };
 
+    let fam = infile
+        .rsplit_once('/')
+        .unwrap()
+        .1
+        .split('.')
+        .next()
+        .unwrap();
+    let assembly = Path::new(infile)
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .to_string();
+// TODO this needs to be reworked, doesn't work with mask files. Probably need to rewrite the function signature
+    let hmm_len = match json_query(
+        &assembly,
+        &MOD_LEN_DIR.to_string(),
+        &fam.to_string(),
+        &"length".to_string(),
+    ) {
+        Ok(len) => len,
+        Err(e) => panic!("{}", e),
+    };
+
     for result in reader.lines() {
         let line = result?;
         let mut fields: Vec<_> = line.split_whitespace().collect();
@@ -177,7 +236,29 @@ pub fn bgzf_filter(
                 && term.is_some()
                 && fields.get(position - 1).unwrap() == term.as_ref().unwrap())
         {
-            fields.truncate(14); // TODO readjust this!
+            if dl_fmt {
+                let seq_name = match json_query(
+                    &assembly,
+                    &SEQUENCE_DIR.to_string(),
+                    &fields[0].to_string(),
+                    &"id".to_string(),
+                ) {
+                    Ok(len) => len,
+                    Err(e) => panic!("{}", e),
+                };
+                let seq_len = match json_query(
+                    &assembly,
+                    &SEQUENCE_DIR.to_string(),
+                    &fields[0].to_string(),
+                    &"length".to_string(),
+                ) {
+                    Ok(len) => len,
+                    Err(e) => panic!("{}", e),
+                };
+                fields = download_format(&fields, &seq_name, &hmm_len, &seq_len);
+            } else {
+                fields.truncate(14); // TODO readjust this!
+            }
             writer
                 .write_all(format!("{}\n", fields.join("\t")).as_bytes())
                 .expect("Unable to write line");
@@ -205,7 +286,7 @@ pub fn prep_beds(assembly: &String, in_tsv: &String, data_type: &String) -> Resu
 
     let acc_idx: usize = match data_type.as_str() {
         ASSEMBLY_DIR => 3,
-        BENCHMARK_DIR => 3,
+        BENCHMARK_DIR => 1,
         MASKS_DIR => 0,
         SEQUENCE_DIR => 0,
         _ => panic!("Invalid Data Type"),
@@ -303,11 +384,11 @@ pub fn prepare_assembly(assembly: &String) -> Result<()> {
 
     fn file_to_source(s: &str) -> Option<&'static str> {
         match s {
-            ASSEMBLY_DIR => Some("-byacc-full_region.tsv"),
-            BENCHMARK_DIR => Some("-byacc-bench_region.tsv"),
-            MASKS_DIR => Some("-mask.tsv"),
-            MOD_LEN_DIR => Some("-model_lengths.json"),
-            SEQUENCE_DIR => Some("-sequence.json"),
+            ASSEMBLY_DIR => Some(ASSEMBLY_FILE),
+            BENCHMARK_DIR => Some(BENCHMARK_FILE),
+            MASKS_DIR => Some(MASKS_FILE),
+            MOD_LEN_DIR => Some(MOD_LEN_FILE),
+            SEQUENCE_DIR => Some(SEQUENCE_FILE),
             _ => None,
         }
     }
@@ -402,7 +483,7 @@ pub fn read_family_assembly_annotations(
 
     let position: usize = 13;
     let term: Option<String> = if *nrph { Some("1".to_string()) } else { None };
-    match bgzf_filter(&fam_file, &position, &term, outfile) {
+    match bgzf_filter(&fam_file, &position, &term, outfile, true) {
         Ok(()) => exit(0),
         Err(err) => {
             eprintln!("Error Filtering File: {} - {}", fam_file, err);

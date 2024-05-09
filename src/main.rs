@@ -35,6 +35,9 @@ pub enum Commands {
         /// Path to file to save filtered data. Should end in .bed.bgz
         #[arg(long, short, verbatim_doc_comment)]
         outfile: Option<String>,
+        /// Flag to reformat the feilds to match Dfam.org download file format
+        #[arg(long, short, verbatim_doc_comment)]
+        dl_fmt: bool,
     },
     /// Build file for grouped .bed.bgz files
     BuildIdx {
@@ -144,8 +147,9 @@ fn main() {
             position,
             term,
             outfile,
+            dl_fmt,
         }) => {
-            bgzf_filter(infile, position, term, outfile).expect("Filter Failed");
+            bgzf_filter(infile, position, term, outfile, *dl_fmt).expect("Filter Failed");
         }
         Some(Commands::BuildIdx {
             assembly,
