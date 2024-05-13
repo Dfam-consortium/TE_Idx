@@ -23,7 +23,7 @@ pub const MASKS_FILE: &'static str = "-mask.tsv";
 pub const MOD_LEN_DIR: &'static str = "model_lengths";
 pub const MOD_LEN_FILE: &'static str = "-model_lengths.json";
 pub const SEQUENCE_DIR: &'static str = "sequences";
-pub const SEQUENCE_FILE: &'static str = "-sequences.json";
+pub const SEQUENCE_FILE: &'static str = "-processed-sequences.json";
 
 const DATA_ELEMENTS: [&str; 5] = [
     ASSEMBLY_DIR,
@@ -205,6 +205,16 @@ pub fn bgzf_filter(
         Err(e) => panic!("{}", e),
     };
 
+    let in_str = read_to_string(&format!(
+        "{}/{}/{}/{}{}",
+        &DATA_DIR, &assembly, &SEQUENCE_DIR, &assembly, &SEQUENCE_FILE
+    ))
+    .expect("Could Not Read String");
+    let seq_json: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
+    let seq_data = seq_json
+        .get("data")
+        .expect(&format!("Sequence Info For {} Not Found", &file));
+
     let mut seq_name;
     let mut seq_len;
 
@@ -217,29 +227,23 @@ pub fn bgzf_filter(
                 && fields.get(position - 1).unwrap() == term.as_ref().unwrap())
         {
             if dl_fmt {
-                if let Ok(name) = json_query(
-                    &assembly,
-                    &SEQUENCE_DIR.to_string(),
-                    &fields[0].to_string(),
-                    &"id".to_string(),
-                ) {
-                    seq_name = name;
-                } else {
-                    panic!("Failed to get sequence name");
-                }
-                if let Ok(len) = json_query(
-                    &assembly,
-                    &SEQUENCE_DIR.to_string(),
-                    &fields[0].to_string(),
-                    &"length".to_string(),
-                ) {
-                    seq_len = len;
-                } else {
-                    panic!("Failed to get sequence length");
-                }
-                fields = download_format(&fields, &seq_name, &hmm_len, &seq_len);
+                let chrom_id = &fields[0].to_string();
+                let seq_details = seq_data
+                    .get(chrom_id)
+                    .expect(&format!("Sequence {} Not Found", chrom_id));
+                seq_name = seq_details
+                    .get(&"id".to_string())
+                    .expect(&format!("Name Not Found For {}", chrom_id))
+                    .as_str()
+                    .expect("Couldn't Cast To Str");
+                seq_len = seq_details
+                    .get(&"length".to_string())
+                    .expect(&format!("Length Not Found For {}", chrom_id))
+                    .as_str()
+                    .expect("Couldn't Cast To Str");
+                fields = download_format(&fields, seq_name, &hmm_len, seq_len);
             } else {
-                // fields.truncate(14); // TODO readjust this!
+                fields.truncate(14); // TODO readjust this!
             }
             writer
                 .write_all(format!("{}\n", &fields.join("\t")).as_bytes())
@@ -583,6 +587,6 @@ pub fn json_query(
         .get("data")
         .and_then(|data| data.get(key).and_then(|item| item.get(target)))
         .expect("Key Target Pair Not Found");
-    let ret = val.as_str().expect("asd");
+    let ret = val.as_str().expect("Can't String to str");
     return Ok(ret.to_string());
 }
