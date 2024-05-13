@@ -35,28 +35,6 @@ const DATA_ELEMENTS: [&str; 5] = [
 pub const INDEX_DATA_TYPES: [&str; 3] = [ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR];
 pub const JSON_DATA_TYPES: [&str; 2] = [MOD_LEN_DIR, SEQUENCE_DIR];
 
-// .bed fields => seq_id 0, seq_start 1, seq_end 2, family_accession 3, hit_bit_score 4, strand 5, ali_start 6, ali_end 7,
-//                model_start 8, model_end 9, hit_evalue_score 10, nrph_hit 11, divergence 12, family_name 13, cigar 14, caf 15
-
-// fam-annotations => sequence name 0, model accession 1, model name 2, bit score 3, e-value 4, hmm start 5, hmm end 6,
-//                   hmm length 7, strand 8, alignment start 9, alignment end 10, envelope start 11, envelope end 12, sequence length 13
-
-// .bed to fam-annotations:
-// 0->0, from seq file
-// 3->1
-// 13->2
-// 4->3
-// 10->4
-// 8->5
-// 9->6
-// 3->7 from family table
-// 5->8
-// 1->9
-// 2->10
-// 6->11
-// 7->12
-// 0->13 from seq file
-
 trait Formattable {
     fn to_json(&self) -> serde_json::Value;
 }
@@ -153,35 +131,20 @@ fn download_format<'a>(
     seq_len: &'a str,
 ) -> Vec<&'a str> {
     let mut fmtted: Vec<&'a str> = Vec::with_capacity(fields.len());
-    fmtted.push(seq_name);
-    fmtted.push(fields[3]);
-    fmtted.push(fields[13]);
-    fmtted.push(fields[4]);
-    fmtted.push(fields[10]);
-    fmtted.push(fields[8]);
-    fmtted.push(fields[9]);
-    fmtted.push(hmm_len);
-    fmtted.push(fields[5]);
-    fmtted.push(fields[1]);
-    fmtted.push(fields[2]);
-    fmtted.push(fields[6]);
-    fmtted.push(fields[12]);
-    fmtted.push(seq_len);
-
-    // fmtted[0] = seq_name;
-    // fmtted[1] =fields[3];
-    // fmtted[2] =fields[13];
-    // fmtted[3] =fields[4];
-    // fmtted[4] =fields[10];
-    // fmtted[5] =fields[8];
-    // fmtted[6] =fields[9];
-    // fmtted[7] =hmm_len;
-    // fmtted[8] =fields[5];
-    // fmtted[9] =fields[1];
-    // fmtted[10] =fields[2];
-    // fmtted[11] =fields[6];
-    // fmtted[12] =fields[12];
-    // fmtted[13] =seq_len;
+    fmtted.push(seq_name); // seq name
+    fmtted.push(fields[3]); // Family Accession
+    fmtted.push(fields[14]); // Family name
+    fmtted.push(fields[4]); // bit score
+    fmtted.push(fields[11]); // e-value
+    fmtted.push(fields[9]); // hmm start
+    fmtted.push(fields[10]); // hmm end
+    fmtted.push(hmm_len); // hmm length
+    fmtted.push(fields[5]); // strand
+    fmtted.push(fields[7]); // align start
+    fmtted.push(fields[8]); // align end
+    fmtted.push(fields[1]); // env start
+    fmtted.push(fields[2]); // env end
+    fmtted.push(seq_len); // sequence length
     return fmtted;
 }
 
@@ -221,12 +184,12 @@ pub fn bgzf_filter(
         )),
         None => Box::new(bgzf::Writer::new(stdout())),
     };
+
     let header;
-    if dl_fmt { 
+    if dl_fmt {
         header = "#sequence name	model accession	model name	bit score	e-value	hmm start	hmm end	hmm length	strand	alignment start	alignment end	envelope start	envelope end	sequence length";
-        
     } else {
-        header = "#seq_id\tseq_start\tseq_end\tfamily_accession\thit_bit_score\tstrand\tali_start\tali_end\tmodel_start\tmodel_end\thit_evalue_score\tnrph_hit\tdivergence\t*family_name\t*cigar\t*caf";
+        header = "#seq_id\tseq_start\tseq_end\tfamily_accession\thit_bit_score\tstrand\tbias\tali_start\tali_end\tmodel_start\tmodel_end\thit_evalue_score\tnrph_hit\tdivergence\t*family_name\t*cigar\t*caf";
     }
     writer
         .write_all(format!("{}\n", header).as_bytes())
@@ -276,7 +239,7 @@ pub fn bgzf_filter(
                 }
                 fields = download_format(&fields, &seq_name, &hmm_len, &seq_len);
             } else {
-                fields.truncate(14); // TODO readjust this!
+                // fields.truncate(14); // TODO readjust this!
             }
             writer
                 .write_all(format!("{}\n", &fields.join("\t")).as_bytes())
