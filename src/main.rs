@@ -23,9 +23,16 @@ pub struct Cli {
 pub enum Commands {
     /// Search an individual .bed.bgz file for matches in a specified column
     BgzfFilter {
+        /// Name of assembly/assembly folder
+        #[arg(short, long, verbatim_doc_comment)]
+        assembly: String,
+        /// Type of data to be indexed/searched
+        #[arg(short, long, verbatim_doc_comment)]
+        #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
+        data_type: String,
         /// Path to .bed.bgz file to be searched. Assumed to be CSV/TSV
         #[arg(long, short, verbatim_doc_comment)]
-        infile: String,
+        fam: String,
         /// Column number to be searched. 1-indexed
         #[arg(long, short, verbatim_doc_comment)]
         position: usize,
@@ -37,7 +44,7 @@ pub enum Commands {
         outfile: Option<String>,
         /// Flag to reformat the feilds to match Dfam.org download file format
         #[arg(long, short, verbatim_doc_comment)]
-        dl_fmt: bool,
+        web_fmt: bool,
     },
     /// Build file for grouped .bed.bgz files
     BuildIdx {
@@ -143,13 +150,16 @@ fn main() {
 
     match &cli.command {
         Some(Commands::BgzfFilter {
-            infile,
+            assembly,
+            data_type,
+            fam,
             position,
             term,
             outfile,
-            dl_fmt,
+            web_fmt,
         }) => {
-            bgzf_filter(infile, position, term, outfile, *dl_fmt).expect("Filter Failed");
+            bgzf_filter(assembly, data_type, fam, position, term, outfile, *web_fmt)
+                .expect("Filter Failed");
         }
         Some(Commands::BuildIdx {
             assembly,

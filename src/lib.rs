@@ -23,7 +23,7 @@ pub const MASKS_FILE: &'static str = "-mask.tsv";
 pub const MOD_LEN_DIR: &'static str = "model_lengths";
 pub const MOD_LEN_FILE: &'static str = "-model_lengths.json";
 pub const SEQUENCE_DIR: &'static str = "sequences";
-pub const SEQUENCE_FILE: &'static str = "-sequence.json";
+pub const SEQUENCE_FILE: &'static str = "-sequences.json";
 
 const DATA_ELEMENTS: [&str; 5] = [
     ASSEMBLY_DIR,
@@ -152,42 +152,64 @@ fn download_format<'a>(
     hmm_len: &'a str,
     seq_len: &'a str,
 ) -> Vec<&'a str> {
-    let mut fmtted: Vec<&str> = Vec::with_capacity(fields.len());
-    fmtted[0] = seq_name;
-    fmtted[1] = fields[3];
-    fmtted[2] = fields[13];
-    fmtted[3] = fields[4];
-    fmtted[4] = fields[10];
-    fmtted[5] = fields[8];
-    fmtted[6] = fields[9];
-    fmtted[7] = hmm_len;
-    fmtted[8] = fields[5];
-    fmtted[9] = fields[1];
-    fmtted[10] = fields[2];
-    fmtted[11] = fields[6];
-    fmtted[12] = fields[12];
-    fmtted[13] = seq_len;
+    let mut fmtted: Vec<&'a str> = Vec::with_capacity(fields.len());
+    fmtted.push(seq_name);
+    fmtted.push(fields[3]);
+    fmtted.push(fields[13]);
+    fmtted.push(fields[4]);
+    fmtted.push(fields[10]);
+    fmtted.push(fields[8]);
+    fmtted.push(fields[9]);
+    fmtted.push(hmm_len);
+    fmtted.push(fields[5]);
+    fmtted.push(fields[1]);
+    fmtted.push(fields[2]);
+    fmtted.push(fields[6]);
+    fmtted.push(fields[12]);
+    fmtted.push(seq_len);
 
+    // fmtted[0] = seq_name;
+    // fmtted[1] =fields[3];
+    // fmtted[2] =fields[13];
+    // fmtted[3] =fields[4];
+    // fmtted[4] =fields[10];
+    // fmtted[5] =fields[8];
+    // fmtted[6] =fields[9];
+    // fmtted[7] =hmm_len;
+    // fmtted[8] =fields[5];
+    // fmtted[9] =fields[1];
+    // fmtted[10] =fields[2];
+    // fmtted[11] =fields[6];
+    // fmtted[12] =fields[12];
+    // fmtted[13] =seq_len;
     return fmtted;
 }
 
 pub fn bgzf_filter(
-    infile: &String,
+    assembly: &String,
+    data_type: &String,
+    file: &String,
     position: &usize,
     term: &Option<String>,
     outfile: &Option<String>,
     dl_fmt: bool,
 ) -> Result<()> {
-    if !Path::new(&infile).exists() {
-        eprintln!("{} Not Found", &infile);
-        std::process::exit(1)
+    let assembly_path: String = format!("{}/{}/{}", &DATA_DIR, &assembly, &data_type);
+    if !Path::new(&assembly_path).exists() {
+        eprintln!("Data \"{}\" Does Not Exist", assembly_path);
+        exit(1)
+    }
+    let fam_file: String = format!("{}/{}.bed.bgz", &assembly_path, &file);
+    if !Path::new(&fam_file).exists() {
+        eprintln!("Family {} Not Found In Assembly {}", &file, assembly_path);
+        exit(1)
     }
 
     let worker_count: NonZeroUsize = match NonZeroUsize::new(5) {
         Some(n) => n,
         None => unreachable!(),
     };
-    let in_f = File::open(infile).expect("Could Not Open Input File");
+    let in_f = File::open(fam_file).expect("Could Not Open Input File");
     let reader = bgzf::MultithreadedReader::with_worker_count(worker_count, in_f);
     let mut writer: Box<dyn Write> = match outfile {
         Some(outfile) => Box::new(bgzf::MultithreadedWriter::with_worker_count(
@@ -199,34 +221,29 @@ pub fn bgzf_filter(
         )),
         None => Box::new(bgzf::Writer::new(stdout())),
     };
+    let header;
+    if dl_fmt { 
+        header = "#sequence name	model accession	model name	bit score	e-value	hmm start	hmm end	hmm length	strand	alignment start	alignment end	envelope start	envelope end	sequence length";
+        
+    } else {
+        header = "#seq_id\tseq_start\tseq_end\tfamily_accession\thit_bit_score\tstrand\tali_start\tali_end\tmodel_start\tmodel_end\thit_evalue_score\tnrph_hit\tdivergence\t*family_name\t*cigar\t*caf";
+    }
+    writer
+        .write_all(format!("{}\n", header).as_bytes())
+        .expect("Unable to write line");
 
-    let fam = infile
-        .rsplit_once('/')
-        .unwrap()
-        .1
-        .split('.')
-        .next()
-        .unwrap();
-    let assembly = Path::new(infile)
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .file_name()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_string();
-// TODO this needs to be reworked, doesn't work with mask files. Probably need to rewrite the function signature
     let hmm_len = match json_query(
         &assembly,
         &MOD_LEN_DIR.to_string(),
-        &fam.to_string(),
+        &file.to_string(),
         &"length".to_string(),
     ) {
         Ok(len) => len,
         Err(e) => panic!("{}", e),
     };
+
+    let mut seq_name;
+    let mut seq_len;
 
     for result in reader.lines() {
         let line = result?;
@@ -237,30 +254,32 @@ pub fn bgzf_filter(
                 && fields.get(position - 1).unwrap() == term.as_ref().unwrap())
         {
             if dl_fmt {
-                let seq_name = match json_query(
+                if let Ok(name) = json_query(
                     &assembly,
                     &SEQUENCE_DIR.to_string(),
                     &fields[0].to_string(),
                     &"id".to_string(),
                 ) {
-                    Ok(len) => len,
-                    Err(e) => panic!("{}", e),
-                };
-                let seq_len = match json_query(
+                    seq_name = name;
+                } else {
+                    panic!("Failed to get sequence name");
+                }
+                if let Ok(len) = json_query(
                     &assembly,
                     &SEQUENCE_DIR.to_string(),
                     &fields[0].to_string(),
                     &"length".to_string(),
                 ) {
-                    Ok(len) => len,
-                    Err(e) => panic!("{}", e),
-                };
+                    seq_len = len;
+                } else {
+                    panic!("Failed to get sequence length");
+                }
                 fields = download_format(&fields, &seq_name, &hmm_len, &seq_len);
             } else {
                 fields.truncate(14); // TODO readjust this!
             }
             writer
-                .write_all(format!("{}\n", fields.join("\t")).as_bytes())
+                .write_all(format!("{}\n", &fields.join("\t")).as_bytes())
                 .expect("Unable to write line");
         }
     }
@@ -483,7 +502,15 @@ pub fn read_family_assembly_annotations(
 
     let position: usize = 13;
     let term: Option<String> = if *nrph { Some("1".to_string()) } else { None };
-    match bgzf_filter(&fam_file, &position, &term, outfile, true) {
+    match bgzf_filter(
+        &assembly_id,
+        &ASSEMBLY_DIR.to_string(),
+        &id,
+        &position,
+        &term,
+        outfile,
+        true,
+    ) {
         Ok(()) => exit(0),
         Err(err) => {
             eprintln!("Error Filtering File: {} - {}", fam_file, err);
