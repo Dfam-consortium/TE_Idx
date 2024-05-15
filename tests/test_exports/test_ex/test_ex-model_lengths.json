@@ -1,0 +1,5596 @@
+[
+{
+    "type": "header",
+    "version": "5.1.1deb5ubuntu1",
+    "comment": "Export to JSON plugin for PHPMyAdmin"
+},
+{
+    "type": "database",
+    "name": "hg38_df38"
+},
+{
+    "type": "table",
+    "name": "t2",
+    "database": "hg38_df38",
+    "data": 
+[
+{
+    "family_accession": "DF000000001",
+    "length": "262"
+},
+{
+    "family_accession": "DF000000002",
+    "length": "311"
+},
+{
+    "family_accession": "DF000000003",
+    "length": "309"
+},
+{
+    "family_accession": "DF000000004",
+    "length": "348"
+},
+{
+    "family_accession": "DF000000005",
+    "length": "355"
+},
+{
+    "family_accession": "DF000000006",
+    "length": "1062"
+},
+{
+    "family_accession": "DF000000007",
+    "length": "312"
+},
+{
+    "family_accession": "DF000000008",
+    "length": "3294"
+},
+{
+    "family_accession": "DF000000010",
+    "length": "2789"
+},
+{
+    "family_accession": "DF000000011",
+    "length": "331"
+},
+{
+    "family_accession": "DF000000012",
+    "length": "121"
+},
+{
+    "family_accession": "DF000000013",
+    "length": "147"
+},
+{
+    "family_accession": "DF000000014",
+    "length": "172"
+},
+{
+    "family_accession": "DF000000015",
+    "length": "169"
+},
+{
+    "family_accession": "DF000000016",
+    "length": "320"
+},
+{
+    "family_accession": "DF000000017",
+    "length": "6896"
+},
+{
+    "family_accession": "DF000000018",
+    "length": "2781"
+},
+{
+    "family_accession": "DF000000019",
+    "length": "2861"
+},
+{
+    "family_accession": "DF000000020",
+    "length": "2782"
+},
+{
+    "family_accession": "DF000000021",
+    "length": "1455"
+},
+{
+    "family_accession": "DF000000022",
+    "length": "523"
+},
+{
+    "family_accession": "DF000000023",
+    "length": "2706"
+},
+{
+    "family_accession": "DF000000024",
+    "length": "3378"
+},
+{
+    "family_accession": "DF000000025",
+    "length": "508"
+},
+{
+    "family_accession": "DF000000026",
+    "length": "167"
+},
+{
+    "family_accession": "DF000000027",
+    "length": "2624"
+},
+{
+    "family_accession": "DF000000028",
+    "length": "957"
+},
+{
+    "family_accession": "DF000000029",
+    "length": "171"
+},
+{
+    "family_accession": "DF000000034",
+    "length": "312"
+},
+{
+    "family_accession": "DF000000035",
+    "length": "312"
+},
+{
+    "family_accession": "DF000000036",
+    "length": "312"
+},
+{
+    "family_accession": "DF000000037",
+    "length": "309"
+},
+{
+    "family_accession": "DF000000038",
+    "length": "311"
+},
+{
+    "family_accession": "DF000000039",
+    "length": "310"
+},
+{
+    "family_accession": "DF000000040",
+    "length": "310"
+},
+{
+    "family_accession": "DF000000041",
+    "length": "309"
+},
+{
+    "family_accession": "DF000000042",
+    "length": "313"
+},
+{
+    "family_accession": "DF000000043",
+    "length": "313"
+},
+{
+    "family_accession": "DF000000044",
+    "length": "313"
+},
+{
+    "family_accession": "DF000000045",
+    "length": "313"
+},
+{
+    "family_accession": "DF000000046",
+    "length": "311"
+},
+{
+    "family_accession": "DF000000047",
+    "length": "312"
+},
+{
+    "family_accession": "DF000000048",
+    "length": "312"
+},
+{
+    "family_accession": "DF000000049",
+    "length": "311"
+},
+{
+    "family_accession": "DF000000050",
+    "length": "310"
+},
+{
+    "family_accession": "DF000000051",
+    "length": "312"
+},
+{
+    "family_accession": "DF000000052",
+    "length": "312"
+},
+{
+    "family_accession": "DF000000053",
+    "length": "311"
+},
+{
+    "family_accession": "DF000000054",
+    "length": "310"
+},
+{
+    "family_accession": "DF000000055",
+    "length": "318"
+},
+{
+    "family_accession": "DF000000056",
+    "length": "318"
+},
+{
+    "family_accession": "DF000000057",
+    "length": "299"
+},
+{
+    "family_accession": "DF000000058",
+    "length": "300"
+},
+{
+    "family_accession": "DF000000060",
+    "length": "299"
+},
+{
+    "family_accession": "DF000000063",
+    "length": "311"
+},
+{
+    "family_accession": "DF000000064",
+    "length": "311"
+},
+{
+    "family_accession": "DF000000065",
+    "length": "311"
+},
+{
+    "family_accession": "DF000000066",
+    "length": "311"
+},
+{
+    "family_accession": "DF000000067",
+    "length": "575"
+},
+{
+    "family_accession": "DF000000068",
+    "length": "358"
+},
+{
+    "family_accession": "DF000000069",
+    "length": "3947"
+},
+{
+    "family_accession": "DF000000070",
+    "length": "177"
+},
+{
+    "family_accession": "DF000000071",
+    "length": "1225"
+},
+{
+    "family_accession": "DF000000072",
+    "length": "363"
+},
+{
+    "family_accession": "DF000000073",
+    "length": "145"
+},
+{
+    "family_accession": "DF000000074",
+    "length": "2969"
+},
+{
+    "family_accession": "DF000000075",
+    "length": "136"
+},
+{
+    "family_accession": "DF000000076",
+    "length": "142"
+},
+{
+    "family_accession": "DF000000077",
+    "length": "152"
+},
+{
+    "family_accession": "DF000000078",
+    "length": "152"
+},
+{
+    "family_accession": "DF000000079",
+    "length": "379"
+},
+{
+    "family_accession": "DF000000080",
+    "length": "342"
+},
+{
+    "family_accession": "DF000000081",
+    "length": "2822"
+},
+{
+    "family_accession": "DF000000082",
+    "length": "280"
+},
+{
+    "family_accession": "DF000000083",
+    "length": "242"
+},
+{
+    "family_accession": "DF000000084",
+    "length": "2196"
+},
+{
+    "family_accession": "DF000000085",
+    "length": "2870"
+},
+{
+    "family_accession": "DF000000086",
+    "length": "1514"
+},
+{
+    "family_accession": "DF000000087",
+    "length": "512"
+},
+{
+    "family_accession": "DF000000088",
+    "length": "1166"
+},
+{
+    "family_accession": "DF000000089",
+    "length": "224"
+},
+{
+    "family_accession": "DF000000090",
+    "length": "1061"
+},
+{
+    "family_accession": "DF000000091",
+    "length": "342"
+},
+{
+    "family_accession": "DF000000092",
+    "length": "2916"
+},
+{
+    "family_accession": "DF000000093",
+    "length": "217"
+},
+{
+    "family_accession": "DF000000094",
+    "length": "1204"
+},
+{
+    "family_accession": "DF000000095",
+    "length": "342"
+},
+{
+    "family_accession": "DF000000096",
+    "length": "386"
+},
+{
+    "family_accession": "DF000000097",
+    "length": "807"
+},
+{
+    "family_accession": "DF000000098",
+    "length": "1213"
+},
+{
+    "family_accession": "DF000000099",
+    "length": "491"
+},
+{
+    "family_accession": "DF000000100",
+    "length": "339"
+},
+{
+    "family_accession": "DF000000101",
+    "length": "2449"
+},
+{
+    "family_accession": "DF000000102",
+    "length": "2524"
+},
+{
+    "family_accession": "DF000000103",
+    "length": "325"
+},
+{
+    "family_accession": "DF000000104",
+    "length": "748"
+},
+{
+    "family_accession": "DF000000105",
+    "length": "3519"
+},
+{
+    "family_accession": "DF000000106",
+    "length": "272"
+},
+{
+    "family_accession": "DF000000107",
+    "length": "2457"
+},
+{
+    "family_accession": "DF000000108",
+    "length": "2787"
+},
+{
+    "family_accession": "DF000000109",
+    "length": "2420"
+},
+{
+    "family_accession": "DF000000110",
+    "length": "2204"
+},
+{
+    "family_accession": "DF000000111",
+    "length": "98"
+},
+{
+    "family_accession": "DF000000113",
+    "length": "407"
+},
+{
+    "family_accession": "DF000000114",
+    "length": "7613"
+},
+{
+    "family_accession": "DF000000115",
+    "length": "7575"
+},
+{
+    "family_accession": "DF000000116",
+    "length": "5226"
+},
+{
+    "family_accession": "DF000000117",
+    "length": "422"
+},
+{
+    "family_accession": "DF000000118",
+    "length": "5757"
+},
+{
+    "family_accession": "DF000000119",
+    "length": "5246"
+},
+{
+    "family_accession": "DF000000120",
+    "length": "5667"
+},
+{
+    "family_accession": "DF000000121",
+    "length": "357"
+},
+{
+    "family_accession": "DF000000122",
+    "length": "317"
+},
+{
+    "family_accession": "DF000000123",
+    "length": "552"
+},
+{
+    "family_accession": "DF000000124",
+    "length": "184"
+},
+{
+    "family_accession": "DF000000125",
+    "length": "306"
+},
+{
+    "family_accession": "DF000000126",
+    "length": "273"
+},
+{
+    "family_accession": "DF000000127",
+    "length": "168"
+},
+{
+    "family_accession": "DF000000128",
+    "length": "304"
+},
+{
+    "family_accession": "DF000000129",
+    "length": "416"
+},
+{
+    "family_accession": "DF000000130",
+    "length": "316"
+},
+{
+    "family_accession": "DF000000131",
+    "length": "192"
+},
+{
+    "family_accession": "DF000000132",
+    "length": "248"
+},
+{
+    "family_accession": "DF000000133",
+    "length": "338"
+},
+{
+    "family_accession": "DF000000134",
+    "length": "208"
+},
+{
+    "family_accession": "DF000000135",
+    "length": "302"
+},
+{
+    "family_accession": "DF000000136",
+    "length": "292"
+},
+{
+    "family_accession": "DF000000137",
+    "length": "193"
+},
+{
+    "family_accession": "DF000000138",
+    "length": "562"
+},
+{
+    "family_accession": "DF000000139",
+    "length": "301"
+},
+{
+    "family_accession": "DF000000140",
+    "length": "240"
+},
+{
+    "family_accession": "DF000000141",
+    "length": "270"
+},
+{
+    "family_accession": "DF000000142",
+    "length": "185"
+},
+{
+    "family_accession": "DF000000143",
+    "length": "142"
+},
+{
+    "family_accession": "DF000000144",
+    "length": "143"
+},
+{
+    "family_accession": "DF000000145",
+    "length": "1683"
+},
+{
+    "family_accession": "DF000000146",
+    "length": "508"
+},
+{
+    "family_accession": "DF000000147",
+    "length": "176"
+},
+{
+    "family_accession": "DF000000148",
+    "length": "217"
+},
+{
+    "family_accession": "DF000000150",
+    "length": "216"
+},
+{
+    "family_accession": "DF000000152",
+    "length": "218"
+},
+{
+    "family_accession": "DF000000154",
+    "length": "2507"
+},
+{
+    "family_accession": "DF000000155",
+    "length": "2421"
+},
+{
+    "family_accession": "DF000000156",
+    "length": "2991"
+},
+{
+    "family_accession": "DF000000157",
+    "length": "2465"
+},
+{
+    "family_accession": "DF000000158",
+    "length": "1116"
+},
+{
+    "family_accession": "DF000000159",
+    "length": "324"
+},
+{
+    "family_accession": "DF000000160",
+    "length": "486"
+},
+{
+    "family_accession": "DF000000161",
+    "length": "8751"
+},
+{
+    "family_accession": "DF000000162",
+    "length": "4996"
+},
+{
+    "family_accession": "DF000000163",
+    "length": "8801"
+},
+{
+    "family_accession": "DF000000164",
+    "length": "521"
+},
+{
+    "family_accession": "DF000000165",
+    "length": "511"
+},
+{
+    "family_accession": "DF000000166",
+    "length": "491"
+},
+{
+    "family_accession": "DF000000167",
+    "length": "535"
+},
+{
+    "family_accession": "DF000000168",
+    "length": "537"
+},
+{
+    "family_accession": "DF000000169",
+    "length": "8426"
+},
+{
+    "family_accession": "DF000000170",
+    "length": "8308"
+},
+{
+    "family_accession": "DF000000171",
+    "length": "6918"
+},
+{
+    "family_accession": "DF000000172",
+    "length": "6539"
+},
+{
+    "family_accession": "DF000000173",
+    "length": "8436"
+},
+{
+    "family_accession": "DF000000174",
+    "length": "7813"
+},
+{
+    "family_accession": "DF000000175",
+    "length": "7847"
+},
+{
+    "family_accession": "DF000000176",
+    "length": "4629"
+},
+{
+    "family_accession": "DF000000177",
+    "length": "346"
+},
+{
+    "family_accession": "DF000000178",
+    "length": "476"
+},
+{
+    "family_accession": "DF000000179",
+    "length": "7250"
+},
+{
+    "family_accession": "DF000000180",
+    "length": "374"
+},
+{
+    "family_accession": "DF000000181",
+    "length": "7719"
+},
+{
+    "family_accession": "DF000000182",
+    "length": "6529"
+},
+{
+    "family_accession": "DF000000183",
+    "length": "7713"
+},
+{
+    "family_accession": "DF000000184",
+    "length": "6654"
+},
+{
+    "family_accession": "DF000000185",
+    "length": "7784"
+},
+{
+    "family_accession": "DF000000186",
+    "length": "7737"
+},
+{
+    "family_accession": "DF000000187",
+    "length": "5102"
+},
+{
+    "family_accession": "DF000000188",
+    "length": "7536"
+},
+{
+    "family_accession": "DF000000189",
+    "length": "7953"
+},
+{
+    "family_accession": "DF000000190",
+    "length": "7752"
+},
+{
+    "family_accession": "DF000000191",
+    "length": "8116"
+},
+{
+    "family_accession": "DF000000192",
+    "length": "6096"
+},
+{
+    "family_accession": "DF000000193",
+    "length": "7434"
+},
+{
+    "family_accession": "DF000000194",
+    "length": "6837"
+},
+{
+    "family_accession": "DF000000195",
+    "length": "7202"
+},
+{
+    "family_accession": "DF000000196",
+    "length": "6021"
+},
+{
+    "family_accession": "DF000000197",
+    "length": "5262"
+},
+{
+    "family_accession": "DF000000198",
+    "length": "5654"
+},
+{
+    "family_accession": "DF000000199",
+    "length": "6047"
+},
+{
+    "family_accession": "DF000000200",
+    "length": "3418"
+},
+{
+    "family_accession": "DF000000201",
+    "length": "6084"
+},
+{
+    "family_accession": "DF000000202",
+    "length": "4329"
+},
+{
+    "family_accession": "DF000000203",
+    "length": "5685"
+},
+{
+    "family_accession": "DF000000204",
+    "length": "7590"
+},
+{
+    "family_accession": "DF000000205",
+    "length": "8978"
+},
+{
+    "family_accession": "DF000000206",
+    "length": "105"
+},
+{
+    "family_accession": "DF000000207",
+    "length": "86"
+},
+{
+    "family_accession": "DF000000209",
+    "length": "126"
+},
+{
+    "family_accession": "DF000000210",
+    "length": "568"
+},
+{
+    "family_accession": "DF000000211",
+    "length": "170"
+},
+{
+    "family_accession": "DF000000212",
+    "length": "1287"
+},
+{
+    "family_accession": "DF000000213",
+    "length": "1302"
+},
+{
+    "family_accession": "DF000000214",
+    "length": "6263"
+},
+{
+    "family_accession": "DF000000215",
+    "length": "3088"
+},
+{
+    "family_accession": "DF000000216",
+    "length": "8919"
+},
+{
+    "family_accession": "DF000000217",
+    "length": "7418"
+},
+{
+    "family_accession": "DF000000218",
+    "length": "1745"
+},
+{
+    "family_accession": "DF000000219",
+    "length": "970"
+},
+{
+    "family_accession": "DF000000220",
+    "length": "754"
+},
+{
+    "family_accession": "DF000000221",
+    "length": "779"
+},
+{
+    "family_accession": "DF000000222",
+    "length": "729"
+},
+{
+    "family_accession": "DF000000223",
+    "length": "609"
+},
+{
+    "family_accession": "DF000000224",
+    "length": "887"
+},
+{
+    "family_accession": "DF000000225",
+    "length": "902"
+},
+{
+    "family_accession": "DF000000226",
+    "length": "2136"
+},
+{
+    "family_accession": "DF000000227",
+    "length": "3675"
+},
+{
+    "family_accession": "DF000000228",
+    "length": "3294"
+},
+{
+    "family_accession": "DF000000229",
+    "length": "2904"
+},
+{
+    "family_accession": "DF000000230",
+    "length": "1842"
+},
+{
+    "family_accession": "DF000000231",
+    "length": "660"
+},
+{
+    "family_accession": "DF000000232",
+    "length": "2233"
+},
+{
+    "family_accession": "DF000000233",
+    "length": "2030"
+},
+{
+    "family_accession": "DF000000234",
+    "length": "2334"
+},
+{
+    "family_accession": "DF000000235",
+    "length": "5015"
+},
+{
+    "family_accession": "DF000000236",
+    "length": "3291"
+},
+{
+    "family_accession": "DF000000237",
+    "length": "1175"
+},
+{
+    "family_accession": "DF000000238",
+    "length": "1765"
+},
+{
+    "family_accession": "DF000000239",
+    "length": "1625"
+},
+{
+    "family_accession": "DF000000240",
+    "length": "1375"
+},
+{
+    "family_accession": "DF000000241",
+    "length": "2137"
+},
+{
+    "family_accession": "DF000000242",
+    "length": "2113"
+},
+{
+    "family_accession": "DF000000243",
+    "length": "1263"
+},
+{
+    "family_accession": "DF000000244",
+    "length": "3288"
+},
+{
+    "family_accession": "DF000000245",
+    "length": "2686"
+},
+{
+    "family_accession": "DF000000246",
+    "length": "2579"
+},
+{
+    "family_accession": "DF000000247",
+    "length": "2656"
+},
+{
+    "family_accession": "DF000000248",
+    "length": "3237"
+},
+{
+    "family_accession": "DF000000249",
+    "length": "2500"
+},
+{
+    "family_accession": "DF000000250",
+    "length": "3294"
+},
+{
+    "family_accession": "DF000000251",
+    "length": "2515"
+},
+{
+    "family_accession": "DF000000252",
+    "length": "362"
+},
+{
+    "family_accession": "DF000000253",
+    "length": "2237"
+},
+{
+    "family_accession": "DF000000254",
+    "length": "2355"
+},
+{
+    "family_accession": "DF000000255",
+    "length": "1081"
+},
+{
+    "family_accession": "DF000000256",
+    "length": "1049"
+},
+{
+    "family_accession": "DF000000257",
+    "length": "1051"
+},
+{
+    "family_accession": "DF000000258",
+    "length": "1052"
+},
+{
+    "family_accession": "DF000000259",
+    "length": "1047"
+},
+{
+    "family_accession": "DF000000260",
+    "length": "1050"
+},
+{
+    "family_accession": "DF000000261",
+    "length": "1047"
+},
+{
+    "family_accession": "DF000000262",
+    "length": "1044"
+},
+{
+    "family_accession": "DF000000263",
+    "length": "1047"
+},
+{
+    "family_accession": "DF000000264",
+    "length": "1038"
+},
+{
+    "family_accession": "DF000000265",
+    "length": "1038"
+},
+{
+    "family_accession": "DF000000266",
+    "length": "1059"
+},
+{
+    "family_accession": "DF000000267",
+    "length": "915"
+},
+{
+    "family_accession": "DF000000268",
+    "length": "918"
+},
+{
+    "family_accession": "DF000000269",
+    "length": "930"
+},
+{
+    "family_accession": "DF000000270",
+    "length": "927"
+},
+{
+    "family_accession": "DF000000271",
+    "length": "1795"
+},
+{
+    "family_accession": "DF000000272",
+    "length": "921"
+},
+{
+    "family_accession": "DF000000273",
+    "length": "931"
+},
+{
+    "family_accession": "DF000000274",
+    "length": "925"
+},
+{
+    "family_accession": "DF000000275",
+    "length": "1080"
+},
+{
+    "family_accession": "DF000000276",
+    "length": "1091"
+},
+{
+    "family_accession": "DF000000277",
+    "length": "2532"
+},
+{
+    "family_accession": "DF000000278",
+    "length": "2555"
+},
+{
+    "family_accession": "DF000000279",
+    "length": "2629"
+},
+{
+    "family_accession": "DF000000280",
+    "length": "2694"
+},
+{
+    "family_accession": "DF000000281",
+    "length": "2777"
+},
+{
+    "family_accession": "DF000000282",
+    "length": "2434"
+},
+{
+    "family_accession": "DF000000283",
+    "length": "1197"
+},
+{
+    "family_accession": "DF000000284",
+    "length": "1536"
+},
+{
+    "family_accession": "DF000000285",
+    "length": "3294"
+},
+{
+    "family_accession": "DF000000286",
+    "length": "989"
+},
+{
+    "family_accession": "DF000000287",
+    "length": "1106"
+},
+{
+    "family_accession": "DF000000288",
+    "length": "1069"
+},
+{
+    "family_accession": "DF000000289",
+    "length": "2742"
+},
+{
+    "family_accession": "DF000000290",
+    "length": "2650"
+},
+{
+    "family_accession": "DF000000291",
+    "length": "1422"
+},
+{
+    "family_accession": "DF000000292",
+    "length": "3294"
+},
+{
+    "family_accession": "DF000000293",
+    "length": "926"
+},
+{
+    "family_accession": "DF000000294",
+    "length": "911"
+},
+{
+    "family_accession": "DF000000295",
+    "length": "1191"
+},
+{
+    "family_accession": "DF000000296",
+    "length": "909"
+},
+{
+    "family_accession": "DF000000297",
+    "length": "920"
+},
+{
+    "family_accession": "DF000000298",
+    "length": "989"
+},
+{
+    "family_accession": "DF000000299",
+    "length": "870"
+},
+{
+    "family_accession": "DF000000300",
+    "length": "989"
+},
+{
+    "family_accession": "DF000000301",
+    "length": "990"
+},
+{
+    "family_accession": "DF000000302",
+    "length": "924"
+},
+{
+    "family_accession": "DF000000303",
+    "length": "871"
+},
+{
+    "family_accession": "DF000000304",
+    "length": "892"
+},
+{
+    "family_accession": "DF000000305",
+    "length": "830"
+},
+{
+    "family_accession": "DF000000306",
+    "length": "941"
+},
+{
+    "family_accession": "DF000000307",
+    "length": "1089"
+},
+{
+    "family_accession": "DF000000308",
+    "length": "2217"
+},
+{
+    "family_accession": "DF000000309",
+    "length": "783"
+},
+{
+    "family_accession": "DF000000310",
+    "length": "1000"
+},
+{
+    "family_accession": "DF000000311",
+    "length": "2101"
+},
+{
+    "family_accession": "DF000000312",
+    "length": "2235"
+},
+{
+    "family_accession": "DF000000313",
+    "length": "2212"
+},
+{
+    "family_accession": "DF000000314",
+    "length": "2160"
+},
+{
+    "family_accession": "DF000000315",
+    "length": "2259"
+},
+{
+    "family_accession": "DF000000316",
+    "length": "3294"
+},
+{
+    "family_accession": "DF000000317",
+    "length": "2275"
+},
+{
+    "family_accession": "DF000000318",
+    "length": "1727"
+},
+{
+    "family_accession": "DF000000319",
+    "length": "1141"
+},
+{
+    "family_accession": "DF000000320",
+    "length": "3294"
+},
+{
+    "family_accession": "DF000000321",
+    "length": "2596"
+},
+{
+    "family_accession": "DF000000322",
+    "length": "1783"
+},
+{
+    "family_accession": "DF000000323",
+    "length": "1583"
+},
+{
+    "family_accession": "DF000000324",
+    "length": "2035"
+},
+{
+    "family_accession": "DF000000325",
+    "length": "1391"
+},
+{
+    "family_accession": "DF000000326",
+    "length": "3294"
+},
+{
+    "family_accession": "DF000000327",
+    "length": "915"
+},
+{
+    "family_accession": "DF000000328",
+    "length": "2444"
+},
+{
+    "family_accession": "DF000000329",
+    "length": "921"
+},
+{
+    "family_accession": "DF000000330",
+    "length": "915"
+},
+{
+    "family_accession": "DF000000331",
+    "length": "910"
+},
+{
+    "family_accession": "DF000000332",
+    "length": "2881"
+},
+{
+    "family_accession": "DF000000333",
+    "length": "908"
+},
+{
+    "family_accession": "DF000000334",
+    "length": "2962"
+},
+{
+    "family_accession": "DF000000335",
+    "length": "912"
+},
+{
+    "family_accession": "DF000000336",
+    "length": "913"
+},
+{
+    "family_accession": "DF000000337",
+    "length": "913"
+},
+{
+    "family_accession": "DF000000338",
+    "length": "1734"
+},
+{
+    "family_accession": "DF000000339",
+    "length": "902"
+},
+{
+    "family_accession": "DF000000340",
+    "length": "902"
+},
+{
+    "family_accession": "DF000000341",
+    "length": "902"
+},
+{
+    "family_accession": "DF000000342",
+    "length": "901"
+},
+{
+    "family_accession": "DF000000343",
+    "length": "901"
+},
+{
+    "family_accession": "DF000000344",
+    "length": "901"
+},
+{
+    "family_accession": "DF000000345",
+    "length": "919"
+},
+{
+    "family_accession": "DF000000346",
+    "length": "878"
+},
+{
+    "family_accession": "DF000000347",
+    "length": "898"
+},
+{
+    "family_accession": "DF000000348",
+    "length": "898"
+},
+{
+    "family_accession": "DF000000349",
+    "length": "901"
+},
+{
+    "family_accession": "DF000000350",
+    "length": "903"
+},
+{
+    "family_accession": "DF000000351",
+    "length": "1592"
+},
+{
+    "family_accession": "DF000000352",
+    "length": "2971"
+},
+{
+    "family_accession": "DF000000353",
+    "length": "1058"
+},
+{
+    "family_accession": "DF000000354",
+    "length": "3294"
+},
+{
+    "family_accession": "DF000000355",
+    "length": "907"
+},
+{
+    "family_accession": "DF000000356",
+    "length": "4254"
+},
+{
+    "family_accession": "DF000000357",
+    "length": "3294"
+},
+{
+    "family_accession": "DF000000358",
+    "length": "3082"
+},
+{
+    "family_accession": "DF000000359",
+    "length": "517"
+},
+{
+    "family_accession": "DF000000360",
+    "length": "466"
+},
+{
+    "family_accession": "DF000000361",
+    "length": "478"
+},
+{
+    "family_accession": "DF000000362",
+    "length": "4099"
+},
+{
+    "family_accession": "DF000000363",
+    "length": "1206"
+},
+{
+    "family_accession": "DF000000364",
+    "length": "4990"
+},
+{
+    "family_accession": "DF000000365",
+    "length": "4939"
+},
+{
+    "family_accession": "DF000000366",
+    "length": "5138"
+},
+{
+    "family_accession": "DF000000367",
+    "length": "2263"
+},
+{
+    "family_accession": "DF000000368",
+    "length": "459"
+},
+{
+    "family_accession": "DF000000369",
+    "length": "1557"
+},
+{
+    "family_accession": "DF000000370",
+    "length": "497"
+},
+{
+    "family_accession": "DF000000371",
+    "length": "461"
+},
+{
+    "family_accession": "DF000000372",
+    "length": "8120"
+},
+{
+    "family_accession": "DF000000373",
+    "length": "498"
+},
+{
+    "family_accession": "DF000000374",
+    "length": "476"
+},
+{
+    "family_accession": "DF000000375",
+    "length": "783"
+},
+{
+    "family_accession": "DF000000376",
+    "length": "829"
+},
+{
+    "family_accession": "DF000000377",
+    "length": "851"
+},
+{
+    "family_accession": "DF000000378",
+    "length": "548"
+},
+{
+    "family_accession": "DF000000379",
+    "length": "475"
+},
+{
+    "family_accession": "DF000000380",
+    "length": "1509"
+},
+{
+    "family_accession": "DF000000381",
+    "length": "600"
+},
+{
+    "family_accession": "DF000000382",
+    "length": "708"
+},
+{
+    "family_accession": "DF000000383",
+    "length": "570"
+},
+{
+    "family_accession": "DF000000384",
+    "length": "511"
+},
+{
+    "family_accession": "DF000000385",
+    "length": "497"
+},
+{
+    "family_accession": "DF000000386",
+    "length": "519"
+},
+{
+    "family_accession": "DF000000387",
+    "length": "544"
+},
+{
+    "family_accession": "DF000000388",
+    "length": "548"
+},
+{
+    "family_accession": "DF000000389",
+    "length": "419"
+},
+{
+    "family_accession": "DF000000390",
+    "length": "609"
+},
+{
+    "family_accession": "DF000000391",
+    "length": "505"
+},
+{
+    "family_accession": "DF000000392",
+    "length": "547"
+},
+{
+    "family_accession": "DF000000393",
+    "length": "503"
+},
+{
+    "family_accession": "DF000000394",
+    "length": "591"
+},
+{
+    "family_accession": "DF000000395",
+    "length": "513"
+},
+{
+    "family_accession": "DF000000396",
+    "length": "633"
+},
+{
+    "family_accession": "DF000000397",
+    "length": "511"
+},
+{
+    "family_accession": "DF000000398",
+    "length": "523"
+},
+{
+    "family_accession": "DF000000399",
+    "length": "826"
+},
+{
+    "family_accession": "DF000000400",
+    "length": "688"
+},
+{
+    "family_accession": "DF000000401",
+    "length": "667"
+},
+{
+    "family_accession": "DF000000402",
+    "length": "1579"
+},
+{
+    "family_accession": "DF000000403",
+    "length": "1254"
+},
+{
+    "family_accession": "DF000000404",
+    "length": "1322"
+},
+{
+    "family_accession": "DF000000405",
+    "length": "519"
+},
+{
+    "family_accession": "DF000000406",
+    "length": "1007"
+},
+{
+    "family_accession": "DF000000407",
+    "length": "954"
+},
+{
+    "family_accession": "DF000000408",
+    "length": "966"
+},
+{
+    "family_accession": "DF000000409",
+    "length": "548"
+},
+{
+    "family_accession": "DF000000410",
+    "length": "344"
+},
+{
+    "family_accession": "DF000000411",
+    "length": "608"
+},
+{
+    "family_accession": "DF000000412",
+    "length": "587"
+},
+{
+    "family_accession": "DF000000413",
+    "length": "493"
+},
+{
+    "family_accession": "DF000000414",
+    "length": "438"
+},
+{
+    "family_accession": "DF000000415",
+    "length": "451"
+},
+{
+    "family_accession": "DF000000416",
+    "length": "456"
+},
+{
+    "family_accession": "DF000000417",
+    "length": "495"
+},
+{
+    "family_accession": "DF000000418",
+    "length": "463"
+},
+{
+    "family_accession": "DF000000419",
+    "length": "480"
+},
+{
+    "family_accession": "DF000000420",
+    "length": "462"
+},
+{
+    "family_accession": "DF000000421",
+    "length": "489"
+},
+{
+    "family_accession": "DF000000422",
+    "length": "651"
+},
+{
+    "family_accession": "DF000000423",
+    "length": "675"
+},
+{
+    "family_accession": "DF000000424",
+    "length": "572"
+},
+{
+    "family_accession": "DF000000425",
+    "length": "538"
+},
+{
+    "family_accession": "DF000000426",
+    "length": "568"
+},
+{
+    "family_accession": "DF000000427",
+    "length": "780"
+},
+{
+    "family_accession": "DF000000428",
+    "length": "357"
+},
+{
+    "family_accession": "DF000000429",
+    "length": "614"
+},
+{
+    "family_accession": "DF000000430",
+    "length": "345"
+},
+{
+    "family_accession": "DF000000431",
+    "length": "486"
+},
+{
+    "family_accession": "DF000000432",
+    "length": "580"
+},
+{
+    "family_accession": "DF000000433",
+    "length": "779"
+},
+{
+    "family_accession": "DF000000434",
+    "length": "5586"
+},
+{
+    "family_accession": "DF000000435",
+    "length": "799"
+},
+{
+    "family_accession": "DF000000436",
+    "length": "837"
+},
+{
+    "family_accession": "DF000000437",
+    "length": "824"
+},
+{
+    "family_accession": "DF000000438",
+    "length": "742"
+},
+{
+    "family_accession": "DF000000439",
+    "length": "818"
+},
+{
+    "family_accession": "DF000000440",
+    "length": "747"
+},
+{
+    "family_accession": "DF000000441",
+    "length": "648"
+},
+{
+    "family_accession": "DF000000442",
+    "length": "638"
+},
+{
+    "family_accession": "DF000000443",
+    "length": "975"
+},
+{
+    "family_accession": "DF000000444",
+    "length": "899"
+},
+{
+    "family_accession": "DF000000445",
+    "length": "804"
+},
+{
+    "family_accession": "DF000000446",
+    "length": "772"
+},
+{
+    "family_accession": "DF000000447",
+    "length": "729"
+},
+{
+    "family_accession": "DF000000448",
+    "length": "739"
+},
+{
+    "family_accession": "DF000000449",
+    "length": "463"
+},
+{
+    "family_accession": "DF000000450",
+    "length": "481"
+},
+{
+    "family_accession": "DF000000451",
+    "length": "437"
+},
+{
+    "family_accession": "DF000000452",
+    "length": "511"
+},
+{
+    "family_accession": "DF000000453",
+    "length": "571"
+},
+{
+    "family_accession": "DF000000454",
+    "length": "458"
+},
+{
+    "family_accession": "DF000000455",
+    "length": "492"
+},
+{
+    "family_accession": "DF000000456",
+    "length": "526"
+},
+{
+    "family_accession": "DF000000457",
+    "length": "600"
+},
+{
+    "family_accession": "DF000000458",
+    "length": "509"
+},
+{
+    "family_accession": "DF000000459",
+    "length": "502"
+},
+{
+    "family_accession": "DF000000460",
+    "length": "496"
+},
+{
+    "family_accession": "DF000000461",
+    "length": "507"
+},
+{
+    "family_accession": "DF000000462",
+    "length": "437"
+},
+{
+    "family_accession": "DF000000463",
+    "length": "4850"
+},
+{
+    "family_accession": "DF000000464",
+    "length": "467"
+},
+{
+    "family_accession": "DF000000465",
+    "length": "576"
+},
+{
+    "family_accession": "DF000000466",
+    "length": "635"
+},
+{
+    "family_accession": "DF000000467",
+    "length": "844"
+},
+{
+    "family_accession": "DF000000468",
+    "length": "7188"
+},
+{
+    "family_accession": "DF000000469",
+    "length": "603"
+},
+{
+    "family_accession": "DF000000470",
+    "length": "531"
+},
+{
+    "family_accession": "DF000000471",
+    "length": "539"
+},
+{
+    "family_accession": "DF000000472",
+    "length": "604"
+},
+{
+    "family_accession": "DF000000473",
+    "length": "622"
+},
+{
+    "family_accession": "DF000000474",
+    "length": "640"
+},
+{
+    "family_accession": "DF000000475",
+    "length": "1263"
+},
+{
+    "family_accession": "DF000000476",
+    "length": "594"
+},
+{
+    "family_accession": "DF000000477",
+    "length": "767"
+},
+{
+    "family_accession": "DF000000478",
+    "length": "615"
+},
+{
+    "family_accession": "DF000000479",
+    "length": "1077"
+},
+{
+    "family_accession": "DF000000480",
+    "length": "1020"
+},
+{
+    "family_accession": "DF000000481",
+    "length": "974"
+},
+{
+    "family_accession": "DF000000482",
+    "length": "1129"
+},
+{
+    "family_accession": "DF000000483",
+    "length": "622"
+},
+{
+    "family_accession": "DF000000484",
+    "length": "483"
+},
+{
+    "family_accession": "DF000000485",
+    "length": "501"
+},
+{
+    "family_accession": "DF000000486",
+    "length": "714"
+},
+{
+    "family_accession": "DF000000487",
+    "length": "619"
+},
+{
+    "family_accession": "DF000000488",
+    "length": "457"
+},
+{
+    "family_accession": "DF000000489",
+    "length": "515"
+},
+{
+    "family_accession": "DF000000490",
+    "length": "520"
+},
+{
+    "family_accession": "DF000000491",
+    "length": "531"
+},
+{
+    "family_accession": "DF000000492",
+    "length": "503"
+},
+{
+    "family_accession": "DF000000493",
+    "length": "629"
+},
+{
+    "family_accession": "DF000000494",
+    "length": "699"
+},
+{
+    "family_accession": "DF000000495",
+    "length": "608"
+},
+{
+    "family_accession": "DF000000496",
+    "length": "547"
+},
+{
+    "family_accession": "DF000000497",
+    "length": "605"
+},
+{
+    "family_accession": "DF000000498",
+    "length": "611"
+},
+{
+    "family_accession": "DF000000499",
+    "length": "426"
+},
+{
+    "family_accession": "DF000000500",
+    "length": "468"
+},
+{
+    "family_accession": "DF000000501",
+    "length": "4060"
+},
+{
+    "family_accession": "DF000000502",
+    "length": "556"
+},
+{
+    "family_accession": "DF000000503",
+    "length": "543"
+},
+{
+    "family_accession": "DF000000504",
+    "length": "610"
+},
+{
+    "family_accession": "DF000000505",
+    "length": "711"
+},
+{
+    "family_accession": "DF000000506",
+    "length": "1786"
+},
+{
+    "family_accession": "DF000000507",
+    "length": "783"
+},
+{
+    "family_accession": "DF000000508",
+    "length": "9043"
+},
+{
+    "family_accession": "DF000000509",
+    "length": "484"
+},
+{
+    "family_accession": "DF000000510",
+    "length": "437"
+},
+{
+    "family_accession": "DF000000511",
+    "length": "499"
+},
+{
+    "family_accession": "DF000000512",
+    "length": "596"
+},
+{
+    "family_accession": "DF000000513",
+    "length": "519"
+},
+{
+    "family_accession": "DF000000514",
+    "length": "584"
+},
+{
+    "family_accession": "DF000000515",
+    "length": "462"
+},
+{
+    "family_accession": "DF000000516",
+    "length": "465"
+},
+{
+    "family_accession": "DF000000517",
+    "length": "768"
+},
+{
+    "family_accession": "DF000000518",
+    "length": "758"
+},
+{
+    "family_accession": "DF000000519",
+    "length": "701"
+},
+{
+    "family_accession": "DF000000520",
+    "length": "495"
+},
+{
+    "family_accession": "DF000000521",
+    "length": "602"
+},
+{
+    "family_accession": "DF000000522",
+    "length": "572"
+},
+{
+    "family_accession": "DF000000523",
+    "length": "4798"
+},
+{
+    "family_accession": "DF000000524",
+    "length": "519"
+},
+{
+    "family_accession": "DF000000525",
+    "length": "525"
+},
+{
+    "family_accession": "DF000000526",
+    "length": "489"
+},
+{
+    "family_accession": "DF000000527",
+    "length": "539"
+},
+{
+    "family_accession": "DF000000528",
+    "length": "460"
+},
+{
+    "family_accession": "DF000000529",
+    "length": "6985"
+},
+{
+    "family_accession": "DF000000530",
+    "length": "452"
+},
+{
+    "family_accession": "DF000000531",
+    "length": "432"
+},
+{
+    "family_accession": "DF000000532",
+    "length": "443"
+},
+{
+    "family_accession": "DF000000533",
+    "length": "434"
+},
+{
+    "family_accession": "DF000000534",
+    "length": "464"
+},
+{
+    "family_accession": "DF000000535",
+    "length": "434"
+},
+{
+    "family_accession": "DF000000536",
+    "length": "787"
+},
+{
+    "family_accession": "DF000000537",
+    "length": "644"
+},
+{
+    "family_accession": "DF000000538",
+    "length": "595"
+},
+{
+    "family_accession": "DF000000539",
+    "length": "6331"
+},
+{
+    "family_accession": "DF000000540",
+    "length": "969"
+},
+{
+    "family_accession": "DF000000541",
+    "length": "795"
+},
+{
+    "family_accession": "DF000000542",
+    "length": "671"
+},
+{
+    "family_accession": "DF000000543",
+    "length": "421"
+},
+{
+    "family_accession": "DF000000544",
+    "length": "3556"
+},
+{
+    "family_accession": "DF000000545",
+    "length": "519"
+},
+{
+    "family_accession": "DF000000546",
+    "length": "533"
+},
+{
+    "family_accession": "DF000000547",
+    "length": "3329"
+},
+{
+    "family_accession": "DF000000548",
+    "length": "510"
+},
+{
+    "family_accession": "DF000000549",
+    "length": "498"
+},
+{
+    "family_accession": "DF000000550",
+    "length": "548"
+},
+{
+    "family_accession": "DF000000551",
+    "length": "445"
+},
+{
+    "family_accession": "DF000000552",
+    "length": "411"
+},
+{
+    "family_accession": "DF000000553",
+    "length": "5343"
+},
+{
+    "family_accession": "DF000000554",
+    "length": "679"
+},
+{
+    "family_accession": "DF000000555",
+    "length": "597"
+},
+{
+    "family_accession": "DF000000556",
+    "length": "1033"
+},
+{
+    "family_accession": "DF000000557",
+    "length": "1002"
+},
+{
+    "family_accession": "DF000000558",
+    "length": "968"
+},
+{
+    "family_accession": "DF000000559",
+    "length": "586"
+},
+{
+    "family_accession": "DF000000560",
+    "length": "765"
+},
+{
+    "family_accession": "DF000000561",
+    "length": "559"
+},
+{
+    "family_accession": "DF000000562",
+    "length": "709"
+},
+{
+    "family_accession": "DF000000563",
+    "length": "528"
+},
+{
+    "family_accession": "DF000000564",
+    "length": "669"
+},
+{
+    "family_accession": "DF000000565",
+    "length": "610"
+},
+{
+    "family_accession": "DF000000566",
+    "length": "620"
+},
+{
+    "family_accession": "DF000000567",
+    "length": "740"
+},
+{
+    "family_accession": "DF000000568",
+    "length": "588"
+},
+{
+    "family_accession": "DF000000569",
+    "length": "564"
+},
+{
+    "family_accession": "DF000000570",
+    "length": "558"
+},
+{
+    "family_accession": "DF000000571",
+    "length": "450"
+},
+{
+    "family_accession": "DF000000572",
+    "length": "1286"
+},
+{
+    "family_accession": "DF000000573",
+    "length": "459"
+},
+{
+    "family_accession": "DF000000574",
+    "length": "610"
+},
+{
+    "family_accession": "DF000000575",
+    "length": "519"
+},
+{
+    "family_accession": "DF000000576",
+    "length": "500"
+},
+{
+    "family_accession": "DF000000577",
+    "length": "572"
+},
+{
+    "family_accession": "DF000000578",
+    "length": "562"
+},
+{
+    "family_accession": "DF000000579",
+    "length": "546"
+},
+{
+    "family_accession": "DF000000580",
+    "length": "608"
+},
+{
+    "family_accession": "DF000000581",
+    "length": "675"
+},
+{
+    "family_accession": "DF000000582",
+    "length": "622"
+},
+{
+    "family_accession": "DF000000583",
+    "length": "1304"
+},
+{
+    "family_accession": "DF000000584",
+    "length": "1296"
+},
+{
+    "family_accession": "DF000000585",
+    "length": "527"
+},
+{
+    "family_accession": "DF000000587",
+    "length": "464"
+},
+{
+    "family_accession": "DF000000588",
+    "length": "470"
+},
+{
+    "family_accession": "DF000000589",
+    "length": "464"
+},
+{
+    "family_accession": "DF000000590",
+    "length": "691"
+},
+{
+    "family_accession": "DF000000591",
+    "length": "583"
+},
+{
+    "family_accession": "DF000000592",
+    "length": "584"
+},
+{
+    "family_accession": "DF000000593",
+    "length": "1189"
+},
+{
+    "family_accession": "DF000000594",
+    "length": "1350"
+},
+{
+    "family_accession": "DF000000595",
+    "length": "278"
+},
+{
+    "family_accession": "DF000000596",
+    "length": "1393"
+},
+{
+    "family_accession": "DF000000597",
+    "length": "1153"
+},
+{
+    "family_accession": "DF000000598",
+    "length": "872"
+},
+{
+    "family_accession": "DF000000599",
+    "length": "830"
+},
+{
+    "family_accession": "DF000000600",
+    "length": "780"
+},
+{
+    "family_accession": "DF000000601",
+    "length": "757"
+},
+{
+    "family_accession": "DF000000602",
+    "length": "761"
+},
+{
+    "family_accession": "DF000000603",
+    "length": "702"
+},
+{
+    "family_accession": "DF000000604",
+    "length": "784"
+},
+{
+    "family_accession": "DF000000605",
+    "length": "823"
+},
+{
+    "family_accession": "DF000000606",
+    "length": "513"
+},
+{
+    "family_accession": "DF000000607",
+    "length": "508"
+},
+{
+    "family_accession": "DF000000608",
+    "length": "493"
+},
+{
+    "family_accession": "DF000000609",
+    "length": "487"
+},
+{
+    "family_accession": "DF000000610",
+    "length": "621"
+},
+{
+    "family_accession": "DF000000611",
+    "length": "624"
+},
+{
+    "family_accession": "DF000000612",
+    "length": "816"
+},
+{
+    "family_accession": "DF000000613",
+    "length": "837"
+},
+{
+    "family_accession": "DF000000614",
+    "length": "862"
+},
+{
+    "family_accession": "DF000000615",
+    "length": "879"
+},
+{
+    "family_accession": "DF000000616",
+    "length": "727"
+},
+{
+    "family_accession": "DF000000617",
+    "length": "820"
+},
+{
+    "family_accession": "DF000000618",
+    "length": "612"
+},
+{
+    "family_accession": "DF000000619",
+    "length": "976"
+},
+{
+    "family_accession": "DF000000620",
+    "length": "796"
+},
+{
+    "family_accession": "DF000000621",
+    "length": "874"
+},
+{
+    "family_accession": "DF000000622",
+    "length": "728"
+},
+{
+    "family_accession": "DF000000623",
+    "length": "644"
+},
+{
+    "family_accession": "DF000000624",
+    "length": "666"
+},
+{
+    "family_accession": "DF000000625",
+    "length": "645"
+},
+{
+    "family_accession": "DF000000626",
+    "length": "96"
+},
+{
+    "family_accession": "DF000000627",
+    "length": "2615"
+},
+{
+    "family_accession": "DF000000628",
+    "length": "8839"
+},
+{
+    "family_accession": "DF000000629",
+    "length": "80"
+},
+{
+    "family_accession": "DF000000630",
+    "length": "119"
+},
+{
+    "family_accession": "DF000000631",
+    "length": "101"
+},
+{
+    "family_accession": "DF000000632",
+    "length": "93"
+},
+{
+    "family_accession": "DF000000633",
+    "length": "84"
+},
+{
+    "family_accession": "DF000000634",
+    "length": "311"
+},
+{
+    "family_accession": "DF000000635",
+    "length": "997"
+},
+{
+    "family_accession": "DF000000636",
+    "length": "72"
+},
+{
+    "family_accession": "DF000000637",
+    "length": "72"
+},
+{
+    "family_accession": "DF000000638",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000639",
+    "length": "74"
+},
+{
+    "family_accession": "DF000000640",
+    "length": "76"
+},
+{
+    "family_accession": "DF000000641",
+    "length": "73"
+},
+{
+    "family_accession": "DF000000643",
+    "length": "76"
+},
+{
+    "family_accession": "DF000000644",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000645",
+    "length": "72"
+},
+{
+    "family_accession": "DF000000646",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000647",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000648",
+    "length": "74"
+},
+{
+    "family_accession": "DF000000649",
+    "length": "74"
+},
+{
+    "family_accession": "DF000000650",
+    "length": "72"
+},
+{
+    "family_accession": "DF000000651",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000652",
+    "length": "83"
+},
+{
+    "family_accession": "DF000000653",
+    "length": "82"
+},
+{
+    "family_accession": "DF000000654",
+    "length": "86"
+},
+{
+    "family_accession": "DF000000655",
+    "length": "84"
+},
+{
+    "family_accession": "DF000000656",
+    "length": "76"
+},
+{
+    "family_accession": "DF000000657",
+    "length": "74"
+},
+{
+    "family_accession": "DF000000658",
+    "length": "74"
+},
+{
+    "family_accession": "DF000000659",
+    "length": "83"
+},
+{
+    "family_accession": "DF000000661",
+    "length": "85"
+},
+{
+    "family_accession": "DF000000662",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000663",
+    "length": "72"
+},
+{
+    "family_accession": "DF000000665",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000666",
+    "length": "74"
+},
+{
+    "family_accession": "DF000000667",
+    "length": "73"
+},
+{
+    "family_accession": "DF000000668",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000669",
+    "length": "74"
+},
+{
+    "family_accession": "DF000000670",
+    "length": "77"
+},
+{
+    "family_accession": "DF000000671",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000672",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000673",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000674",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000675",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000676",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000677",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000678",
+    "length": "83"
+},
+{
+    "family_accession": "DF000000679",
+    "length": "76"
+},
+{
+    "family_accession": "DF000000680",
+    "length": "76"
+},
+{
+    "family_accession": "DF000000681",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000682",
+    "length": "74"
+},
+{
+    "family_accession": "DF000000683",
+    "length": "74"
+},
+{
+    "family_accession": "DF000000684",
+    "length": "75"
+},
+{
+    "family_accession": "DF000000685",
+    "length": "85"
+},
+{
+    "family_accession": "DF000000686",
+    "length": "77"
+},
+{
+    "family_accession": "DF000000687",
+    "length": "74"
+},
+{
+    "family_accession": "DF000000688",
+    "length": "76"
+},
+{
+    "family_accession": "DF000000689",
+    "length": "432"
+},
+{
+    "family_accession": "DF000000690",
+    "length": "80"
+},
+{
+    "family_accession": "DF000000691",
+    "length": "784"
+},
+{
+    "family_accession": "DF000000692",
+    "length": "782"
+},
+{
+    "family_accession": "DF000000693",
+    "length": "803"
+},
+{
+    "family_accession": "DF000000694",
+    "length": "813"
+},
+{
+    "family_accession": "DF000000695",
+    "length": "570"
+},
+{
+    "family_accession": "DF000000696",
+    "length": "330"
+},
+{
+    "family_accession": "DF000000697",
+    "length": "341"
+},
+{
+    "family_accession": "DF000000698",
+    "length": "331"
+},
+{
+    "family_accession": "DF000000699",
+    "length": "297"
+},
+{
+    "family_accession": "DF000000700",
+    "length": "6639"
+},
+{
+    "family_accession": "DF000000701",
+    "length": "181"
+},
+{
+    "family_accession": "DF000000702",
+    "length": "203"
+},
+{
+    "family_accession": "DF000000703",
+    "length": "236"
+},
+{
+    "family_accession": "DF000000704",
+    "length": "200"
+},
+{
+    "family_accession": "DF000000705",
+    "length": "491"
+},
+{
+    "family_accession": "DF000000706",
+    "length": "468"
+},
+{
+    "family_accession": "DF000000707",
+    "length": "4647"
+},
+{
+    "family_accession": "DF000000708",
+    "length": "1059"
+},
+{
+    "family_accession": "DF000000709",
+    "length": "261"
+},
+{
+    "family_accession": "DF000000710",
+    "length": "521"
+},
+{
+    "family_accession": "DF000000711",
+    "length": "314"
+},
+{
+    "family_accession": "DF000000713",
+    "length": "197"
+},
+{
+    "family_accession": "DF000000714",
+    "length": "1266"
+},
+{
+    "family_accession": "DF000000715",
+    "length": "1236"
+},
+{
+    "family_accession": "DF000000716",
+    "length": "583"
+},
+{
+    "family_accession": "DF000000717",
+    "length": "1071"
+},
+{
+    "family_accession": "DF000000718",
+    "length": "897"
+},
+{
+    "family_accession": "DF000000719",
+    "length": "401"
+},
+{
+    "family_accession": "DF000000720",
+    "length": "265"
+},
+{
+    "family_accession": "DF000000721",
+    "length": "397"
+},
+{
+    "family_accession": "DF000000722",
+    "length": "176"
+},
+{
+    "family_accession": "DF000000723",
+    "length": "449"
+},
+{
+    "family_accession": "DF000000724",
+    "length": "364"
+},
+{
+    "family_accession": "DF000000725",
+    "length": "469"
+},
+{
+    "family_accession": "DF000000726",
+    "length": "1586"
+},
+{
+    "family_accession": "DF000000727",
+    "length": "215"
+},
+{
+    "family_accession": "DF000000728",
+    "length": "178"
+},
+{
+    "family_accession": "DF000000729",
+    "length": "104"
+},
+{
+    "family_accession": "DF000000730",
+    "length": "115"
+},
+{
+    "family_accession": "DF000000731",
+    "length": "513"
+},
+{
+    "family_accession": "DF000000732",
+    "length": "228"
+},
+{
+    "family_accession": "DF000000733",
+    "length": "318"
+},
+{
+    "family_accession": "DF000000734",
+    "length": "529"
+},
+{
+    "family_accession": "DF000000735",
+    "length": "339"
+},
+{
+    "family_accession": "DF000000736",
+    "length": "345"
+},
+{
+    "family_accession": "DF000000737",
+    "length": "219"
+},
+{
+    "family_accession": "DF000000738",
+    "length": "783"
+},
+{
+    "family_accession": "DF000000739",
+    "length": "931"
+},
+{
+    "family_accession": "DF000000740",
+    "length": "938"
+},
+{
+    "family_accession": "DF000000741",
+    "length": "868"
+},
+{
+    "family_accession": "DF000000742",
+    "length": "336"
+},
+{
+    "family_accession": "DF000000743",
+    "length": "209"
+},
+{
+    "family_accession": "DF000000744",
+    "length": "230"
+},
+{
+    "family_accession": "DF000000745",
+    "length": "190"
+},
+{
+    "family_accession": "DF000000746",
+    "length": "485"
+},
+{
+    "family_accession": "DF000000747",
+    "length": "466"
+},
+{
+    "family_accession": "DF000000748",
+    "length": "324"
+},
+{
+    "family_accession": "DF000000749",
+    "length": "571"
+},
+{
+    "family_accession": "DF000000750",
+    "length": "587"
+},
+{
+    "family_accession": "DF000000751",
+    "length": "565"
+},
+{
+    "family_accession": "DF000000752",
+    "length": "5355"
+},
+{
+    "family_accession": "DF000000753",
+    "length": "551"
+},
+{
+    "family_accession": "DF000000754",
+    "length": "585"
+},
+{
+    "family_accession": "DF000000755",
+    "length": "555"
+},
+{
+    "family_accession": "DF000000756",
+    "length": "579"
+},
+{
+    "family_accession": "DF000000757",
+    "length": "8207"
+},
+{
+    "family_accession": "DF000000758",
+    "length": "707"
+},
+{
+    "family_accession": "DF000000759",
+    "length": "653"
+},
+{
+    "family_accession": "DF000000760",
+    "length": "554"
+},
+{
+    "family_accession": "DF000000761",
+    "length": "634"
+},
+{
+    "family_accession": "DF000000762",
+    "length": "521"
+},
+{
+    "family_accession": "DF000000763",
+    "length": "595"
+},
+{
+    "family_accession": "DF000000764",
+    "length": "885"
+},
+{
+    "family_accession": "DF000000765",
+    "length": "5946"
+},
+{
+    "family_accession": "DF000000766",
+    "length": "4932"
+},
+{
+    "family_accession": "DF000000767",
+    "length": "339"
+},
+{
+    "family_accession": "DF000000768",
+    "length": "474"
+},
+{
+    "family_accession": "DF000000769",
+    "length": "4191"
+},
+{
+    "family_accession": "DF000000770",
+    "length": "542"
+},
+{
+    "family_accession": "DF000000771",
+    "length": "989"
+},
+{
+    "family_accession": "DF000000772",
+    "length": "5035"
+},
+{
+    "family_accession": "DF000000773",
+    "length": "2787"
+},
+{
+    "family_accession": "DF000000774",
+    "length": "1089"
+},
+{
+    "family_accession": "DF000000775",
+    "length": "5714"
+},
+{
+    "family_accession": "DF000000776",
+    "length": "2527"
+},
+{
+    "family_accession": "DF000000777",
+    "length": "2224"
+},
+{
+    "family_accession": "DF000000778",
+    "length": "3072"
+},
+{
+    "family_accession": "DF000000779",
+    "length": "586"
+},
+{
+    "family_accession": "DF000000780",
+    "length": "693"
+},
+{
+    "family_accession": "DF000000781",
+    "length": "557"
+},
+{
+    "family_accession": "DF000000782",
+    "length": "550"
+},
+{
+    "family_accession": "DF000000783",
+    "length": "733"
+},
+{
+    "family_accession": "DF000000784",
+    "length": "705"
+},
+{
+    "family_accession": "DF000000785",
+    "length": "178"
+},
+{
+    "family_accession": "DF000000786",
+    "length": "1040"
+},
+{
+    "family_accession": "DF000000787",
+    "length": "953"
+},
+{
+    "family_accession": "DF000000788",
+    "length": "1581"
+},
+{
+    "family_accession": "DF000000789",
+    "length": "338"
+},
+{
+    "family_accession": "DF000000790",
+    "length": "366"
+},
+{
+    "family_accession": "DF000000791",
+    "length": "418"
+},
+{
+    "family_accession": "DF000000792",
+    "length": "97"
+},
+{
+    "family_accession": "DF000000793",
+    "length": "407"
+},
+{
+    "family_accession": "DF000000794",
+    "length": "923"
+},
+{
+    "family_accession": "DF000000795",
+    "length": "472"
+},
+{
+    "family_accession": "DF000000796",
+    "length": "600"
+},
+{
+    "family_accession": "DF000000797",
+    "length": "610"
+},
+{
+    "family_accession": "DF000000798",
+    "length": "6758"
+},
+{
+    "family_accession": "DF000000799",
+    "length": "465"
+},
+{
+    "family_accession": "DF000000800",
+    "length": "765"
+},
+{
+    "family_accession": "DF000000801",
+    "length": "903"
+},
+{
+    "family_accession": "DF000000802",
+    "length": "872"
+},
+{
+    "family_accession": "DF000000803",
+    "length": "900"
+},
+{
+    "family_accession": "DF000000804",
+    "length": "766"
+},
+{
+    "family_accession": "DF000000805",
+    "length": "781"
+},
+{
+    "family_accession": "DF000000806",
+    "length": "6598"
+},
+{
+    "family_accession": "DF000000807",
+    "length": "734"
+},
+{
+    "family_accession": "DF000000808",
+    "length": "782"
+},
+{
+    "family_accession": "DF000000809",
+    "length": "634"
+},
+{
+    "family_accession": "DF000000810",
+    "length": "377"
+},
+{
+    "family_accession": "DF000000811",
+    "length": "640"
+},
+{
+    "family_accession": "DF000000812",
+    "length": "657"
+},
+{
+    "family_accession": "DF000000813",
+    "length": "482"
+},
+{
+    "family_accession": "DF000000814",
+    "length": "697"
+},
+{
+    "family_accession": "DF000000815",
+    "length": "7205"
+},
+{
+    "family_accession": "DF000000816",
+    "length": "7816"
+},
+{
+    "family_accession": "DF000000817",
+    "length": "1580"
+},
+{
+    "family_accession": "DF000000818",
+    "length": "364"
+},
+{
+    "family_accession": "DF000000819",
+    "length": "375"
+},
+{
+    "family_accession": "DF000000820",
+    "length": "381"
+},
+{
+    "family_accession": "DF000000821",
+    "length": "2097"
+},
+{
+    "family_accession": "DF000000822",
+    "length": "735"
+},
+{
+    "family_accession": "DF000000823",
+    "length": "2475"
+},
+{
+    "family_accession": "DF000000824",
+    "length": "819"
+},
+{
+    "family_accession": "DF000000825",
+    "length": "734"
+},
+{
+    "family_accession": "DF000000826",
+    "length": "771"
+},
+{
+    "family_accession": "DF000000827",
+    "length": "324"
+},
+{
+    "family_accession": "DF000000828",
+    "length": "715"
+},
+{
+    "family_accession": "DF000000829",
+    "length": "331"
+},
+{
+    "family_accession": "DF000000830",
+    "length": "2673"
+},
+{
+    "family_accession": "DF000000831",
+    "length": "654"
+},
+{
+    "family_accession": "DF000000832",
+    "length": "1073"
+},
+{
+    "family_accession": "DF000000833",
+    "length": "1188"
+},
+{
+    "family_accession": "DF000000834",
+    "length": "852"
+},
+{
+    "family_accession": "DF000000835",
+    "length": "323"
+},
+{
+    "family_accession": "DF000000836",
+    "length": "2718"
+},
+{
+    "family_accession": "DF000000837",
+    "length": "973"
+},
+{
+    "family_accession": "DF000000838",
+    "length": "434"
+},
+{
+    "family_accession": "DF000000839",
+    "length": "1068"
+},
+{
+    "family_accession": "DF000000840",
+    "length": "3029"
+},
+{
+    "family_accession": "DF000000841",
+    "length": "1231"
+},
+{
+    "family_accession": "DF000000842",
+    "length": "602"
+},
+{
+    "family_accession": "DF000000843",
+    "length": "321"
+},
+{
+    "family_accession": "DF000000844",
+    "length": "2731"
+},
+{
+    "family_accession": "DF000000845",
+    "length": "236"
+},
+{
+    "family_accession": "DF000000846",
+    "length": "361"
+},
+{
+    "family_accession": "DF000000847",
+    "length": "2406"
+},
+{
+    "family_accession": "DF000000848",
+    "length": "472"
+},
+{
+    "family_accession": "DF000000849",
+    "length": "1081"
+},
+{
+    "family_accession": "DF000000850",
+    "length": "1597"
+},
+{
+    "family_accession": "DF000000851",
+    "length": "2492"
+},
+{
+    "family_accession": "DF000000852",
+    "length": "667"
+},
+{
+    "family_accession": "DF000000853",
+    "length": "732"
+},
+{
+    "family_accession": "DF000000854",
+    "length": "624"
+},
+{
+    "family_accession": "DF000000855",
+    "length": "7091"
+},
+{
+    "family_accession": "DF000000856",
+    "length": "1755"
+},
+{
+    "family_accession": "DF000000857",
+    "length": "1278"
+},
+{
+    "family_accession": "DF000000858",
+    "length": "2123"
+},
+{
+    "family_accession": "DF000000859",
+    "length": "193"
+},
+{
+    "family_accession": "DF000000860",
+    "length": "901"
+},
+{
+    "family_accession": "DF000000861",
+    "length": "793"
+},
+{
+    "family_accession": "DF000000862",
+    "length": "6187"
+},
+{
+    "family_accession": "DF000000863",
+    "length": "432"
+},
+{
+    "family_accession": "DF000000864",
+    "length": "403"
+},
+{
+    "family_accession": "DF000000865",
+    "length": "401"
+},
+{
+    "family_accession": "DF000000866",
+    "length": "434"
+},
+{
+    "family_accession": "DF000000867",
+    "length": "385"
+},
+{
+    "family_accession": "DF000000868",
+    "length": "411"
+},
+{
+    "family_accession": "DF000000869",
+    "length": "372"
+},
+{
+    "family_accession": "DF000000870",
+    "length": "402"
+},
+{
+    "family_accession": "DF000000871",
+    "length": "487"
+},
+{
+    "family_accession": "DF000000872",
+    "length": "224"
+},
+{
+    "family_accession": "DF000000873",
+    "length": "341"
+},
+{
+    "family_accession": "DF000000874",
+    "length": "215"
+},
+{
+    "family_accession": "DF000000875",
+    "length": "386"
+},
+{
+    "family_accession": "DF000000876",
+    "length": "189"
+},
+{
+    "family_accession": "DF000000877",
+    "length": "166"
+},
+{
+    "family_accession": "DF000000878",
+    "length": "178"
+},
+{
+    "family_accession": "DF000000879",
+    "length": "313"
+},
+{
+    "family_accession": "DF000000880",
+    "length": "263"
+},
+{
+    "family_accession": "DF000000881",
+    "length": "865"
+},
+{
+    "family_accession": "DF000000882",
+    "length": "5217"
+},
+{
+    "family_accession": "DF000000883",
+    "length": "341"
+},
+{
+    "family_accession": "DF000000884",
+    "length": "427"
+},
+{
+    "family_accession": "DF000000885",
+    "length": "428"
+},
+{
+    "family_accession": "DF000000886",
+    "length": "501"
+},
+{
+    "family_accession": "DF000000887",
+    "length": "569"
+},
+{
+    "family_accession": "DF000000888",
+    "length": "676"
+},
+{
+    "family_accession": "DF000000889",
+    "length": "435"
+},
+{
+    "family_accession": "DF000000890",
+    "length": "7537"
+},
+{
+    "family_accession": "DF000000891",
+    "length": "2418"
+},
+{
+    "family_accession": "DF000000892",
+    "length": "664"
+},
+{
+    "family_accession": "DF000000893",
+    "length": "210"
+},
+{
+    "family_accession": "DF000000894",
+    "length": "436"
+},
+{
+    "family_accession": "DF000000895",
+    "length": "930"
+},
+{
+    "family_accession": "DF000000896",
+    "length": "1061"
+},
+{
+    "family_accession": "DF000000897",
+    "length": "445"
+},
+{
+    "family_accession": "DF000000898",
+    "length": "531"
+},
+{
+    "family_accession": "DF000000899",
+    "length": "461"
+},
+{
+    "family_accession": "DF000000900",
+    "length": "473"
+},
+{
+    "family_accession": "DF000000901",
+    "length": "4870"
+},
+{
+    "family_accession": "DF000000902",
+    "length": "478"
+},
+{
+    "family_accession": "DF000000903",
+    "length": "486"
+},
+{
+    "family_accession": "DF000000904",
+    "length": "555"
+},
+{
+    "family_accession": "DF000000905",
+    "length": "484"
+},
+{
+    "family_accession": "DF000000906",
+    "length": "6676"
+},
+{
+    "family_accession": "DF000000907",
+    "length": "543"
+},
+{
+    "family_accession": "DF000000908",
+    "length": "661"
+},
+{
+    "family_accession": "DF000000909",
+    "length": "711"
+},
+{
+    "family_accession": "DF000000910",
+    "length": "514"
+},
+{
+    "family_accession": "DF000000911",
+    "length": "563"
+},
+{
+    "family_accession": "DF000000912",
+    "length": "564"
+},
+{
+    "family_accession": "DF000000913",
+    "length": "419"
+},
+{
+    "family_accession": "DF000000914",
+    "length": "2990"
+},
+{
+    "family_accession": "DF000000915",
+    "length": "605"
+},
+{
+    "family_accession": "DF000000916",
+    "length": "210"
+},
+{
+    "family_accession": "DF000000917",
+    "length": "202"
+},
+{
+    "family_accession": "DF000000918",
+    "length": "472"
+},
+{
+    "family_accession": "DF000000919",
+    "length": "578"
+},
+{
+    "family_accession": "DF000000920",
+    "length": "531"
+},
+{
+    "family_accession": "DF000000921",
+    "length": "5023"
+},
+{
+    "family_accession": "DF000000922",
+    "length": "722"
+},
+{
+    "family_accession": "DF000000923",
+    "length": "768"
+},
+{
+    "family_accession": "DF000000924",
+    "length": "644"
+},
+{
+    "family_accession": "DF000000925",
+    "length": "558"
+},
+{
+    "family_accession": "DF000000926",
+    "length": "622"
+},
+{
+    "family_accession": "DF000000927",
+    "length": "460"
+},
+{
+    "family_accession": "DF000000928",
+    "length": "514"
+},
+{
+    "family_accession": "DF000000929",
+    "length": "77"
+},
+{
+    "family_accession": "DF000000930",
+    "length": "243"
+},
+{
+    "family_accession": "DF000000931",
+    "length": "691"
+},
+{
+    "family_accession": "DF000000932",
+    "length": "6189"
+},
+{
+    "family_accession": "DF000000933",
+    "length": "604"
+},
+{
+    "family_accession": "DF000000934",
+    "length": "700"
+},
+{
+    "family_accession": "DF000000935",
+    "length": "239"
+},
+{
+    "family_accession": "DF000000936",
+    "length": "114"
+},
+{
+    "family_accession": "DF000000937",
+    "length": "448"
+},
+{
+    "family_accession": "DF000000938",
+    "length": "4266"
+},
+{
+    "family_accession": "DF000000939",
+    "length": "378"
+},
+{
+    "family_accession": "DF000000940",
+    "length": "4878"
+},
+{
+    "family_accession": "DF000000941",
+    "length": "373"
+},
+{
+    "family_accession": "DF000000942",
+    "length": "507"
+},
+{
+    "family_accession": "DF000000943",
+    "length": "4954"
+},
+{
+    "family_accession": "DF000000944",
+    "length": "541"
+},
+{
+    "family_accession": "DF000000945",
+    "length": "509"
+},
+{
+    "family_accession": "DF000000946",
+    "length": "464"
+},
+{
+    "family_accession": "DF000000947",
+    "length": "559"
+},
+{
+    "family_accession": "DF000000948",
+    "length": "6801"
+},
+{
+    "family_accession": "DF000000949",
+    "length": "575"
+},
+{
+    "family_accession": "DF000000950",
+    "length": "614"
+},
+{
+    "family_accession": "DF000000951",
+    "length": "196"
+},
+{
+    "family_accession": "DF000000952",
+    "length": "190"
+},
+{
+    "family_accession": "DF000000953",
+    "length": "140"
+},
+{
+    "family_accession": "DF000000954",
+    "length": "412"
+},
+{
+    "family_accession": "DF000000955",
+    "length": "636"
+},
+{
+    "family_accession": "DF000000956",
+    "length": "590"
+},
+{
+    "family_accession": "DF000000957",
+    "length": "320"
+},
+{
+    "family_accession": "DF000000958",
+    "length": "5218"
+},
+{
+    "family_accession": "DF000000959",
+    "length": "134"
+},
+{
+    "family_accession": "DF000000960",
+    "length": "133"
+},
+{
+    "family_accession": "DF000000961",
+    "length": "431"
+},
+{
+    "family_accession": "DF000000962",
+    "length": "175"
+},
+{
+    "family_accession": "DF000000963",
+    "length": "417"
+},
+{
+    "family_accession": "DF000000964",
+    "length": "890"
+},
+{
+    "family_accession": "DF000000965",
+    "length": "1049"
+},
+{
+    "family_accession": "DF000000966",
+    "length": "1129"
+},
+{
+    "family_accession": "DF000000967",
+    "length": "1205"
+},
+{
+    "family_accession": "DF000000968",
+    "length": "831"
+},
+{
+    "family_accession": "DF000000969",
+    "length": "513"
+},
+{
+    "family_accession": "DF000000970",
+    "length": "513"
+},
+{
+    "family_accession": "DF000000971",
+    "length": "512"
+},
+{
+    "family_accession": "DF000000972",
+    "length": "499"
+},
+{
+    "family_accession": "DF000000973",
+    "length": "756"
+},
+{
+    "family_accession": "DF000000974",
+    "length": "208"
+},
+{
+    "family_accession": "DF000000975",
+    "length": "268"
+},
+{
+    "family_accession": "DF000000976",
+    "length": "268"
+},
+{
+    "family_accession": "DF000000977",
+    "length": "139"
+},
+{
+    "family_accession": "DF000000978",
+    "length": "340"
+},
+{
+    "family_accession": "DF000000979",
+    "length": "5102"
+},
+{
+    "family_accession": "DF000000980",
+    "length": "922"
+},
+{
+    "family_accession": "DF000000981",
+    "length": "1068"
+},
+{
+    "family_accession": "DF000000982",
+    "length": "894"
+},
+{
+    "family_accession": "DF000000983",
+    "length": "981"
+},
+{
+    "family_accession": "DF000000984",
+    "length": "3809"
+},
+{
+    "family_accession": "DF000000985",
+    "length": "709"
+},
+{
+    "family_accession": "DF000000986",
+    "length": "510"
+},
+{
+    "family_accession": "DF000000987",
+    "length": "969"
+},
+{
+    "family_accession": "DF000000988",
+    "length": "216"
+},
+{
+    "family_accession": "DF000000989",
+    "length": "123"
+},
+{
+    "family_accession": "DF000000990",
+    "length": "295"
+},
+{
+    "family_accession": "DF000000991",
+    "length": "426"
+},
+{
+    "family_accession": "DF000000992",
+    "length": "426"
+},
+{
+    "family_accession": "DF000000993",
+    "length": "219"
+},
+{
+    "family_accession": "DF000000994",
+    "length": "354"
+},
+{
+    "family_accession": "DF000000995",
+    "length": "849"
+},
+{
+    "family_accession": "DF000000996",
+    "length": "290"
+},
+{
+    "family_accession": "DF000000997",
+    "length": "267"
+},
+{
+    "family_accession": "DF000000998",
+    "length": "305"
+},
+{
+    "family_accession": "DF000000999",
+    "length": "500"
+},
+{
+    "family_accession": "DF000001000",
+    "length": "1175"
+},
+{
+    "family_accession": "DF000001001",
+    "length": "365"
+},
+{
+    "family_accession": "DF000001002",
+    "length": "408"
+},
+{
+    "family_accession": "DF000001003",
+    "length": "467"
+},
+{
+    "family_accession": "DF000001004",
+    "length": "505"
+},
+{
+    "family_accession": "DF000001005",
+    "length": "653"
+},
+{
+    "family_accession": "DF000001006",
+    "length": "654"
+},
+{
+    "family_accession": "DF000001007",
+    "length": "627"
+},
+{
+    "family_accession": "DF000001008",
+    "length": "548"
+},
+{
+    "family_accession": "DF000001009",
+    "length": "569"
+},
+{
+    "family_accession": "DF000001010",
+    "length": "560"
+},
+{
+    "family_accession": "DF000001011",
+    "length": "1489"
+},
+{
+    "family_accession": "DF000001012",
+    "length": "579"
+},
+{
+    "family_accession": "DF000001013",
+    "length": "595"
+},
+{
+    "family_accession": "DF000001014",
+    "length": "549"
+},
+{
+    "family_accession": "DF000001015",
+    "length": "555"
+},
+{
+    "family_accession": "DF000001016",
+    "length": "1409"
+},
+{
+    "family_accession": "DF000001017",
+    "length": "411"
+},
+{
+    "family_accession": "DF000001018",
+    "length": "512"
+},
+{
+    "family_accession": "DF000001019",
+    "length": "444"
+},
+{
+    "family_accession": "DF000001020",
+    "length": "448"
+},
+{
+    "family_accession": "DF000001021",
+    "length": "1387"
+},
+{
+    "family_accession": "DF000001022",
+    "length": "595"
+},
+{
+    "family_accession": "DF000001023",
+    "length": "610"
+},
+{
+    "family_accession": "DF000001024",
+    "length": "672"
+},
+{
+    "family_accession": "DF000001025",
+    "length": "562"
+},
+{
+    "family_accession": "DF000001026",
+    "length": "542"
+},
+{
+    "family_accession": "DF000001027",
+    "length": "444"
+},
+{
+    "family_accession": "DF000001028",
+    "length": "453"
+},
+{
+    "family_accession": "DF000001029",
+    "length": "520"
+},
+{
+    "family_accession": "DF000001030",
+    "length": "515"
+},
+{
+    "family_accession": "DF000001031",
+    "length": "554"
+},
+{
+    "family_accession": "DF000001032",
+    "length": "556"
+},
+{
+    "family_accession": "DF000001033",
+    "length": "717"
+},
+{
+    "family_accession": "DF000001034",
+    "length": "397"
+},
+{
+    "family_accession": "DF000001035",
+    "length": "464"
+},
+{
+    "family_accession": "DF000001036",
+    "length": "414"
+},
+{
+    "family_accession": "DF000001037",
+    "length": "628"
+},
+{
+    "family_accession": "DF000001038",
+    "length": "663"
+},
+{
+    "family_accession": "DF000001039",
+    "length": "1735"
+},
+{
+    "family_accession": "DF000001040",
+    "length": "111"
+},
+{
+    "family_accession": "DF000001041",
+    "length": "428"
+},
+{
+    "family_accession": "DF000001042",
+    "length": "426"
+},
+{
+    "family_accession": "DF000001043",
+    "length": "432"
+},
+{
+    "family_accession": "DF000001044",
+    "length": "428"
+},
+{
+    "family_accession": "DF000001045",
+    "length": "396"
+},
+{
+    "family_accession": "DF000001046",
+    "length": "1651"
+},
+{
+    "family_accession": "DF000001047",
+    "length": "275"
+},
+{
+    "family_accession": "DF000001048",
+    "length": "342"
+},
+{
+    "family_accession": "DF000001049",
+    "length": "508"
+},
+{
+    "family_accession": "DF000001050",
+    "length": "667"
+},
+{
+    "family_accession": "DF000001051",
+    "length": "7122"
+},
+{
+    "family_accession": "DF000001052",
+    "length": "7756"
+},
+{
+    "family_accession": "DF000001053",
+    "length": "8270"
+},
+{
+    "family_accession": "DF000001054",
+    "length": "594"
+},
+{
+    "family_accession": "DF000001055",
+    "length": "4102"
+},
+{
+    "family_accession": "DF000001056",
+    "length": "503"
+},
+{
+    "family_accession": "DF000001057",
+    "length": "1817"
+},
+{
+    "family_accession": "DF000001058",
+    "length": "3246"
+},
+{
+    "family_accession": "DF000001059",
+    "length": "1733"
+},
+{
+    "family_accession": "DF000001060",
+    "length": "1255"
+},
+{
+    "family_accession": "DF000001061",
+    "length": "2048"
+},
+{
+    "family_accession": "DF000001062",
+    "length": "84"
+},
+{
+    "family_accession": "DF000001063",
+    "length": "423"
+},
+{
+    "family_accession": "DF000001064",
+    "length": "319"
+},
+{
+    "family_accession": "DF000001065",
+    "length": "1563"
+},
+{
+    "family_accession": "DF000001066",
+    "length": "1869"
+},
+{
+    "family_accession": "DF000001067",
+    "length": "1387"
+},
+{
+    "family_accession": "DF000001068",
+    "length": "1383"
+},
+{
+    "family_accession": "DF000001069",
+    "length": "1384"
+},
+{
+    "family_accession": "DF000001070",
+    "length": "1386"
+},
+{
+    "family_accession": "DF000001071",
+    "length": "1382"
+},
+{
+    "family_accession": "DF000001072",
+    "length": "1375"
+},
+{
+    "family_accession": "DF000001073",
+    "length": "165"
+},
+{
+    "family_accession": "DF000001074",
+    "length": "108"
+},
+{
+    "family_accession": "DF000001075",
+    "length": "86"
+},
+{
+    "family_accession": "DF000001076",
+    "length": "188"
+},
+{
+    "family_accession": "DF000001077",
+    "length": "217"
+},
+{
+    "family_accession": "DF000001078",
+    "length": "145"
+},
+{
+    "family_accession": "DF000001079",
+    "length": "116"
+},
+{
+    "family_accession": "DF000001080",
+    "length": "107"
+},
+{
+    "family_accession": "DF000001081",
+    "length": "63"
+},
+{
+    "family_accession": "DF000001082",
+    "length": "136"
+},
+{
+    "family_accession": "DF000001083",
+    "length": "1386"
+},
+{
+    "family_accession": "DF000001085",
+    "length": "438"
+},
+{
+    "family_accession": "DF000001086",
+    "length": "512"
+},
+{
+    "family_accession": "DF000001087",
+    "length": "371"
+},
+{
+    "family_accession": "DF000001089",
+    "length": "344"
+},
+{
+    "family_accession": "DF000001090",
+    "length": "346"
+},
+{
+    "family_accession": "DF000001091",
+    "length": "261"
+},
+{
+    "family_accession": "DF000001092",
+    "length": "430"
+},
+{
+    "family_accession": "DF000001093",
+    "length": "548"
+},
+{
+    "family_accession": "DF000001094",
+    "length": "378"
+},
+{
+    "family_accession": "DF000001095",
+    "length": "585"
+},
+{
+    "family_accession": "DF000001096",
+    "length": "769"
+},
+{
+    "family_accession": "DF000001097",
+    "length": "327"
+},
+{
+    "family_accession": "DF000001098",
+    "length": "334"
+},
+{
+    "family_accession": "DF000001099",
+    "length": "373"
+},
+{
+    "family_accession": "DF000001100",
+    "length": "272"
+},
+{
+    "family_accession": "DF000001101",
+    "length": "398"
+},
+{
+    "family_accession": "DF000001103",
+    "length": "795"
+},
+{
+    "family_accession": "DF000001104",
+    "length": "572"
+},
+{
+    "family_accession": "DF000001105",
+    "length": "568"
+},
+{
+    "family_accession": "DF000001106",
+    "length": "439"
+},
+{
+    "family_accession": "DF000001107",
+    "length": "453"
+},
+{
+    "family_accession": "DF000001108",
+    "length": "478"
+},
+{
+    "family_accession": "DF000001109",
+    "length": "435"
+},
+{
+    "family_accession": "DF000001110",
+    "length": "437"
+},
+{
+    "family_accession": "DF000001111",
+    "length": "1113"
+},
+{
+    "family_accession": "DF000001112",
+    "length": "1358"
+},
+{
+    "family_accession": "DF000001113",
+    "length": "645"
+},
+{
+    "family_accession": "DF000001116",
+    "length": "185"
+},
+{
+    "family_accession": "DF000001117",
+    "length": "1078"
+},
+{
+    "family_accession": "DF000001118",
+    "length": "1072"
+},
+{
+    "family_accession": "DF000001119",
+    "length": "267"
+},
+{
+    "family_accession": "DF000001120",
+    "length": "250"
+},
+{
+    "family_accession": "DF000001121",
+    "length": "296"
+},
+{
+    "family_accession": "DF000001122",
+    "length": "936"
+},
+{
+    "family_accession": "DF000001123",
+    "length": "4079"
+},
+{
+    "family_accession": "DF000001124",
+    "length": "3592"
+},
+{
+    "family_accession": "DF000001125",
+    "length": "2624"
+},
+{
+    "family_accession": "DF000001126",
+    "length": "374"
+},
+{
+    "family_accession": "DF000001127",
+    "length": "390"
+},
+{
+    "family_accession": "DF000001128",
+    "length": "680"
+},
+{
+    "family_accession": "DF000001129",
+    "length": "624"
+},
+{
+    "family_accession": "DF000001130",
+    "length": "591"
+},
+{
+    "family_accession": "DF000001131",
+    "length": "489"
+},
+{
+    "family_accession": "DF000001132",
+    "length": "1371"
+},
+{
+    "family_accession": "DF000001133",
+    "length": "465"
+},
+{
+    "family_accession": "DF000001134",
+    "length": "457"
+},
+{
+    "family_accession": "DF000001135",
+    "length": "3573"
+},
+{
+    "family_accession": "DF000001136",
+    "length": "1173"
+},
+{
+    "family_accession": "DF000001137",
+    "length": "2110"
+},
+{
+    "family_accession": "DF000001138",
+    "length": "207"
+},
+{
+    "family_accession": "DF000001139",
+    "length": "154"
+},
+{
+    "family_accession": "DF000001140",
+    "length": "393"
+},
+{
+    "family_accession": "DF000001141",
+    "length": "1408"
+},
+{
+    "family_accession": "DF000001142",
+    "length": "236"
+},
+{
+    "family_accession": "DF000001143",
+    "length": "159"
+},
+{
+    "family_accession": "DF000001144",
+    "length": "555"
+},
+{
+    "family_accession": "DF000001145",
+    "length": "311"
+},
+{
+    "family_accession": "DF000001146",
+    "length": "1018"
+},
+{
+    "family_accession": "DF000001147",
+    "length": "550"
+},
+{
+    "family_accession": "DF000001148",
+    "length": "189"
+},
+{
+    "family_accession": "DF000001149",
+    "length": "3812"
+},
+{
+    "family_accession": "DF000001150",
+    "length": "162"
+},
+{
+    "family_accession": "DF000001151",
+    "length": "426"
+},
+{
+    "family_accession": "DF000001152",
+    "length": "1263"
+},
+{
+    "family_accession": "DF000001153",
+    "length": "517"
+},
+{
+    "family_accession": "DF000001154",
+    "length": "311"
+},
+{
+    "family_accession": "DF000001155",
+    "length": "501"
+},
+{
+    "family_accession": "DF000001156",
+    "length": "182"
+},
+{
+    "family_accession": "DF000001157",
+    "length": "128"
+},
+{
+    "family_accession": "DF000001158",
+    "length": "659"
+},
+{
+    "family_accession": "DF000001159",
+    "length": "169"
+},
+{
+    "family_accession": "DF000001160",
+    "length": "391"
+},
+{
+    "family_accession": "DF000001161",
+    "length": "314"
+},
+{
+    "family_accession": "DF000001162",
+    "length": "891"
+},
+{
+    "family_accession": "DF000001163",
+    "length": "324"
+},
+{
+    "family_accession": "DF000001164",
+    "length": "857"
+},
+{
+    "family_accession": "DF000001165",
+    "length": "325"
+},
+{
+    "family_accession": "DF000001166",
+    "length": "197"
+},
+{
+    "family_accession": "DF000001167",
+    "length": "375"
+},
+{
+    "family_accession": "DF000001168",
+    "length": "335"
+},
+{
+    "family_accession": "DF000001170",
+    "length": "588"
+},
+{
+    "family_accession": "DF000001171",
+    "length": "938"
+},
+{
+    "family_accession": "DF000001172",
+    "length": "2747"
+},
+{
+    "family_accession": "DF000001173",
+    "length": "157"
+},
+{
+    "family_accession": "DF000001174",
+    "length": "310"
+},
+{
+    "family_accession": "DF000001175",
+    "length": "486"
+},
+{
+    "family_accession": "DF000001176",
+    "length": "1194"
+},
+{
+    "family_accession": "DF000001177",
+    "length": "1552"
+},
+{
+    "family_accession": "DF000001178",
+    "length": "122"
+},
+{
+    "family_accession": "DF000001179",
+    "length": "231"
+},
+{
+    "family_accession": "DF000001180",
+    "length": "443"
+},
+{
+    "family_accession": "DF000001181",
+    "length": "222"
+},
+{
+    "family_accession": "DF000001183",
+    "length": "901"
+},
+{
+    "family_accession": "DF000001184",
+    "length": "1289"
+},
+{
+    "family_accession": "DF000001185",
+    "length": "564"
+},
+{
+    "family_accession": "DF000001186",
+    "length": "250"
+},
+{
+    "family_accession": "DF000001187",
+    "length": "780"
+},
+{
+    "family_accession": "DF000001188",
+    "length": "142"
+},
+{
+    "family_accession": "DF000001189",
+    "length": "300"
+},
+{
+    "family_accession": "DF000001190",
+    "length": "522"
+},
+{
+    "family_accession": "DF000001191",
+    "length": "773"
+},
+{
+    "family_accession": "DF000001192",
+    "length": "406"
+},
+{
+    "family_accession": "DF000001193",
+    "length": "791"
+},
+{
+    "family_accession": "DF000001194",
+    "length": "258"
+},
+{
+    "family_accession": "DF000001195",
+    "length": "132"
+},
+{
+    "family_accession": "DF000001196",
+    "length": "640"
+},
+{
+    "family_accession": "DF000001197",
+    "length": "311"
+},
+{
+    "family_accession": "DF000001198",
+    "length": "1446"
+},
+{
+    "family_accession": "DF000001199",
+    "length": "1124"
+},
+{
+    "family_accession": "DF000001200",
+    "length": "185"
+},
+{
+    "family_accession": "DF000001201",
+    "length": "183"
+},
+{
+    "family_accession": "DF000001202",
+    "length": "709"
+},
+{
+    "family_accession": "DF000001203",
+    "length": "178"
+},
+{
+    "family_accession": "DF000001204",
+    "length": "152"
+},
+{
+    "family_accession": "DF000001205",
+    "length": "442"
+},
+{
+    "family_accession": "DF000001206",
+    "length": "940"
+},
+{
+    "family_accession": "DF000001207",
+    "length": "84"
+},
+{
+    "family_accession": "DF000001208",
+    "length": "1079"
+},
+{
+    "family_accession": "DF000001209",
+    "length": "1038"
+},
+{
+    "family_accession": "DF000001210",
+    "length": "156"
+},
+{
+    "family_accession": "DF000001211",
+    "length": "270"
+},
+{
+    "family_accession": "DF000001212",
+    "length": "133"
+},
+{
+    "family_accession": "DF000001213",
+    "length": "242"
+},
+{
+    "family_accession": "DF000001214",
+    "length": "484"
+},
+{
+    "family_accession": "DF000001215",
+    "length": "516"
+},
+{
+    "family_accession": "DF000001216",
+    "length": "284"
+},
+{
+    "family_accession": "DF000001217",
+    "length": "866"
+},
+{
+    "family_accession": "DF000001218",
+    "length": "253"
+},
+{
+    "family_accession": "DF000001219",
+    "length": "173"
+},
+{
+    "family_accession": "DF000001220",
+    "length": "392"
+},
+{
+    "family_accession": "DF000001221",
+    "length": "461"
+},
+{
+    "family_accession": "DF000001222",
+    "length": "179"
+},
+{
+    "family_accession": "DF000001223",
+    "length": "459"
+},
+{
+    "family_accession": "DF000001224",
+    "length": "579"
+},
+{
+    "family_accession": "DF000001225",
+    "length": "320"
+},
+{
+    "family_accession": "DF000001226",
+    "length": "111"
+},
+{
+    "family_accession": "DF000001227",
+    "length": "392"
+},
+{
+    "family_accession": "DF000001228",
+    "length": "744"
+},
+{
+    "family_accession": "DF000001229",
+    "length": "382"
+},
+{
+    "family_accession": "DF000001231",
+    "length": "378"
+},
+{
+    "family_accession": "DF000001232",
+    "length": "165"
+},
+{
+    "family_accession": "DF000001233",
+    "length": "790"
+},
+{
+    "family_accession": "DF000001234",
+    "length": "593"
+},
+{
+    "family_accession": "DF000001235",
+    "length": "371"
+},
+{
+    "family_accession": "DF000001236",
+    "length": "164"
+},
+{
+    "family_accession": "DF000001237",
+    "length": "340"
+},
+{
+    "family_accession": "DF000001238",
+    "length": "352"
+},
+{
+    "family_accession": "DF000001239",
+    "length": "181"
+},
+{
+    "family_accession": "DF000001240",
+    "length": "310"
+},
+{
+    "family_accession": "DF000001241",
+    "length": "376"
+},
+{
+    "family_accession": "DF000001242",
+    "length": "487"
+},
+{
+    "family_accession": "DF000001243",
+    "length": "760"
+},
+{
+    "family_accession": "DF000001244",
+    "length": "554"
+},
+{
+    "family_accession": "DF000001245",
+    "length": "362"
+},
+{
+    "family_accession": "DF000001246",
+    "length": "138"
+},
+{
+    "family_accession": "DF000001247",
+    "length": "758"
+},
+{
+    "family_accession": "DF000001248",
+    "length": "154"
+},
+{
+    "family_accession": "DF000001249",
+    "length": "336"
+},
+{
+    "family_accession": "DF000001250",
+    "length": "372"
+},
+{
+    "family_accession": "DF000001251",
+    "length": "1574"
+},
+{
+    "family_accession": "DF000001252",
+    "length": "296"
+},
+{
+    "family_accession": "DF000001253",
+    "length": "230"
+},
+{
+    "family_accession": "DF000001254",
+    "length": "504"
+},
+{
+    "family_accession": "DF000001256",
+    "length": "1631"
+},
+{
+    "family_accession": "DF000001258",
+    "length": "1130"
+},
+{
+    "family_accession": "DF000001259",
+    "length": "602"
+},
+{
+    "family_accession": "DF000001260",
+    "length": "88"
+},
+{
+    "family_accession": "DF000001261",
+    "length": "362"
+},
+{
+    "family_accession": "DF000001262",
+    "length": "923"
+},
+{
+    "family_accession": "DF000001263",
+    "length": "289"
+},
+{
+    "family_accession": "DF000001264",
+    "length": "1699"
+},
+{
+    "family_accession": "DF000001265",
+    "length": "851"
+},
+{
+    "family_accession": "DF000001266",
+    "length": "636"
+},
+{
+    "family_accession": "DF000001267",
+    "length": "137"
+},
+{
+    "family_accession": "DF000001270",
+    "length": "407"
+},
+{
+    "family_accession": "DF000001272",
+    "length": "256"
+},
+{
+    "family_accession": "DF000001273",
+    "length": "371"
+},
+{
+    "family_accession": "DF000001274",
+    "length": "485"
+},
+{
+    "family_accession": "DF000001275",
+    "length": "2842"
+},
+{
+    "family_accession": "DF000001276",
+    "length": "3700"
+},
+{
+    "family_accession": "DF000001277",
+    "length": "144"
+},
+{
+    "family_accession": "DF000001278",
+    "length": "6118"
+},
+{
+    "family_accession": "DF000001279",
+    "length": "148"
+},
+{
+    "family_accession": "DF000001280",
+    "length": "361"
+},
+{
+    "family_accession": "DF000001281",
+    "length": "955"
+},
+{
+    "family_accession": "DF000001282",
+    "length": "398"
+},
+{
+    "family_accession": "DF000001283",
+    "length": "724"
+},
+{
+    "family_accession": "DF000001285",
+    "length": "239"
+},
+{
+    "family_accession": "DF000001286",
+    "length": "269"
+},
+{
+    "family_accession": "DF000001288",
+    "length": "174"
+},
+{
+    "family_accession": "DF000001289",
+    "length": "112"
+},
+{
+    "family_accession": "DF000001290",
+    "length": "1823"
+},
+{
+    "family_accession": "DF000001291",
+    "length": "724"
+},
+{
+    "family_accession": "DF000001292",
+    "length": "571"
+},
+{
+    "family_accession": "DF000001293",
+    "length": "3469"
+},
+{
+    "family_accession": "DF000001294",
+    "length": "371"
+},
+{
+    "family_accession": "DF000001295",
+    "length": "300"
+},
+{
+    "family_accession": "DF000001296",
+    "length": "983"
+},
+{
+    "family_accession": "DF000001297",
+    "length": "664"
+},
+{
+    "family_accession": "DF000001298",
+    "length": "449"
+},
+{
+    "family_accession": "DF000001299",
+    "length": "2259"
+},
+{
+    "family_accession": "DF000001300",
+    "length": "614"
+},
+{
+    "family_accession": "DF000001301",
+    "length": "271"
+},
+{
+    "family_accession": "DF000001303",
+    "length": "5374"
+},
+{
+    "family_accession": "DF000001304",
+    "length": "4166"
+},
+{
+    "family_accession": "DF000001305",
+    "length": "746"
+},
+{
+    "family_accession": "DF000001307",
+    "length": "189"
+},
+{
+    "family_accession": "DF000001308",
+    "length": "310"
+},
+{
+    "family_accession": "DF000001309",
+    "length": "647"
+},
+{
+    "family_accession": "DF000001310",
+    "length": "7603"
+},
+{
+    "family_accession": "DF000001311",
+    "length": "257"
+},
+{
+    "family_accession": "DF000001312",
+    "length": "291"
+},
+{
+    "family_accession": "DF000001313",
+    "length": "3051"
+},
+{
+    "family_accession": "DF000001314",
+    "length": "192"
+},
+{
+    "family_accession": "DF000001317",
+    "length": "311"
+},
+{
+    "family_accession": "DF000001318",
+    "length": "311"
+},
+{
+    "family_accession": "DF000001321",
+    "length": "311"
+},
+{
+    "family_accession": "DF000001323",
+    "length": "980"
+},
+{
+    "family_accession": "DF000001325",
+    "length": "3605"
+},
+{
+    "family_accession": "DF000001326",
+    "length": "4288"
+},
+{
+    "family_accession": "DF000001327",
+    "length": "3277"
+},
+{
+    "family_accession": "DF000001328",
+    "length": "1461"
+},
+{
+    "family_accession": "DF000001331",
+    "length": "1241"
+},
+{
+    "family_accession": "DF000001333",
+    "length": "682"
+},
+{
+    "family_accession": "DF000001334",
+    "length": "1235"
+},
+{
+    "family_accession": "DF000001335",
+    "length": "3540"
+},
+{
+    "family_accession": "DF000001336",
+    "length": "813"
+},
+{
+    "family_accession": "DF000001337",
+    "length": "425"
+},
+{
+    "family_accession": "DF000001423",
+    "length": "121"
+},
+{
+    "family_accession": "DF000001428",
+    "length": "2432"
+},
+{
+    "family_accession": "DF000001474",
+    "length": "777"
+},
+{
+    "family_accession": "DF000001731",
+    "length": "1444"
+},
+{
+    "family_accession": "DF000001732",
+    "length": "2613"
+},
+{
+    "family_accession": "DF000002200",
+    "length": "312"
+},
+{
+    "family_accession": "DF000003796",
+    "length": "1359"
+},
+{
+    "family_accession": "DF000004193",
+    "length": "1319"
+},
+{
+    "family_accession": "DF000006271",
+    "length": "5475"
+},
+{
+    "family_accession": "DF000006272",
+    "length": "5479"
+},
+{
+    "family_accession": "DF000006273",
+    "length": "5492"
+},
+{
+    "family_accession": "DF000289982",
+    "length": "49"
+},
+{
+    "family_accession": "DF000289983",
+    "length": "34"
+},
+{
+    "family_accession": "DF000289984",
+    "length": "51"
+},
+{
+    "family_accession": "DF000289985",
+    "length": "101"
+},
+{
+    "family_accession": "DF000289986",
+    "length": "59"
+},
+{
+    "family_accession": "DF000289987",
+    "length": "859"
+},
+{
+    "family_accession": "DF000289988",
+    "length": "557"
+},
+{
+    "family_accession": "DF000289989",
+    "length": "147"
+},
+{
+    "family_accession": "DF000289990",
+    "length": "913"
+},
+{
+    "family_accession": "DF000289991",
+    "length": "648"
+},
+{
+    "family_accession": "DF000289992",
+    "length": "1300"
+},
+{
+    "family_accession": "DF000289993",
+    "length": "5024"
+},
+{
+    "family_accession": "DF000289994",
+    "length": "117"
+},
+{
+    "family_accession": "DF000289995",
+    "length": "1447"
+},
+{
+    "family_accession": "DF000289996",
+    "length": "503"
+},
+{
+    "family_accession": "DF000289997",
+    "length": "616"
+},
+{
+    "family_accession": "DF000289998",
+    "length": "2309"
+},
+{
+    "family_accession": "DF000289999",
+    "length": "86"
+},
+{
+    "family_accession": "DF000290000",
+    "length": "264"
+},
+{
+    "family_accession": "DF000290001",
+    "length": "2162"
+},
+{
+    "family_accession": "DF000290002",
+    "length": "482"
+},
+{
+    "family_accession": "DF000290003",
+    "length": "52"
+},
+{
+    "family_accession": "DF000290004",
+    "length": "4662"
+},
+{
+    "family_accession": "DF000290005",
+    "length": "84"
+},
+{
+    "family_accession": "DF000290006",
+    "length": "102"
+},
+{
+    "family_accession": "DF000290007",
+    "length": "2495"
+},
+{
+    "family_accession": "DF000290008",
+    "length": "80"
+},
+{
+    "family_accession": "DF000290009",
+    "length": "54"
+},
+{
+    "family_accession": "DF000290010",
+    "length": "5898"
+},
+{
+    "family_accession": "DF000290011",
+    "length": "4742"
+},
+{
+    "family_accession": "DF000290012",
+    "length": "61"
+},
+{
+    "family_accession": "DF000290013",
+    "length": "16306"
+},
+{
+    "family_accession": "DF000290014",
+    "length": "55"
+},
+{
+    "family_accession": "DF000290015",
+    "length": "307"
+},
+{
+    "family_accession": "DF000290016",
+    "length": "37"
+},
+{
+    "family_accession": "DF000290017",
+    "length": "779"
+},
+{
+    "family_accession": "DF000290018",
+    "length": "1214"
+},
+{
+    "family_accession": "DF000290019",
+    "length": "1263"
+},
+{
+    "family_accession": "DF000290020",
+    "length": "1056"
+},
+{
+    "family_accession": "DF000290021",
+    "length": "2051"
+},
+{
+    "family_accession": "DF000290022",
+    "length": "64"
+},
+{
+    "family_accession": "DF003440068",
+    "length": "454"
+},
+{
+    "family_accession": "DF003440069",
+    "length": "470"
+},
+{
+    "family_accession": "DF003440070",
+    "length": "448"
+},
+{
+    "family_accession": "DF003440071",
+    "length": "553"
+},
+{
+    "family_accession": "DF003440072",
+    "length": "390"
+},
+{
+    "family_accession": "DF003440073",
+    "length": "452"
+},
+{
+    "family_accession": "DF003440074",
+    "length": "498"
+},
+{
+    "family_accession": "DF003440075",
+    "length": "484"
+},
+{
+    "family_accession": "DF003440076",
+    "length": "391"
+},
+{
+    "family_accession": "DF003440077",
+    "length": "412"
+},
+{
+    "family_accession": "DF003440078",
+    "length": "414"
+},
+{
+    "family_accession": "DF003440079",
+    "length": "434"
+},
+{
+    "family_accession": "DF003440080",
+    "length": "453"
+},
+{
+    "family_accession": "DF003440081",
+    "length": "451"
+},
+{
+    "family_accession": "DF003440082",
+    "length": "441"
+},
+{
+    "family_accession": "DF003576557",
+    "length": "5662"
+},
+{
+    "family_accession": "DF003576558",
+    "length": "5426"
+},
+{
+    "family_accession": "DF003576559",
+    "length": "401"
+},
+{
+    "family_accession": "DF003576560",
+    "length": "7612"
+},
+{
+    "family_accession": "DF003576561",
+    "length": "4362"
+},
+{
+    "family_accession": "DF003576562",
+    "length": "6397"
+},
+{
+    "family_accession": "DF003576563",
+    "length": "7111"
+},
+{
+    "family_accession": "DF003576564",
+    "length": "5254"
+},
+{
+    "family_accession": "DF003576565",
+    "length": "7990"
+},
+{
+    "family_accession": "DF003576566",
+    "length": "681"
+},
+{
+    "family_accession": "DF003576567",
+    "length": "6893"
+},
+{
+    "family_accession": "DF003576568",
+    "length": "584"
+},
+{
+    "family_accession": "DF003576569",
+    "length": "409"
+},
+{
+    "family_accession": "DF003576570",
+    "length": "566"
+},
+{
+    "family_accession": "DF003576571",
+    "length": "5415"
+},
+{
+    "family_accession": "DF003576572",
+    "length": "784"
+},
+{
+    "family_accession": "DF003576573",
+    "length": "700"
+},
+{
+    "family_accession": "DF003576574",
+    "length": "5797"
+},
+{
+    "family_accession": "DF003576575",
+    "length": "4403"
+},
+{
+    "family_accession": "DF003576576",
+    "length": "1446"
+},
+{
+    "family_accession": "DF003576577",
+    "length": "1329"
+},
+{
+    "family_accession": "DF003576578",
+    "length": "1527"
+},
+{
+    "family_accession": "DF003576579",
+    "length": "1484"
+},
+{
+    "family_accession": "DF003576580",
+    "length": "1670"
+},
+{
+    "family_accession": "DF003576581",
+    "length": "1708"
+},
+{
+    "family_accession": "DF003576582",
+    "length": "636"
+},
+{
+    "family_accession": "DF003576583",
+    "length": "4397"
+},
+{
+    "family_accession": "DF003576584",
+    "length": "7085"
+},
+{
+    "family_accession": "DF003576585",
+    "length": "5391"
+},
+{
+    "family_accession": "DF003576586",
+    "length": "5412"
+},
+{
+    "family_accession": "DF003576587",
+    "length": "5520"
+},
+{
+    "family_accession": "DF003576588",
+    "length": "1578"
+},
+{
+    "family_accession": "DF003576590",
+    "length": "1705"
+},
+{
+    "family_accession": "DF003576591",
+    "length": "5680"
+}
+]
+
+}
+]

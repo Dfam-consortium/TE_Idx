@@ -30,7 +30,7 @@ pub enum Commands {
         #[arg(short, long, verbatim_doc_comment)]
         #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
         data_type: String,
-        /// Path to .bed.bgz file to be searched. Assumed to be CSV/TSV
+        /// Family name, corresponds to compressed TSV file prefix
         #[arg(long, short, verbatim_doc_comment)]
         fam: String,
         /// Column number to be searched. 1-indexed
@@ -158,8 +158,10 @@ fn main() {
             outfile,
             web_fmt,
         }) => {
-            bgzf_filter(assembly, data_type, fam, position, term, outfile, *web_fmt)
-                .expect("Filter Failed");
+            bgzf_filter(
+                assembly, data_type, fam, position, term, outfile, *web_fmt, None,
+            )
+            .expect("Filter Failed");
         }
         Some(Commands::BuildIdx {
             assembly,
@@ -180,7 +182,7 @@ fn main() {
             assembly,
             in_tsv,
             data_type,
-        }) => match prep_beds(assembly, in_tsv, data_type) {
+        }) => match prep_beds(assembly, in_tsv, data_type, None) {
             Ok(()) => println!("Bed Files Created - {}", data_type),
             Err(e) => panic!("{:?}", e),
         },
@@ -192,7 +194,7 @@ fn main() {
             end,
             family,
             nrph,
-        }) => idx_query(assembly, data_type, chrom, *start, *end, family, nrph)
+        }) => idx_query(assembly, data_type, chrom, *start, *end, family, nrph, None)
             .expect("Index Query Failed"),
         Some(Commands::JsonQuery {
             assembly,
@@ -200,7 +202,7 @@ fn main() {
             key,
             target,
         }) => {
-            let ans = json_query(assembly, data_type, key, target).expect("JSON Read Failed");
+            let ans = json_query(assembly, data_type, key, target, None).expect("JSON Read Failed");
             println!("{}", ans)
         }
         Some(Commands::ReadFamilyAssemblyAnnotations {
@@ -208,13 +210,13 @@ fn main() {
             assembly_id,
             nrph,
             outfile,
-        }) => read_family_assembly_annotations(id, assembly_id, nrph, outfile),
+        }) => read_family_assembly_annotations(id, assembly_id, nrph, outfile, None),
         Some(Commands::ProcessJSON {
             in_file,
             key,
             outfile,
         }) => process_json(in_file, key, outfile).expect("JSON Parse Failed"),
-        Some(Commands::PrepareAssembly { assembly }) => prepare_assembly(assembly)
+        Some(Commands::PrepareAssembly { assembly }) => prepare_assembly(assembly, None, None)
             .expect(format!("Assembly Prep for {} Failed", &assembly).as_str()),
         None => {}
     }
