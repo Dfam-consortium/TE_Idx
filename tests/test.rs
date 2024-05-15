@@ -1,12 +1,13 @@
+use noodles::bgzf;
 use std::fs::{read_dir, File};
 use std::io::{BufRead, BufReader};
 use std::path::Path;
+use te_idx::idx::{build_idx, prep_idx, search_idx};
 use te_idx::{
     bgzf_filter, idx_query, json_query, prep_beds, prepare_assembly, process_json,
     read_family_assembly_annotations,
 };
 use tempfile::{NamedTempFile, TempDir};
-use noodles::bgzf;
 
 pub const TEST_DIR: &'static str = "/home/agray/te_idx/tests";
 pub const TEST_DATA_DIR: &'static str = "/home/agray/te_idx/tests/data";
@@ -59,6 +60,7 @@ fn test_bgzf_filter_nrph() {
             let filter_count = BufReader::new(File::open(out_f).expect("Can't Open File"))
                 .lines()
                 .count();
+            // check that filtered file is smaller and contains expected lines
             assert_eq!(filter_count, 20317);
             assert_ne!(orig_count, filter_count);
         }
@@ -117,8 +119,10 @@ fn test_bgzf_filter_dl_fmt() {
                 .expect("No Line");
             let toplines = format!("{}\n{}", first, second);
             let target = "#sequence name\tmodel accession\tmodel name\tbit score\te-value\thmm start\thmm end\thmm length\tstrand\talignment start\talignment end\tenvelope start\tenvelope end\tsequence length\nchr1\tDF000000001\tMIR\t97.7\t1e-24\t6\t261\t262\t+\t100012864\t100013069\t100012853\t100013069\t248956422";
+            // check that header and first line are correct
             assert_eq!(toplines, target);
 
+            // check that filtered file is smaller and contains expected lines
             let filter_count = filter_lines.count();
             assert_ne!(orig_count, filter_count);
             assert_eq!(filter_count, 1007);
@@ -128,13 +132,50 @@ fn test_bgzf_filter_dl_fmt() {
 }
 
 #[test]
+fn test_build_idx() {
+    let data_dir = TEST_DATA_DIR;
+    let assembly = TEST_ASSEMBLY;
+    let data_type = &te_idx::MASKS_DIR.to_string();
+
+    let (filenames, bgz_dir, mut contig_index, index_file) =
+        match prep_idx(&format!("{}/{}", &data_dir, &assembly), data_type) {
+            Ok(res) => res,
+            Err(e) => panic!(
+                "Search Prep Failed, Assembly or Data Type May Not Exist - {:?}",
+                e
+            ),
+        };
+    assert_eq!(filenames.len(), 341);
+    assert_eq!(bgz_dir, "/home/agray/te_idx/tests/data/test_ex/masks");
+    assert_eq!(index_file, "/home/agray/te_idx/tests/data/test_ex/masks_idx.dat");
+
+    let working_directory = gen_working_dir();
+    let test_data_dir = working_directory.path().to_str().unwrap();
+    let test_index_file = format!("{}/masks_idx.dat", test_data_dir);
+
+    build_idx(&filenames, &bgz_dir, &mut contig_index, &test_index_file).expect("Indexing Failed");
+    
+    assert!(Path::new(&test_index_file).exists());
+
+    let _ = working_directory.close();
+}
+
+#[test]
 fn test_idx_query() {
-    assert_eq!(true, true)
+    let assembly = &TEST_ASSEMBLY.to_string();
+    let data_type = &te_idx::ASSEMBLY_DIR.to_string();
+    let chrom = &1.to_string();
+    let start = 10000;
+    let end = 100000;
+    let family: &Option<String> = &None;
+    let nrph = &false;
+
+    idx_query(assembly, data_type, chrom, start, end, family, nrph, None).expect("Index Query Failed");
 }
 
 #[test]
 fn test_json_query() {
-    assert_eq!(true, true)
+    panic!()
 }
 
 #[test]
@@ -154,6 +195,7 @@ fn test_prep_beds() {
                 &TEST_ASSEMBLY,
                 &data_type
             );
+            // check that new folder was created and contains expected number of files
             assert_eq!(true, Path::new(&mask_dir).exists());
             assert_eq!(
                 17,
@@ -172,15 +214,15 @@ fn test_prep_beds() {
 
 #[test]
 fn test_prepare_assembly() {
-    assert_eq!(true, true)
+    panic!()
 }
 
 #[test]
 fn test_process_json() {
-    assert_eq!(true, true)
+    panic!()
 }
 
 #[test]
 fn test_read_family_assembly_annotation() {
-    assert_eq!(true, true)
+    panic!()
 }

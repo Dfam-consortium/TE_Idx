@@ -9,7 +9,7 @@ use std::path::Path;
 use std::process::exit;
 use tempfile::tempfile;
 
-mod idx;
+pub mod idx;
 
 pub const DATA_DIR: &'static str = "/home/agray/te_idx/data"; // TODO replace with config
 pub const EXPORT_DIR: &'static str = "/home/agray/te_idx/exports"; // TODO replace with config
