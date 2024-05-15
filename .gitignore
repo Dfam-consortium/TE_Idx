@@ -1,3 +1,6 @@
 /target
 /data
 /exports
+/tests/.*
+/tests/data/test_ex/.*
+/tests/data/.*

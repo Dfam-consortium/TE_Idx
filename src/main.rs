@@ -194,8 +194,12 @@ fn main() {
             end,
             family,
             nrph,
-        }) => idx_query(assembly, data_type, chrom, *start, *end, family, nrph, None)
-            .expect("Index Query Failed"),
+        }) => {
+        let result = idx_query(assembly, data_type, chrom, *start, *end, family, nrph, None)
+            .expect("Index Query Failed");
+        println!("{}", result)
+
+        }
         Some(Commands::JsonQuery {
             assembly,
             data_type,

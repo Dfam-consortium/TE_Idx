@@ -40,7 +40,7 @@ trait Formattable {
 }
 
 #[derive(Serialize, Deserialize)]
-struct Annotation {
+pub struct Annotation {
     accession: String,
     seq_start: String,
     seq_end: String,
@@ -94,6 +94,7 @@ impl Formattable for Annotation {
             "bit_score": self.bit_score,
             "e_value": self.e_value,
             "sequence": self.sequence,
+            // "nrph_hit": self.nrph_hit
         })
     }
 }
@@ -111,6 +112,7 @@ fn build_annotation(fields: Vec<&str>) -> Box<dyn Formattable> {
         seq_start: fields[1].to_string(),
         seq_end: fields[2].to_string(),
         sequence: fields[0].to_string(),
+        // nrph_hit: fields[12].to_string()
     })
 }
 
@@ -514,7 +516,7 @@ pub fn idx_query(
     family: &Option<String>,
     nrph: &bool,
     data_directory: Option<&str>,
-) -> Result<()> {
+) -> Result<String> {
     let data_dir = data_directory.unwrap_or(DATA_DIR);
     let assembly_path: String = format!("{}/{}", &data_dir, &assembly);
     // confirm assembly_id and ensure that it accessable
@@ -576,13 +578,16 @@ pub fn idx_query(
         Err(e) => {
             eprintln!("Error Converting Results to JSON - {e}");
             exit(1);
-        }
+        },
         Ok(json_str) => {
-            stdout()
-                .write_all(json_str.as_bytes())
-                .expect("Unable to write line");
-            exit(0)
-        }
+            return Ok(json_str);
+        },
+        // Ok(json_str) => {
+        //     stdout()
+        //         .write_all(json_str.as_bytes())
+        //         .expect("Unable to write line");
+        //     exit(0)
+        // }
     }
 }
 

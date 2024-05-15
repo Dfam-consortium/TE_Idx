@@ -1,13 +1,14 @@
 use noodles::bgzf;
 use std::fs::{read_dir, File};
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, stdout, BufWriter, Write};
 use std::path::Path;
 use te_idx::idx::{build_idx, prep_idx, search_idx};
 use te_idx::{
     bgzf_filter, idx_query, json_query, prep_beds, prepare_assembly, process_json,
-    read_family_assembly_annotations,
+    read_family_assembly_annotations, MASKS_DIR, SEQUENCE_DIR, ASSEMBLY_DIR, Annotation
 };
 use tempfile::{NamedTempFile, TempDir};
+use serde_json::from_str;
 
 pub const TEST_DIR: &'static str = "/home/agray/te_idx/tests";
 pub const TEST_DATA_DIR: &'static str = "/home/agray/te_idx/tests/data";
@@ -25,7 +26,7 @@ fn test_bgzf_filter_nrph() {
     let f_name = out_f.path().to_str().unwrap();
 
     let assembly = &TEST_ASSEMBLY.to_string();
-    let data_type = &te_idx::ASSEMBLY_DIR.to_string();
+    let data_type = &ASSEMBLY_DIR.to_string();
     let fam = &"DF000000001".to_string();
     let position: usize = 13;
     let term: Option<String> = Some("1".to_string());
@@ -50,7 +51,7 @@ fn test_bgzf_filter_nrph() {
                     "{}/{}/{}/{}.bed.bgz",
                     TEST_DATA_DIR,
                     TEST_ASSEMBLY,
-                    te_idx::ASSEMBLY_DIR,
+                    ASSEMBLY_DIR,
                     fam
                 ))
                 .expect("Can't Open File"),
@@ -74,7 +75,7 @@ fn test_bgzf_filter_dl_fmt() {
     let f_name = out_f.path().to_str().unwrap();
 
     let assembly = &TEST_ASSEMBLY.to_string();
-    let data_type = &te_idx::ASSEMBLY_DIR.to_string();
+    let data_type = &ASSEMBLY_DIR.to_string();
     let fam = &"DF000000001".to_string();
     let position = 7;
     let term = Some("14.7".to_string());
@@ -99,7 +100,7 @@ fn test_bgzf_filter_dl_fmt() {
                     "{}/{}/{}/{}.bed.bgz",
                     TEST_DATA_DIR,
                     TEST_ASSEMBLY,
-                    te_idx::ASSEMBLY_DIR,
+                    ASSEMBLY_DIR,
                     fam
                 ))
                 .expect("Can't Open File"),
@@ -135,7 +136,7 @@ fn test_bgzf_filter_dl_fmt() {
 fn test_build_idx() {
     let data_dir = TEST_DATA_DIR;
     let assembly = TEST_ASSEMBLY;
-    let data_type = &te_idx::MASKS_DIR.to_string();
+    let data_type = &MASKS_DIR.to_string();
 
     let (filenames, bgz_dir, mut contig_index, index_file) =
         match prep_idx(&format!("{}/{}", &data_dir, &assembly), data_type) {
@@ -163,19 +164,39 @@ fn test_build_idx() {
 #[test]
 fn test_idx_query() {
     let assembly = &TEST_ASSEMBLY.to_string();
-    let data_type = &te_idx::ASSEMBLY_DIR.to_string();
+    let data_type = &ASSEMBLY_DIR.to_string();
     let chrom = &1.to_string();
     let start = 10000;
     let end = 100000;
     let family: &Option<String> = &None;
     let nrph = &false;
+    let data_directory = Some(TEST_DATA_DIR);
 
-    idx_query(assembly, data_type, chrom, start, end, family, nrph, None).expect("Index Query Failed");
+    let res1 = idx_query(assembly, data_type, chrom, start, end, family, nrph, data_directory).expect("Index Query Failed");
+    let vals1: Vec<Annotation> = from_str(&res1).expect("Cannot Deserialize");
+    assert_eq!(vals1.len(), 32);
+
+    let family = &Some("DF000000001".to_string());    
+    let res2 = idx_query(assembly, data_type, chrom, start, end, family, nrph, data_directory).expect("Index Query Failed");
+    let vals2: Vec<Annotation> = from_str(&res2).expect("Cannot Deserialize");
+    assert_eq!(vals2.len(), 15);
+
+    // TODO nrph test not working???
+    // nrph = &true;
+    // let res3 = idx_query(assembly, data_type, chrom, start, end, family, nrph, data_directory).expect("Index Query Failed");
+    // let vals3: Vec<Annotation> = from_str(&res3).expect("Cannot Deserialize");
+    // assert_eq!(vals3.len(), 32);
 }
 
 #[test]
 fn test_json_query() {
-    panic!()
+    let assembly = &TEST_ASSEMBLY.to_string();
+    let data_type = &SEQUENCE_DIR.to_string();
+    let key = &"1".to_string();
+    let target = &"length".to_string();
+    let data_directory = Some(TEST_DATA_DIR);
+    let ans = json_query(assembly, data_type, key, target, data_directory).expect("JSON Read Failed");
+    assert_eq!(ans , "248956422");
 }
 
 #[test]
@@ -184,7 +205,7 @@ fn test_prep_beds() {
 
     let assembly = &TEST_ASSEMBLY.to_string();
     let in_tsv = format!("{}/{}/test_ex-mask.tsv", TEST_EXPORT_DIR, TEST_ASSEMBLY);
-    let data_type = &te_idx::MASKS_DIR.to_string();
+    let data_type = &MASKS_DIR.to_string();
     let data_directory = working_directory.path().to_str();
 
     match prep_beds(assembly, &in_tsv, data_type, data_directory) {
@@ -207,7 +228,7 @@ fn test_prep_beds() {
                     .unwrap_or(0)
             );
         }
-        Err(_e) => panic!(),
+        Err(_e) =>  {let _ = working_directory.close();panic!()},
     }
     let _ = working_directory.close();
 }

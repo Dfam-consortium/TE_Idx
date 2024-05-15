@@ -858,7 +858,7 @@ pub fn search_idx(
     nrph: bool,
     prod: bool,
 ) -> Result<Vec<String>, Box<dyn Error>> {
-    log::set_logger(&MY_LOGGER).unwrap();
+    // log::set_logger(&MY_LOGGER).unwrap();
     if prod {
         log::set_max_level(LevelFilter::Warn);
     } else {
