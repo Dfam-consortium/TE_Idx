@@ -195,10 +195,9 @@ fn main() {
             family,
             nrph,
         }) => {
-        let result = idx_query(assembly, data_type, chrom, *start, *end, family, nrph, None)
-            .expect("Index Query Failed");
-        println!("{}", result)
-
+            let result = idx_query(assembly, data_type, chrom, *start, *end, family, nrph, None)
+                .expect("Index Query Failed");
+            println!("{}", result)
         }
         Some(Commands::JsonQuery {
             assembly,
@@ -214,7 +213,9 @@ fn main() {
             assembly_id,
             nrph,
             outfile,
-        }) => read_family_assembly_annotations(id, assembly_id, nrph, outfile, None),
+        }) => {
+            let _res = read_family_assembly_annotations(id, assembly_id, nrph, outfile, None);
+        }
         Some(Commands::ProcessJSON {
             in_file,
             key,

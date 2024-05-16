@@ -23,7 +23,7 @@ pub const MASKS_FILE: &'static str = "-mask.tsv";
 pub const MOD_LEN_DIR: &'static str = "model_lengths";
 pub const MOD_LEN_FILE: &'static str = "-model_lengths.json";
 pub const SEQUENCE_DIR: &'static str = "sequences";
-pub const SEQUENCE_FILE: &'static str = "-processed-sequences.json";
+pub const SEQUENCE_FILE: &'static str = "-sequences.json";
 
 const DATA_ELEMENTS: [&str; 5] = [
     ASSEMBLY_DIR,
@@ -211,7 +211,7 @@ pub fn bgzf_filter(
     };
 
     let in_str = read_to_string(&format!(
-        "{}/{}/{}/{}{}",
+        "{}/{}/{}/{}-processed{}",
         &data_dir, &assembly, &SEQUENCE_DIR, &assembly, &SEQUENCE_FILE
     ))
     .expect("Could Not Read String");
@@ -474,7 +474,7 @@ pub fn read_family_assembly_annotations(
     nrph: &bool,
     outfile: &Option<String>,
     data_directory: Option<&str>,
-) {
+) -> Result<()> {
     let data_dir = data_directory.unwrap_or(DATA_DIR);
     let assembly_path: String = format!("{}/{}", &data_dir, &assembly_id);
     if !Path::new(&assembly_path).exists() {
@@ -486,7 +486,6 @@ pub fn read_family_assembly_annotations(
         eprintln!("Family {} Not Found In Assembly {}", id, assembly_path);
         exit(1)
     }
-
     let position: usize = 13;
     let term: Option<String> = if *nrph { Some("1".to_string()) } else { None };
     match bgzf_filter(
@@ -497,9 +496,9 @@ pub fn read_family_assembly_annotations(
         &term,
         outfile,
         true,
-        None,
+        Some(data_dir),
     ) {
-        Ok(()) => exit(0),
+        Ok(()) => return Ok(()),
         Err(err) => {
             eprintln!("Error Filtering File: {} - {}", fam_file, err);
             exit(1)
@@ -578,16 +577,15 @@ pub fn idx_query(
         Err(e) => {
             eprintln!("Error Converting Results to JSON - {e}");
             exit(1);
-        },
+        }
         Ok(json_str) => {
             return Ok(json_str);
-        },
-        // Ok(json_str) => {
-        //     stdout()
-        //         .write_all(json_str.as_bytes())
-        //         .expect("Unable to write line");
-        //     exit(0)
-        // }
+        } // Ok(json_str) => {
+          //     stdout()
+          //         .write_all(json_str.as_bytes())
+          //         .expect("Unable to write line");
+          //     exit(0)
+          // }
     }
 }
 

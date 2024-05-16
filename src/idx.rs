@@ -13,7 +13,7 @@ use std::path::Path;
 use std::process::exit;
 use std::time::SystemTime;
 
-static MY_LOGGER: MyLogger = MyLogger;
+// static MY_LOGGER: MyLogger = MyLogger;
 
 struct MyLogger;
 
