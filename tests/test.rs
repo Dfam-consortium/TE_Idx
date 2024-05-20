@@ -5,9 +5,19 @@ use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use te_idx::idx::{build_idx, prep_idx};
 use te_idx::{
-    bgzf_filter, idx_query, json_query, prep_beds, prepare_assembly, process_json,
-    read_family_assembly_annotations, Annotation, ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR,
-    MOD_LEN_DIR, SEQUENCE_DIR,
+    bgzf_filter,
+    idx_query,
+    json_query,
+    prep_beds,
+    prepare_assembly,
+    process_json,
+    read_family_assembly_annotations,
+    Annotation,
+    ASSEMBLY_DIR,
+    MASKS_DIR,
+    MOD_LEN_DIR,
+    SEQUENCE_DIR,
+    // BENCHMARK_DIR
 };
 use tempfile::{NamedTempFile, TempDir};
 
@@ -216,8 +226,8 @@ fn test_idx_query_nrph() {
     let assembly = &TEST_ASSEMBLY.to_string();
     let data_type = &ASSEMBLY_DIR.to_string();
     let chrom = &1.to_string();
-    let start = 100012853;
-    let end = 100714779;
+    let start = 10000;
+    let end = 100000;
     let family: &Option<String> = &Some("DF000000001".to_string());
 
     let nrph = &true;
@@ -234,10 +244,8 @@ fn test_idx_query_nrph() {
         data_directory,
     )
     .expect("Index Query Failed");
-
     let vals: Vec<Annotation> = from_str(&res).expect("Cannot Deserialize");
-
-    assert_eq!(vals.len(), 10);
+    assert_eq!(vals.len(), 6);
 }
 
 #[test]

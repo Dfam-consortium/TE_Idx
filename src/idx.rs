@@ -14,6 +14,7 @@ use std::process::exit;
 use std::time::SystemTime;
 
 // static MY_LOGGER: MyLogger = MyLogger;
+pub const TILE_SIZE: u32 = 16384;
 
 struct MyLogger;
 
@@ -382,7 +383,7 @@ impl ContigIndex {
                 };
             }
             if *q_nrph == true {
-                match fields.last() {
+                match fields.get(12) {
                     Some(l) => match l {
                         &"1" => return true,
                         _ => return false,
@@ -743,7 +744,7 @@ pub fn prep_idx(
 ) -> Result<(Vec<String>, String, ContigIndex, String), Box<dyn Error>> {
     // Initial instantiation
     let contig_index = ContigIndex {
-        tile_size: 16384,
+        tile_size: TILE_SIZE,
         bgz_files: Vec::new(),
         contig_count: 0,
         contig_lookup: HashMap::new(),
