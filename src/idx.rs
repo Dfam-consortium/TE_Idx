@@ -382,8 +382,12 @@ impl ContigIndex {
                 };
             }
             if *q_nrph == true {
-                if fields.last().unwrap() != &"1" {
-                    return false;
+                match fields.last() {
+                    Some(l) => match l {
+                        &"1" => return true,
+                        _ => return false,
+                    },
+                    None => return false,
                 }
             }
             return true;

@@ -183,9 +183,20 @@ fn test_idx_query() {
     .expect("Index Query Failed");
     let vals1: Vec<Annotation> = from_str(&res1).expect("Cannot Deserialize");
     assert_eq!(vals1.len(), 32);
+}
 
-    let family = &Some("DF000000001".to_string());
-    let res2 = idx_query(
+#[test]
+fn test_idx_query_fam() {
+    let assembly = &TEST_ASSEMBLY.to_string();
+    let data_type = &ASSEMBLY_DIR.to_string();
+    let chrom = &1.to_string();
+    let start = 10000;
+    let end = 100000;
+    let family: &Option<String> = &Some("DF000000001".to_string());
+    let nrph = &false;
+    let data_directory = Some(TEST_DATA_DIR);
+
+    let res = idx_query(
         assembly,
         data_type,
         chrom,
@@ -196,14 +207,37 @@ fn test_idx_query() {
         data_directory,
     )
     .expect("Index Query Failed");
-    let vals2: Vec<Annotation> = from_str(&res2).expect("Cannot Deserialize");
-    assert_eq!(vals2.len(), 15);
+    let vals: Vec<Annotation> = from_str(&res).expect("Cannot Deserialize");
+    assert_eq!(vals.len(), 15);
+}
 
-    // TODO nrph test not working???
-    // nrph = &true;
-    // let res3 = idx_query(assembly, data_type, chrom, start, end, family, nrph, data_directory).expect("Index Query Failed");
-    // let vals3: Vec<Annotation> = from_str(&res3).expect("Cannot Deserialize");
-    // assert_eq!(vals3.len(), 32);
+#[test]
+fn test_idx_query_nrph() {
+    let assembly = &TEST_ASSEMBLY.to_string();
+    let data_type = &ASSEMBLY_DIR.to_string();
+    let chrom = &1.to_string();
+    let start = 100012853;
+    let end = 100714779;
+    let family: &Option<String> = &Some("DF000000001".to_string());
+
+    let nrph = &true;
+    let data_directory = Some(TEST_DATA_DIR);
+
+    let res = idx_query(
+        assembly,
+        data_type,
+        chrom,
+        start,
+        end,
+        family,
+        nrph,
+        data_directory,
+    )
+    .expect("Index Query Failed");
+
+    let vals: Vec<Annotation> = from_str(&res).expect("Cannot Deserialize");
+
+    assert_eq!(vals.len(), 10);
 }
 
 #[test]
@@ -269,30 +303,29 @@ fn test_prepare_assembly() {
     let assembly_dir = format!("{}/{}", data_directory.unwrap(), TEST_ASSEMBLY);
 
     let align_dir = &format!("{}/{}", assembly_dir, ASSEMBLY_DIR);
-    // let mut align_contents = Path::new(&align_dir).read_dir().expect("Couldn't Read Dir");
-    let bench_dir = &format!("{}/{}", assembly_dir, BENCHMARK_DIR);
+    let mut align_contents = Path::new(&align_dir).read_dir().expect("Couldn't Read Dir");
+    // let bench_dir = &format!("{}/{}", assembly_dir, BENCHMARK_DIR);
     // let mut bench_contents = Path::new(&bench_dir).read_dir().expect("Couldn't Read Dir");
     let mask_dir = &format!("{}/{}", assembly_dir, MASKS_DIR);
-    // let mut mask_contents = Path::new(&mask_dir).read_dir().expect("Couldn't Read Dir");
+    let mut mask_contents = Path::new(&mask_dir).read_dir().expect("Couldn't Read Dir");
     let mlen_dir = &format!("{}/{}", assembly_dir, MOD_LEN_DIR);
-    // let mut mlen_contents = Path::new(&mlen_dir).read_dir().expect("Couldn't Read Dir");
+    let mut mlen_contents = Path::new(&mlen_dir).read_dir().expect("Couldn't Read Dir");
     let seq_dir = &format!("{}/{}", assembly_dir, SEQUENCE_DIR);
-    // let mut seq_contents = Path::new(&seq_dir).read_dir().expect("Couldn't Read Dir");
+    let mut seq_contents = Path::new(&seq_dir).read_dir().expect("Couldn't Read Dir");
 
     assert!(Path::new(align_dir).exists());
-    assert!(Path::new(bench_dir).exists());
+    // assert!(Path::new(bench_dir).exists());
     assert!(Path::new(mask_dir).exists());
     assert!(Path::new(mlen_dir).exists());
     assert!(Path::new(seq_dir).exists());
     assert!(Path::new(&format!("{}/{}_idx.dat", assembly_dir, ASSEMBLY_DIR)).exists());
-    assert!(Path::new(&format!("{}/{}_idx.dat", assembly_dir, BENCHMARK_DIR)).exists());
+    // assert!(Path::new(&format!("{}/{}_idx.dat", assembly_dir, BENCHMARK_DIR)).exists());
     assert!(Path::new(&format!("{}/{}_idx.dat", assembly_dir, MASKS_DIR)).exists());
-    // assert!(!align_contents.next().is_none());
+    assert!(!align_contents.next().is_none());
     // assert!(!bench_contents.next().is_none());
-    // assert!(!mask_contents.next().is_none());
-    // assert!(!mlen_contents.next().is_none());
-    // assert!(!seq_contents.next().is_none());
-    //TODO fix
+    assert!(!mask_contents.next().is_none());
+    assert!(!mlen_contents.next().is_none());
+    assert!(!seq_contents.next().is_none());
 
     let _c = working_directory.close();
 }

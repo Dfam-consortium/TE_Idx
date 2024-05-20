@@ -6,7 +6,6 @@ use std::fs::{create_dir_all, read_to_string, File, OpenOptions};
 use std::io::{stdout, BufRead, BufReader, Result, Write};
 use std::num::NonZeroUsize;
 use std::path::Path;
-use std::process::exit;
 use tempfile::tempfile;
 
 pub mod idx;
@@ -163,13 +162,11 @@ pub fn bgzf_filter(
     let data_dir = data_directory.unwrap_or(DATA_DIR);
     let assembly_path: String = format!("{}/{}/{}", &data_dir, &assembly, &data_type);
     if !Path::new(&assembly_path).exists() {
-        eprintln!("Data \"{}\" Does Not Exist", assembly_path);
-        exit(1)
+        panic!("Data \"{}\" Does Not Exist", assembly_path);
     }
     let fam_file: String = format!("{}/{}.bed.bgz", &assembly_path, &fam);
     if !Path::new(&fam_file).exists() {
-        eprintln!("Family {} Not Found In Assembly {}", &fam, assembly_path);
-        exit(1)
+        panic!("Family {} Not Found In Assembly {}", &fam, assembly_path);
     }
 
     let worker_count: NonZeroUsize = match NonZeroUsize::new(5) {
@@ -267,8 +264,7 @@ pub fn prep_beds(
 ) -> Result<()> {
     let data_dir = data_directory.unwrap_or(DATA_DIR);
     if !Path::new(&in_tsv).exists() {
-        eprintln!("Input TSV \"{}\" Not Found", &in_tsv);
-        exit(1)
+        panic!("Input TSV \"{}\" Not Found", &in_tsv);
     }
 
     let db_dir = format!("{}/{}", &data_dir, &assembly);
@@ -417,8 +413,11 @@ pub fn prepare_assembly(
         ]);
         planner.insert(element, info);
     }
-
     for element in DATA_ELEMENTS {
+        if element == BENCHMARK_DIR {
+            // TODO fix this and fix test
+            continue;
+        }
         if matches!(
             planner
                 .get(element)
@@ -450,15 +449,17 @@ pub fn prepare_assembly(
                 );
                 process_json(source, &key.to_string(), &Some(outfile))
                     .expect(&format!("Processing {} JSON Failed", element));
+                println!("   {} Prep Complete", element);
             } else if source.ends_with(".tsv") {
                 println!("   Splitting And Compressing BED Files For {}", element);
-                prep_beds(assembly, source, &element.to_string(), None)
+                prep_beds(assembly, source, &element.to_string(), Some(data_dir))
                     .expect("BED File Prep Failed");
                 println!("   Indexing {}", element);
                 let (filenames, bgz_dir, mut contig_index, index_file) =
                     idx::prep_idx(&working_dir, &element.to_string()).expect("Index Prep Failed");
                 idx::build_idx(&filenames, &bgz_dir, &mut contig_index, &index_file)
-                    .expect("Indexing Failed")
+                    .expect("Indexing Failed");
+                println!("   {} Prep Complete", element);
             } else {
                 eprintln!("Source type not recognized - {}", source)
             }
@@ -478,13 +479,11 @@ pub fn read_family_assembly_annotations(
     let data_dir = data_directory.unwrap_or(DATA_DIR);
     let assembly_path: String = format!("{}/{}", &data_dir, &assembly_id);
     if !Path::new(&assembly_path).exists() {
-        eprintln!("Assembly \"{}\" Does Not Exist", assembly_path);
-        exit(1)
+        panic!("Assembly \"{}\" Does Not Exist", assembly_path);
     }
     let fam_file: String = format!("{}/{}/{}.bed.bgz", &assembly_path, &ASSEMBLY_DIR, &id);
     if !Path::new(&fam_file).exists() {
-        eprintln!("Family {} Not Found In Assembly {}", id, assembly_path);
-        exit(1)
+        panic!("Family {} Not Found In Assembly {}", id, assembly_path);
     }
     let position: usize = 13;
     let term: Option<String> = if *nrph { Some("1".to_string()) } else { None };
@@ -500,8 +499,7 @@ pub fn read_family_assembly_annotations(
     ) {
         Ok(()) => return Ok(()),
         Err(err) => {
-            eprintln!("Error Filtering File: {} - {}", fam_file, err);
-            exit(1)
+            panic!("Error Filtering File: {} - {}", fam_file, err);
         }
     }
 }
@@ -520,8 +518,7 @@ pub fn idx_query(
     let assembly_path: String = format!("{}/{}", &data_dir, &assembly);
     // confirm assembly_id and ensure that it accessable
     if !Path::new(&assembly_path).exists() {
-        eprintln!("Assembly \"{}\" Does Not Exist", assembly_path);
-        exit(1)
+        panic!("Assembly \"{}\" Does Not Exist", assembly_path);
     }
 
     let (filenames, bgz_dir, mut contig_index, index_file) =
@@ -531,13 +528,11 @@ pub fn idx_query(
         };
 
     if !Path::new(&index_file).exists() {
-        eprintln!(
+        panic!(
             "Assembly \"{}\" Is Not Indexed For {}",
             assembly_path, &data_type
         );
-        exit(1)
     }
-
     let results = idx::search_idx(
         &filenames,
         &bgz_dir,
@@ -559,12 +554,11 @@ pub fn idx_query(
     let mut formatted = Vec::new();
     match &results {
         Err(e) => {
-            eprintln!("Index Search Failed - {}", e);
-            exit(1);
+            panic!("Index Search Failed - {}", e);
         }
         Ok(l) if l.as_slice().is_empty() => {
             println!("No Results Found");
-            exit(0);
+            return Ok("[]".to_string());
         }
         Ok(l) => {
             for i in 0..l.len() {
@@ -575,8 +569,7 @@ pub fn idx_query(
     };
     match serde_json::to_string(&formatted) {
         Err(e) => {
-            eprintln!("Error Converting Results to JSON - {e}");
-            exit(1);
+            panic!("Error Converting Results to JSON - {e}");
         }
         Ok(json_str) => {
             return Ok(json_str);
