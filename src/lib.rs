@@ -35,54 +35,64 @@ pub const INDEX_DATA_TYPES: [&str; 3] = [ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR]
 pub const JSON_DATA_TYPES: [&str; 2] = [MOD_LEN_DIR, SEQUENCE_DIR];
 
 trait Formattable {
+    fn from_export_tsv(tsv_line: Vec<&str>) -> Self;
     fn to_json(&self) -> serde_json::Value;
+    fn to_bed_fmt(&self) -> Vec<&str>;
+    fn from_bed(bed_line: Vec<&str>) -> Self;
+    fn to_dl_fmt(&self, seq_name: &str, hmm_len: &str) -> Vec<&str>;
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Annotation {
-    accession: String,
-    seq_start: String,
-    seq_end: String,
-    strand: String,
-    ali_start: String,
-    ali_end: String,
-    model_start: String,
-    model_end: String,
-    bit_score: String,
-    e_value: String,
-    sequence: String,
-    // nrph_hit: String,
-    // divergence: String,
-    // family_name: String,
-    // cigar: String,
-    // caf: String,
+    seq_acc: String, // Dfamseq accession for sequences in assembly (1..)
+    fam_acc: String, // Dfam family accession ( e.g DF######### )
+    family_name: String, // Optional family name
+    bit_score: String, // Alignment bitscore
+    e_value: String, // Alignment evalue
+    bias: String, // God knows...(actually it's in the nhmmer manual)
+    model_start: String, // pHMM start position (1-based, fully closed)
+    model_end: String, // pHMM end position (1-based, fully closed)
+    strand: String, // '+' or '-'
+    ali_start: String, // nhmmer "envelope" start
+    ali_end: String, // nhmmer "envelope" end
+    seq_start: String, // Dfamseq sequence start
+    seq_end: String, // Dfamseq sequence end
+    seq_len: String, // The length of the Dfamseq
+    cigar: String, // CIGAR string of sequence alignment
+    kimura_div: String, // Kimura percent divergence ( only in full_region, not in benchmark_region )
+    nrph_hit: String, // NRPH (1 or 0) (only in full_region, not in benchmark_region)
+    caf: String, // Compressed Alignment Format (CAF) (only in full_region...)
 }
-
-#[derive(Serialize, Deserialize)]
-struct MaskHit {
-    sequence: String,
-    seq_start: String,
-    seq_end: String,
-    repeat_str: String,
-    repeat_length: String,
-}
-
-impl Formattable for MaskHit {
-    fn to_json(&self) -> serde_json::Value {
-        json!({
-            "sequence": self.sequence,
-            "seq_start": self.seq_start,
-            "seq_end": self.seq_end,
-            "repeat_str": self.repeat_str,
-            "repeat_length": self.repeat_length,
-        })
-    }
-}
-
 impl Formattable for Annotation {
+    fn from_export_tsv(tsv_line: Vec<&str>) -> Self {
+        Self {
+            seq_acc: tsv_line[0].to_string(),
+            fam_acc: tsv_line[1].to_string(),
+            family_name: tsv_line[2].to_string(),
+            bit_score: tsv_line[3].to_string(),
+            e_value: tsv_line[4].to_string(),
+            bias: tsv_line[5].to_string(),
+            model_start: tsv_line[6].to_string(),
+            model_end: tsv_line[7].to_string(),
+            strand: tsv_line[8].to_string(),
+            ali_start: tsv_line[9].to_string(),
+            ali_end: tsv_line[10].to_string(),
+            seq_start: tsv_line[11].to_string(),
+            seq_end: tsv_line[12].to_string(),
+            seq_len: tsv_line[13].to_string(),
+            cigar: tsv_line[14].to_string(),
+            kimura_div: tsv_line[15].to_string(),
+            nrph_hit: tsv_line[16].to_string(),
+            caf: tsv_line[17].to_string(),
+        }
+    }
+
     fn to_json(&self) -> serde_json::Value {
         json!({
-            "accession": self.accession,
+            "sequence": self.seq_acc,
+            "accession": self.fam_acc,
+            "bit_score": self.bit_score,
+            "e_value": self.e_value,
             "seq_start": self.seq_start,
             "seq_end": self.seq_end,
             "strand": self.strand,
@@ -92,61 +102,243 @@ impl Formattable for Annotation {
             "model_end": self.model_end,
             "bit_score": self.bit_score,
             "e_value": self.e_value,
-            "sequence": self.sequence,
-            // "nrph_hit": self.nrph_hit
         })
+    }
+
+    fn to_bed_fmt(&self) -> Vec<&str> {
+        let mut bed_line: Vec<&str> = Vec::new();
+        bed_line.push(&self.seq_acc);
+        bed_line.push(&self.seq_start);
+        bed_line.push(&self.seq_end);
+        bed_line.push(&self.fam_acc);
+        bed_line.push(&self.bit_score);
+        bed_line.push(&self.strand);
+        bed_line.push(&self.bias);
+        bed_line.push(&self.ali_start);
+        bed_line.push(&self.ali_end);
+        bed_line.push(&self.model_start);
+        bed_line.push(&self.model_end);
+        bed_line.push(&self.e_value);
+        bed_line.push(&self.nrph_hit);
+        bed_line.push(&self.kimura_div);
+        bed_line.push(&self.family_name);
+        bed_line.push(&self.seq_len);
+        bed_line.push(&self.cigar);
+        bed_line.push(&self.caf);
+        return bed_line;
+    }
+
+    fn from_bed(bed_line: Vec<&str>) -> Self {
+        Self {
+            seq_acc: bed_line[0].to_string(),
+            seq_start: bed_line[1].to_string(),
+            seq_end: bed_line[2].to_string(),
+            fam_acc: bed_line[3].to_string(),
+            bit_score: bed_line[4].to_string(),
+            strand: bed_line[5].to_string(),
+            bias: bed_line[6].to_string(),
+            ali_start: bed_line[7].to_string(),
+            ali_end: bed_line[8].to_string(),
+            model_start: bed_line[9].to_string(),
+            model_end: bed_line[10].to_string(),
+            e_value: bed_line[11].to_string(),
+            nrph_hit: bed_line[12].to_string(),
+            kimura_div: bed_line[13].to_string(),
+            family_name: bed_line[14].to_string(),
+            seq_len: bed_line[15].to_string(),
+            cigar: bed_line[16].to_string(),
+            caf: bed_line[17].to_string(),
+        }
+    }
+
+    fn to_dl_fmt(&self, seq_name: &str, hmm_len: &str) -> Vec<&str> {
+        let mut dl_line: Vec<&str> = Vec::new();
+        dl_line.push(seq_name);
+        dl_line.push(&self.fam_acc);
+        dl_line.push(&self.family_name);
+        dl_line.push(&self.bit_score);
+        dl_line.push(&self.e_value);
+        dl_line.push(&self.model_start);
+        dl_line.push(&self.model_end);
+        dl_line.push(hmm_len);
+        dl_line.push(&self.strand);
+        dl_line.push(&self.ali_start);
+        dl_line.push(&self.ali_end);
+        dl_line.push(&self.seq_start);
+        dl_line.push(&self.seq_end);
+        dl_line.push(&self.seq_len);
+        return dl_line;
     }
 }
 
-fn build_annotation(fields: Vec<&str>) -> Box<dyn Formattable> {
-    Box::new(Annotation {
-        accession: fields[3].to_string(),
-        bit_score: fields[4].to_string(),
-        e_value: fields[11].to_string(),
-        model_start: fields[9].to_string(),
-        model_end: fields[10].to_string(),
-        strand: fields[5].to_string(),
-        ali_start: fields[7].to_string(),
-        ali_end: fields[8].to_string(),
-        seq_start: fields[1].to_string(),
-        seq_end: fields[2].to_string(),
-        sequence: fields[0].to_string(),
-        // nrph_hit: fields[12].to_string()
-    })
+#[derive(Serialize, Deserialize)]
+pub struct BenchMarkAnnotation {
+    seq_acc: String, // Dfamseq accession for sequences in assembly (1..)
+    fam_acc: String, // Dfam family accession ( e.g DF######### )
+    family_name: String, // Optional family name
+    bit_score: String, // Alignment bitscore
+    e_value: String, // Alignment evalue
+    bias: String, // God knows...(actually it's in the nhmmer manual)
+    model_start: String, // pHMM start position (1-based, fully closed)
+    model_end: String, // pHMM end position (1-based, fully closed)
+    strand: String, // '+' or '-'
+    ali_start: String, // nhmmer "envelope" start
+    ali_end: String, // nhmmer "envelope" end
+    seq_start: String, // Dfamseq sequence start
+    seq_end: String, // Dfamseq sequence end
+    seq_len: String, // The length of the Dfamseq
+    cigar: String, // CIGAR string of sequence alignment
+    kimura_div: String, // Kimura percent divergence ( only in full_region, not in benchmark_region )
 }
 
-fn build_mask(fields: Vec<&str>) -> Box<dyn Formattable> {
-    Box::new(MaskHit {
-        sequence: fields[0].to_string(),
-        seq_start: fields[1].to_string(),
-        seq_end: fields[2].to_string(),
-        repeat_str: fields[3].to_string(),
-        repeat_length: fields[4].to_string(),
-    })
+impl Formattable for BenchMarkAnnotation {
+    fn from_export_tsv(tsv_line: Vec<&str>) -> Self {
+        Self {
+            seq_acc: tsv_line[0].to_string(),
+            fam_acc: tsv_line[1].to_string(),
+            family_name: tsv_line[2].to_string(),
+            bit_score: tsv_line[3].to_string(),
+            e_value: tsv_line[4].to_string(),
+            bias: tsv_line[5].to_string(),
+            model_start: tsv_line[6].to_string(),
+            model_end: tsv_line[7].to_string(),
+            strand: tsv_line[8].to_string(),
+            ali_start: tsv_line[9].to_string(),
+            ali_end: tsv_line[10].to_string(),
+            seq_start: tsv_line[11].to_string(),
+            seq_end: tsv_line[12].to_string(),
+            seq_len: tsv_line[13].to_string(),
+            cigar: tsv_line[14].to_string(),
+            kimura_div: tsv_line[15].to_string(),
+        }
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        json!({
+            "sequence": self.seq_acc,
+            "accession": self.fam_acc,
+            "bit_score": self.bit_score,
+            "e_value": self.e_value,
+            "seq_start": self.seq_start,
+            "seq_end": self.seq_end,
+            "strand": self.strand,
+            "ali_start": self.ali_start,
+            "ali_end": self.ali_end,
+            "model_start": self.model_start,
+            "model_end": self.model_end,
+            "bit_score": self.bit_score,
+            "e_value": self.e_value,
+        })
+    } 
+
+    fn to_bed_fmt(&self) -> Vec<&str> {
+        let mut bed_line: Vec<&str> = Vec::new();
+        bed_line.push(&self.seq_acc);
+        bed_line.push(&self.seq_start);
+        bed_line.push(&self.seq_end);
+        bed_line.push(&self.fam_acc);
+        bed_line.push(&self.bit_score);
+        bed_line.push(&self.strand);
+        bed_line.push(&self.bias);
+        bed_line.push(&self.ali_start);
+        bed_line.push(&self.ali_end);
+        bed_line.push(&self.model_start);
+        bed_line.push(&self.model_end);
+        bed_line.push(&self.e_value);
+        bed_line.push(&self.kimura_div);
+        bed_line.push(&self.family_name);
+        bed_line.push(&self.seq_len);
+        bed_line.push(&self.cigar);
+        return bed_line;
+    }
+
+    fn from_bed(bed_line: Vec<&str>) -> Self {
+        Self {
+            seq_acc: bed_line[0].to_string(),
+            seq_start: bed_line[1].to_string(),
+            seq_end: bed_line[2].to_string(),
+            fam_acc: bed_line[3].to_string(),
+            bit_score: bed_line[4].to_string(),
+            strand: bed_line[5].to_string(),
+            bias: bed_line[6].to_string(),
+            ali_start: bed_line[7].to_string(),
+            ali_end: bed_line[8].to_string(),
+            model_start: bed_line[9].to_string(),
+            model_end: bed_line[10].to_string(),
+            e_value: bed_line[11].to_string(),
+            kimura_div: bed_line[12].to_string(),
+            family_name: bed_line[13].to_string(),
+            seq_len: bed_line[14].to_string(),
+            cigar: bed_line[15].to_string(),
+        }
+    }
+
+    fn to_dl_fmt(&self, seq_name: &str, hmm_len: &str) -> Vec<&str> {
+        let mut dl_line: Vec<&str> = Vec::new();
+        dl_line.push(seq_name);
+        dl_line.push(&self.fam_acc);
+        dl_line.push(&self.family_name);
+        dl_line.push(&self.bit_score);
+        dl_line.push(&self.e_value);
+        dl_line.push(&self.model_start);
+        dl_line.push(&self.model_end);
+        dl_line.push(hmm_len);
+        dl_line.push(&self.strand);
+        dl_line.push(&self.ali_start);
+        dl_line.push(&self.ali_end);
+        dl_line.push(&self.seq_start);
+        dl_line.push(&self.seq_end);
+        dl_line.push(&self.seq_len);
+        return dl_line;
+    }
 }
 
-fn download_format<'a>(
-    fields: &Vec<&'a str>,
-    seq_name: &'a str,
-    hmm_len: &'a str,
-    seq_len: &'a str,
-) -> Vec<&'a str> {
-    let mut fmtted: Vec<&'a str> = Vec::with_capacity(fields.len());
-    fmtted.push(seq_name); // seq name
-    fmtted.push(fields[3]); // Family Accession
-    fmtted.push(fields[14]); // Family name
-    fmtted.push(fields[4]); // bit score
-    fmtted.push(fields[11]); // e-value
-    fmtted.push(fields[9]); // hmm start
-    fmtted.push(fields[10]); // hmm end
-    fmtted.push(hmm_len); // hmm length
-    fmtted.push(fields[5]); // strand
-    fmtted.push(fields[7]); // align start
-    fmtted.push(fields[8]); // align end
-    fmtted.push(fields[1]); // env start
-    fmtted.push(fields[2]); // env end
-    fmtted.push(seq_len); // sequence length
-    return fmtted;
+#[derive(Serialize, Deserialize)]
+struct MaskHit {
+    seq_acc: String,
+    seq_start: String,
+    seq_end: String,
+    repeat_str: String,
+    repeat_length: String,
+}
+
+impl Formattable for MaskHit {
+    fn from_export_tsv(tsv_line: Vec<&str>) -> Self {
+        Self {
+            seq_acc: tsv_line[0].to_string(),
+            seq_start: tsv_line[1].to_string(),
+            seq_end: tsv_line[2].to_string(),
+            repeat_str: tsv_line[3].to_string(),
+            repeat_length: tsv_line[4].to_string(),
+        }
+    }
+    fn to_json(&self) -> serde_json::Value {
+        json!({
+            "seq_acc": self.seq_acc,
+            "seq_start": self.seq_start,
+            "seq_end": self.seq_end,
+            "repeat_str": self.repeat_str,
+            "repeat_length": self.repeat_length,
+        })
+    }
+
+    fn to_bed_fmt(&self) -> Vec<&str> {
+        let mut bed_line: Vec<&str> = Vec::new();
+        bed_line.push(self.seq_acc.as_str());
+        bed_line.push(self.seq_start.as_str());
+        bed_line.push(self.seq_end.as_str());
+        bed_line.push(self.repeat_str.as_str());
+        bed_line.push(self.repeat_length.as_str());
+        return bed_line;
+    }
+
+    fn from_bed(bed_line: Vec<&str>) -> Self {
+        MaskHit::from_export_tsv(bed_line)
+    }
+
+    fn to_dl_fmt(&self, seq_name: &str, hmm_len: &str) -> Vec<&str> {
+        MaskHit::to_bed_fmt(&self)
+    }
 }
 
 pub fn bgzf_filter(
@@ -414,10 +606,6 @@ pub fn prepare_assembly(
         planner.insert(element, info);
     }
     for element in DATA_ELEMENTS {
-        if element == BENCHMARK_DIR {
-            // TODO fix this and fix test
-            continue;
-        }
         if matches!(
             planner
                 .get(element)
@@ -546,11 +734,11 @@ pub fn idx_query(
         true,
     );
 
-    let formatter = match data_type.as_str() {
-        ASSEMBLY_DIR => build_annotation,
-        MASKS_DIR => build_mask,
-        _ => panic!("Invalid formatter type"),
-    };
+    // let formatter = match data_type.as_str() {
+    //     ASSEMBLY_DIR => build_annotation,
+    //     MASKS_DIR => build_mask,
+    //     _ => panic!("Invalid formatter type"),
+    // };
     let mut formatted = Vec::new();
     match &results {
         Err(e) => {
@@ -563,7 +751,7 @@ pub fn idx_query(
         Ok(l) => {
             for i in 0..l.len() {
                 let fields = l[i].split_whitespace().collect::<Vec<&str>>();
-                formatted.push(formatter(fields).to_json());
+                formatted.push(Annotation::from_export_tsv(fields).to_json());
             }
         }
     };

@@ -5,19 +5,9 @@ use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use te_idx::idx::{build_idx, prep_idx};
 use te_idx::{
-    bgzf_filter,
-    idx_query,
-    json_query,
-    prep_beds,
-    prepare_assembly,
-    process_json,
-    read_family_assembly_annotations,
-    Annotation,
-    ASSEMBLY_DIR,
-    MASKS_DIR,
-    MOD_LEN_DIR,
-    SEQUENCE_DIR,
-    // BENCHMARK_DIR
+    bgzf_filter, idx_query, json_query, prep_beds, prepare_assembly, process_json,
+    read_family_assembly_annotations, Annotation, ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR,
+    MOD_LEN_DIR, SEQUENCE_DIR,
 };
 use tempfile::{NamedTempFile, TempDir};
 
