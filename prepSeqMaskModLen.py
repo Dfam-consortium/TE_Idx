@@ -2,6 +2,7 @@ import json
 import argparse
 import sys
 import os
+import csv
 
 # Import SQLAlchemy
 from sqlalchemy import create_engine
@@ -103,7 +104,7 @@ def main(*args):
     # Announce ourselves unless otherwise requested
     #
     if not args.quiet:
-        print("#\n# buildFullRegion.py " + df_ver.version_string + "\n#")
+        print("#\n# prepSeqAndModLen.py " + df_ver.version_string + "\n#")
         print("Parameters:")
         print(" - assembly: " + args.assembly)
         print(" - dfam release: " + args.dfam_release)
@@ -125,6 +126,8 @@ def main(*args):
     dateformat = "%y-%m-%d %H:%M:%S"
     allfams = [fam[1] for fam in dfv.getFamiliesInAssembly(df_session, args.assembly)]
     print("Families identified in " + args.assembly + " : " + str(len(allfams)))
+
+    mask_tsv_file = f"{args.assembly}-mask.tsv"
 
     mod_len_info = {
         "assembly": assembly.schema_name,
@@ -168,6 +171,15 @@ def main(*args):
         for seq in aseqs
     }
     seq_info["data"] = seq_data
+
+    print(f"Extracting Mask Data - {args.assembly}")
+    amasks = adb_session.query(adbORM.t_mask).all()
+
+    print(f"Saving Mask TSV - {mask_tsv_file}")
+    with open(mask_tsv_file, "w") as fp:
+        writer = csv.writer(fp, delimiter='\t', lineterminator='\n')
+        for mask in amasks:
+            writer.writerow(mask)
 
     print(f"Saving Sequence JSON - {seq_json_file}")
     with open(seq_json_file, "w") as fp:

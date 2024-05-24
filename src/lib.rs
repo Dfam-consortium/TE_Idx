@@ -466,21 +466,24 @@ pub fn bgzf_filter(
     } else {
         header = "#seq_id\tseq_start\tseq_end\tfamily_accession\thit_bit_score\tstrand\tbias\tali_start\tali_end\tmodel_start\tmodel_end\thit_evalue_score\tnrph_hit\tdivergence\t*family_name\tseq_len\t*cigar\t*caf";
     }
+
     writer
         .write_all(format!("{}\n", header).as_bytes())
         .expect("Unable to write line");
 
-    let hmm_len = match json_query(
-        &assembly,
-        &MOD_LEN_DIR.to_string(),
-        &fam.to_string(),
-        &"length".to_string(),
-        None,
-    ) {
-        Ok(len) => len,
-        Err(e) => panic!("{}", e),
-    };
-
+    let mut hmm_len = "0".to_string();
+    if dl_fmt {
+        hmm_len = match json_query(
+            &assembly,
+            &MOD_LEN_DIR.to_string(),
+            &fam.to_string(),
+            &"length".to_string(),
+            Some(data_dir),
+        ) {
+            Ok(len) => len,
+            Err(e) => panic!("{}", e),
+        };
+    }
     let in_str = read_to_string(&format!(
         "{}/{}/{}/{}{}",
         &data_dir, &assembly, &SEQUENCE_DIR, &assembly, &SEQUENCE_FILE
@@ -674,7 +677,7 @@ pub fn prepare_assembly(
         ]);
         planner.insert(element, info);
     }
-    println!("{:?}", planner);
+
     for element in DATA_ELEMENTS {
         if matches!(
             planner
