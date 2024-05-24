@@ -131,14 +131,14 @@ def main(*args):
         "version": assembly.version,
         "release_date": assembly.release_date.strftime(dateformat),
     }
-    mod_len_json_file = f"{args.assembly}-processed-model_lengths.json"
+    mod_len_json_file = f"{args.assembly}-model_lengths.json"
 
     seq_info = {
         "assembly": assembly.schema_name,
         "version": assembly.version,
         "release_date": assembly.release_date.strftime(dateformat),
     }
-    seq_json_file = f"{args.assembly}-processed-sequences.json"
+    seq_json_file = f"{args.assembly}-sequences.json"
 
     print(f"Extracting Model Length Data - {args.assembly}")
 

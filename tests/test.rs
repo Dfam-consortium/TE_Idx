@@ -5,7 +5,7 @@ use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use te_idx::idx::{build_idx, prep_idx};
 use te_idx::{
-    bgzf_filter, idx_query, json_query, prep_beds, prepare_assembly, process_json,
+    bgzf_filter, idx_query, json_query, prep_beds, prepare_assembly,
     read_family_assembly_annotations, Annotation, ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR,
     MOD_LEN_DIR, SEQUENCE_DIR,
 };
@@ -302,8 +302,8 @@ fn test_prepare_assembly() {
 
     let align_dir = &format!("{}/{}", assembly_dir, ASSEMBLY_DIR);
     let mut align_contents = Path::new(&align_dir).read_dir().expect("Couldn't Read Dir");
-    // let bench_dir = &format!("{}/{}", assembly_dir, BENCHMARK_DIR);
-    // let mut bench_contents = Path::new(&bench_dir).read_dir().expect("Couldn't Read Dir");
+    let bench_dir = &format!("{}/{}", assembly_dir, BENCHMARK_DIR);
+    let mut bench_contents = Path::new(&bench_dir).read_dir().expect("Couldn't Read Dir");
     let mask_dir = &format!("{}/{}", assembly_dir, MASKS_DIR);
     let mut mask_contents = Path::new(&mask_dir).read_dir().expect("Couldn't Read Dir");
     let mlen_dir = &format!("{}/{}", assembly_dir, MOD_LEN_DIR);
@@ -312,15 +312,15 @@ fn test_prepare_assembly() {
     let mut seq_contents = Path::new(&seq_dir).read_dir().expect("Couldn't Read Dir");
 
     assert!(Path::new(align_dir).exists());
-    // assert!(Path::new(bench_dir).exists());
+    assert!(Path::new(bench_dir).exists());
     assert!(Path::new(mask_dir).exists());
     assert!(Path::new(mlen_dir).exists());
     assert!(Path::new(seq_dir).exists());
     assert!(Path::new(&format!("{}/{}_idx.dat", assembly_dir, ASSEMBLY_DIR)).exists());
-    // assert!(Path::new(&format!("{}/{}_idx.dat", assembly_dir, BENCHMARK_DIR)).exists());
+    assert!(Path::new(&format!("{}/{}_idx.dat", assembly_dir, BENCHMARK_DIR)).exists());
     assert!(Path::new(&format!("{}/{}_idx.dat", assembly_dir, MASKS_DIR)).exists());
     assert!(!align_contents.next().is_none());
-    // assert!(!bench_contents.next().is_none());
+    assert!(!bench_contents.next().is_none());
     assert!(!mask_contents.next().is_none());
     assert!(!mlen_contents.next().is_none());
     assert!(!seq_contents.next().is_none());
@@ -328,27 +328,27 @@ fn test_prepare_assembly() {
     let _c = working_directory.close();
 }
 
-#[test]
-fn test_process_json() {
-    let out_f = NamedTempFile::new_in(TEST_DATA_DIR).expect("Couldn't Open Output File");
+// #[test]
+// fn test_process_json() {
+//     let out_f = NamedTempFile::new_in(TEST_DATA_DIR).expect("Couldn't Open Output File");
 
-    let in_file = &format!(
-        "{}/{}/{}-{}.json",
-        TEST_EXPORT_DIR, TEST_ASSEMBLY, TEST_ASSEMBLY, SEQUENCE_DIR
-    );
-    let key = &"accession".to_string();
-    let outfile = &Some(out_f.path().to_str().unwrap().to_string());
+//     let in_file = &format!(
+//         "{}/{}/{}-{}.json",
+//         TEST_EXPORT_DIR, TEST_ASSEMBLY, TEST_ASSEMBLY, SEQUENCE_DIR
+//     );
+//     let key = &"accession".to_string();
+//     let outfile = &Some(out_f.path().to_str().unwrap().to_string());
 
-    process_json(in_file, key, outfile).expect("JSON Parse Failed");
+//     process_json(in_file, key, outfile).expect("JSON Parse Failed");
 
-    let output = read_to_string(out_f).expect("Can't Read File");
-    let comparison = format!(
-        "{}/{}/{}/{}-processed-{}.json",
-        TEST_DATA_DIR, TEST_ASSEMBLY, SEQUENCE_DIR, TEST_ASSEMBLY, SEQUENCE_DIR
-    );
-    let target = read_to_string(comparison).expect("Can't Read File");
-    assert_eq!(output, target);
-}
+//     let output = read_to_string(out_f).expect("Can't Read File");
+//     let comparison = format!(
+//         "{}/{}/{}/{}-processed-{}.json",
+//         TEST_DATA_DIR, TEST_ASSEMBLY, SEQUENCE_DIR, TEST_ASSEMBLY, SEQUENCE_DIR
+//     );
+//     let target = read_to_string(comparison).expect("Can't Read File");
+//     assert_eq!(output, target);
+// }
 
 #[test]
 fn test_read_family_assembly_annotation() {

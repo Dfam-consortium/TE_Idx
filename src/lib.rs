@@ -2,7 +2,7 @@ use noodles::bgzf;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::HashMap;
-use std::fs::{create_dir_all, read_to_string, File, OpenOptions};
+use std::fs::{copy, create_dir_all, read_to_string, File, OpenOptions};
 use std::io::{stdout, BufRead, BufReader, Result, Write};
 use std::num::NonZeroUsize;
 use std::path::Path;
@@ -36,10 +36,11 @@ pub const JSON_DATA_TYPES: [&str; 2] = [MOD_LEN_DIR, SEQUENCE_DIR];
 
 trait Formattable {
     fn from_export_tsv(tsv_line: &Vec<&str>) -> Self;
+    fn from_bed(bed_line: &Vec<&str>) -> Self;
     fn to_json(&self) -> serde_json::Value;
     fn to_bed_fmt(&self) -> Vec<&str>;
-    fn from_bed(bed_line: Vec<&str>) -> Self;
     fn to_dl_fmt(&self, seq_name: &str, hmm_len: &str) -> Vec<String>;
+    fn get_acc(&self) -> String;
 }
 
 #[derive(Serialize, Deserialize)]
@@ -128,7 +129,7 @@ impl Formattable for Annotation {
         ]
     }
 
-    fn from_bed(bed_line: Vec<&str>) -> Self {
+    fn from_bed(bed_line: &Vec<&str>) -> Self {
         Self {
             seq_acc: bed_line[0].to_string(),
             seq_start: bed_line[1].to_string(),
@@ -168,6 +169,10 @@ impl Formattable for Annotation {
             self.seq_end.clone(),
             self.seq_len.clone(),
         ]
+    }
+
+    fn get_acc(&self) -> String {
+        self.fam_acc.clone()
     }
 }
 
@@ -252,7 +257,7 @@ impl Formattable for BenchMarkAnnotation {
         ]
     }
 
-    fn from_bed(bed_line: Vec<&str>) -> Self {
+    fn from_bed(bed_line: &Vec<&str>) -> Self {
         Self {
             seq_acc: bed_line[0].to_string(),
             seq_start: bed_line[1].to_string(),
@@ -290,6 +295,10 @@ impl Formattable for BenchMarkAnnotation {
             self.seq_end.clone(),
             self.seq_len.clone(),
         ]
+    }
+
+    fn get_acc(&self) -> String {
+        self.fam_acc.clone()
     }
 }
 
@@ -332,7 +341,7 @@ impl Formattable for MaskHit {
         ]
     }
 
-    fn from_bed(bed_line: Vec<&str>) -> Self {
+    fn from_bed(bed_line: &Vec<&str>) -> Self {
         MaskHit::from_export_tsv(&bed_line)
     }
 
@@ -345,28 +354,71 @@ impl Formattable for MaskHit {
             self.repeat_length.clone(),
         ]
     }
+
+    fn get_acc(&self) -> String {
+        self.seq_acc.clone()
+    }
 }
 
 enum FormattableLine {
     Annotation(Annotation),
     BenchMarkAnnotation(BenchMarkAnnotation),
-    MaskHit(MaskHit)
+    MaskHit(MaskHit),
 }
 impl FormattableLine {
     fn from_export_tsv(tsv_line: &Vec<&str>, data_type: &str) -> Self {
         match data_type {
             ASSEMBLY_DIR => FormattableLine::Annotation(Annotation::from_export_tsv(tsv_line)),
-            BENCHMARK_DIR => FormattableLine::BenchMarkAnnotation(BenchMarkAnnotation::from_export_tsv(tsv_line)),
+            BENCHMARK_DIR => {
+                FormattableLine::BenchMarkAnnotation(BenchMarkAnnotation::from_export_tsv(tsv_line))
+            }
             MASKS_DIR => FormattableLine::MaskHit(MaskHit::from_export_tsv(tsv_line)),
-            _ => panic!("Can't Format!")
+            _ => panic!("Can't Format!"),
+        }
+    }
+
+    fn from_bed(bed_line: &Vec<&str>, data_type: &str) -> Self {
+        match data_type {
+            ASSEMBLY_DIR => FormattableLine::Annotation(Annotation::from_bed(bed_line)),
+            BENCHMARK_DIR => {
+                FormattableLine::BenchMarkAnnotation(BenchMarkAnnotation::from_bed(bed_line))
+            }
+            MASKS_DIR => FormattableLine::MaskHit(MaskHit::from_bed(bed_line)),
+            _ => panic!("Can't Format!"),
         }
     }
 
     fn to_dl_fmt(&self, seq_name: &str, hmm_len: &str) -> Vec<String> {
         match self {
             FormattableLine::Annotation(annotation) => annotation.to_dl_fmt(seq_name, hmm_len),
-            FormattableLine::BenchMarkAnnotation(benchmark) => benchmark.to_dl_fmt(seq_name, hmm_len),
+            FormattableLine::BenchMarkAnnotation(benchmark) => {
+                benchmark.to_dl_fmt(seq_name, hmm_len)
+            }
             FormattableLine::MaskHit(mask_hit) => mask_hit.to_dl_fmt(seq_name, hmm_len),
+        }
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        match self {
+            FormattableLine::Annotation(annotation) => annotation.to_json(),
+            FormattableLine::BenchMarkAnnotation(benchmark) => benchmark.to_json(),
+            FormattableLine::MaskHit(mask_hit) => mask_hit.to_json(),
+        }
+    }
+
+    fn to_bed_fmt(&self) -> Vec<&str> {
+        match self {
+            FormattableLine::Annotation(annotation) => annotation.to_bed_fmt(),
+            FormattableLine::BenchMarkAnnotation(benchmark) => benchmark.to_bed_fmt(),
+            FormattableLine::MaskHit(mask_hit) => mask_hit.to_bed_fmt(),
+        }
+    }
+
+    fn get_acc(&self) -> String {
+        match self {
+            FormattableLine::Annotation(annotation) => annotation.get_acc(),
+            FormattableLine::BenchMarkAnnotation(benchmark) => benchmark.get_acc(),
+            FormattableLine::MaskHit(mask_hit) => mask_hit.get_acc(),
         }
     }
 }
@@ -430,7 +482,7 @@ pub fn bgzf_filter(
     };
 
     let in_str = read_to_string(&format!(
-        "{}/{}/{}/{}-processed{}",
+        "{}/{}/{}/{}{}",
         &data_dir, &assembly, &SEQUENCE_DIR, &assembly, &SEQUENCE_FILE
     ))
     .expect("Could Not Read String");
@@ -444,7 +496,7 @@ pub fn bgzf_filter(
     for result in reader.lines() {
         let line = result?;
         let mut fields: Vec<_> = line.split_whitespace().collect();
-        let formatted_line = FormattableLine::from_export_tsv(&fields, data_type);
+        let formatted_line = FormattableLine::from_bed(&fields, data_type);
         if term.is_none()
             || (fields.len() >= position - 1
                 && term.is_some()
@@ -494,14 +546,6 @@ pub fn prep_beds(
         create_dir_all(&target_dir)?;
     }
 
-    let acc_idx: usize = match data_type.as_str() {
-        ASSEMBLY_DIR => 3,
-        BENCHMARK_DIR => 1,
-        MASKS_DIR => 0,
-        SEQUENCE_DIR => 0,
-        _ => panic!("Invalid Data Type"),
-    };
-
     let worker_count: NonZeroUsize = match NonZeroUsize::new(10) {
         Some(n) => n,
         None => unreachable!(),
@@ -516,17 +560,17 @@ pub fn prep_beds(
         let line = result?;
         if !&line.starts_with('#') {
             let fields: Vec<_> = line.split_whitespace().collect();
-            if fields[acc_idx] != current_acc {
+            let output = FormattableLine::from_export_tsv(&fields, data_type);
+            let out_acc = output.get_acc();
+            if out_acc != current_acc {
                 // assume accession order TODO confirm this
-                current_acc = fields[acc_idx].to_string();
+                current_acc = out_acc;
                 out_f = File::create(format!("{target_dir}/{current_acc}.bed.bgz",))
                     .expect("Could Not Open Output File");
                 out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
-                // println!("{}", current_acc);
             };
-
             out_writer
-                .write_all(format!("{line}\n").as_bytes())
+                .write_all(format!("{}\n", output.to_bed_fmt().join("\t")).as_bytes())
                 .expect("Unable to write line");
         }
     }
@@ -630,6 +674,7 @@ pub fn prepare_assembly(
         ]);
         planner.insert(element, info);
     }
+    println!("{:?}", planner);
     for element in DATA_ELEMENTS {
         if matches!(
             planner
@@ -648,21 +693,22 @@ pub fn prepare_assembly(
             }
             let source = planner.get(element).unwrap().get("source").unwrap();
             if source.ends_with(".json") {
-                let key = match element {
-                    MOD_LEN_DIR => "family_accession",
-                    SEQUENCE_DIR => "accession",
-                    _ => "accession",
-                };
-                let outfile = format!(
-                    "{}/{}-{}{}",
-                    target,
-                    assembly,
-                    "processed",
-                    file_to_source(element).unwrap().to_string()
-                );
-                process_json(source, &key.to_string(), &Some(outfile))
-                    .expect(&format!("Processing {} JSON Failed", element));
-                println!("   {} Prep Complete", element);
+                copy(source, format!("{}/{}", target, source)).expect("Could Not Copy JSON");
+                // let key = match element {
+                //     MOD_LEN_DIR => "family_accession",
+                //     SEQUENCE_DIR => "accession",
+                //     _ => "accession",
+                // };
+                // let outfile = format!(
+                //     "{}/{}-{}{}",
+                //     target,
+                //     assembly,
+                //     "processed",
+                //     file_to_source(element).unwrap().to_string()
+                // );
+                // process_json(source, &key.to_string(), &Some(outfile))
+                //     .expect(&format!("Processing {} JSON Failed", element));
+                // println!("   {} Prep Complete", element);
             } else if source.ends_with(".tsv") {
                 println!("   Splitting And Compressing BED Files For {}", element);
                 prep_beds(assembly, source, &element.to_string(), Some(data_dir))
@@ -776,7 +822,7 @@ pub fn idx_query(
         Ok(l) => {
             for i in 0..l.len() {
                 let fields = l[i].split_whitespace().collect::<Vec<&str>>();
-                formatted.push(Annotation::from_export_tsv(&fields).to_json());
+                formatted.push(FormattableLine::from_bed(&fields, data_type).to_json());
             }
         }
     };
@@ -804,7 +850,7 @@ pub fn json_query(
 ) -> Result<String> {
     let data_dir = data_directory.unwrap_or(DATA_DIR);
     let target_file = format!(
-        "{}/{}/{}/{}-processed-{}.json",
+        "{}/{}/{}/{}-{}.json",
         &data_dir, &assembly, &data_type, &assembly, &data_type
     );
     if !Path::new(&target_file).exists() {
