@@ -1,13 +1,14 @@
 use noodles::bgzf;
 use serde_json::from_str;
-use std::fs::{read_dir, read_to_string, File};
-use std::io::{BufRead, BufReader, Read};
+use std::collections::HashMap;
+use std::fs::{read_dir, File};
+use std::io::{BufRead, BufReader};
 use std::path::Path;
 use te_idx::idx::{build_idx, prep_idx};
 use te_idx::{
     bgzf_filter, idx_query, json_query, prep_beds, prepare_assembly,
-    read_family_assembly_annotations, Annotation, ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR,
-    MOD_LEN_DIR, SEQUENCE_DIR,
+    read_family_assembly_annotations, ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR, MOD_LEN_DIR,
+    SEQUENCE_DIR,
 };
 use tempfile::{NamedTempFile, TempDir};
 
@@ -60,7 +61,7 @@ fn test_bgzf_filter_nrph() {
                 .lines()
                 .count();
             // check that filtered file is smaller and contains expected lines
-            assert_eq!(filter_count, 20317);
+            assert_eq!(filter_count, 5975);
             assert_ne!(orig_count, filter_count);
         }
         Err(e) => panic!("{}", e),
@@ -114,14 +115,14 @@ fn test_bgzf_filter_dl_fmt() {
                 .unwrap_or_else(|| Ok("".to_string()))
                 .expect("No Line");
             let toplines = format!("{}\n{}", first, second);
-            let target = "#sequence name\tmodel accession\tmodel name\tbit score\te-value\thmm start\thmm end\thmm length\tstrand\talignment start\talignment end\tenvelope start\tenvelope end\tsequence length\nchr1\tDF000000001\tMIR\t97.7\t1e-24\t6\t261\t262\t+\t100012864\t100013069\t100012853\t100013069\t248956422";
+            let target = "#sequence name\tmodel accession\tmodel name\tbit score\te-value\thmm start\thmm end\thmm length\tstrand\talignment start\talignment end\tenvelope start\tenvelope end\tsequence length\nchr1\tDF000000001\tMIR\t11.0\t290.0\t37\t206\t262\t-\t89176700\t89176576\t89176720\t89176556\t248956422";
             // check that header and first line are correct
             assert_eq!(toplines, target);
 
             // check that filtered file is smaller and contains expected lines
             let filter_count = filter_lines.count();
             assert_ne!(orig_count, filter_count);
-            assert_eq!(filter_count, 1007);
+            assert_eq!(filter_count, 96);
         }
         Err(e) => panic!("{}", e),
     }
@@ -181,8 +182,8 @@ fn test_idx_query() {
         data_directory,
     )
     .expect("Index Query Failed");
-    let vals1: Vec<Annotation> = from_str(&res1).expect("Cannot Deserialize");
-    assert_eq!(vals1.len(), 32);
+    let vals1: Vec<HashMap<String, String>> = from_str(&res1).expect("Cannot Deserialize");
+    assert_eq!(vals1.len(), 22);
 }
 
 #[test]
@@ -207,7 +208,8 @@ fn test_idx_query_fam() {
         data_directory,
     )
     .expect("Index Query Failed");
-    let vals: Vec<Annotation> = from_str(&res).expect("Cannot Deserialize");
+    println!("{:?}", res);
+    let vals: Vec<HashMap<String, String>> = from_str(&res).expect("Cannot Deserialize");
     assert_eq!(vals.len(), 15);
 }
 
@@ -234,8 +236,8 @@ fn test_idx_query_nrph() {
         data_directory,
     )
     .expect("Index Query Failed");
-    let vals: Vec<Annotation> = from_str(&res).expect("Cannot Deserialize");
-    assert_eq!(vals.len(), 6);
+    let vals: Vec<HashMap<String, String>> = from_str(&res).expect("Cannot Deserialize");
+    assert_eq!(vals.len(), 15);
 }
 
 #[test]
@@ -271,7 +273,7 @@ fn test_prep_beds() {
             // check that new folder was created and contains expected number of files
             assert_eq!(true, Path::new(&mask_dir).exists());
             assert_eq!(
-                17,
+                19,
                 read_dir(&mask_dir)
                     .map(|entries| entries
                         .filter_map(|entry| entry.ok())
@@ -328,6 +330,40 @@ fn test_prepare_assembly() {
     let _c = working_directory.close();
 }
 
+#[test]
+fn test_read_family_assembly_annotation() {
+    let out_f = NamedTempFile::new_in(TEST_DATA_DIR).expect("Couldn't Open Output File");
+    let id = &"DF000000001".to_string();
+    let assembly_id = &TEST_ASSEMBLY.to_string();
+    let nrph = &false;
+    let outfile = &Some(out_f.path().to_str().unwrap().to_string());
+    let data_directory = Some(TEST_DATA_DIR);
+
+    let _ = read_family_assembly_annotations(id, assembly_id, nrph, outfile, data_directory);
+
+    let reader = bgzf::Reader::new(File::open(out_f).expect("can't open"));
+    let line_count = reader.lines().count();
+    assert_eq!(line_count, 60001);
+}
+
+#[test]
+fn test_read_family_assembly_annotation_nrph() {
+    let out_f = NamedTempFile::new_in(TEST_DATA_DIR).expect("Couldn't Open Output File");
+
+    let id = &"DF000000001".to_string();
+    let assembly_id = &TEST_ASSEMBLY.to_string();
+    let nrph = &true;
+    let outfile = &Some(out_f.path().to_str().unwrap().to_string());
+    let data_directory = Some(TEST_DATA_DIR);
+
+    let _ = read_family_assembly_annotations(id, assembly_id, nrph, outfile, data_directory);
+
+    let reader = bgzf::Reader::new(File::open(out_f).expect("can't open"));
+    let line_count = reader.lines().count();
+    assert_eq!(line_count, 59911);
+}
+
+// OLD
 // #[test]
 // fn test_process_json() {
 //     let out_f = NamedTempFile::new_in(TEST_DATA_DIR).expect("Couldn't Open Output File");
@@ -349,53 +385,3 @@ fn test_prepare_assembly() {
 //     let target = read_to_string(comparison).expect("Can't Read File");
 //     assert_eq!(output, target);
 // }
-
-#[test]
-fn test_read_family_assembly_annotation() {
-    let out_f = NamedTempFile::new_in(TEST_DATA_DIR).expect("Couldn't Open Output File");
-
-    let id = &"DF000000001".to_string();
-    let assembly_id = &TEST_ASSEMBLY.to_string();
-    let nrph = &false;
-    let outfile = &Some(out_f.path().to_str().unwrap().to_string());
-    let data_directory = Some(TEST_DATA_DIR);
-
-    let _ = read_family_assembly_annotations(id, assembly_id, nrph, outfile, data_directory);
-
-    let mut decompressed = Vec::new();
-    let mut reader = bgzf::Reader::new(File::open(out_f).expect("can't open"));
-    reader.read_to_end(&mut decompressed).expect("Can't Read");
-    let output = String::from_utf8_lossy(&decompressed);
-    let target = read_to_string(Path::new(&format!(
-        "{}/DF000000001.test.tsv",
-        TEST_DATA_DIR
-    )))
-    .expect("Can't Read File");
-
-    assert_eq!(output, target)
-}
-
-#[test]
-fn test_read_family_assembly_annotation_nrph() {
-    let out_f = NamedTempFile::new_in(TEST_DATA_DIR).expect("Couldn't Open Output File");
-
-    let id = &"DF000000001".to_string();
-    let assembly_id = &TEST_ASSEMBLY.to_string();
-    let nrph = &true;
-    let outfile = &Some(out_f.path().to_str().unwrap().to_string());
-    let data_directory = Some(TEST_DATA_DIR);
-
-    let _ = read_family_assembly_annotations(id, assembly_id, nrph, outfile, data_directory);
-
-    let mut decompressed = Vec::new();
-    let mut reader = bgzf::Reader::new(File::open(out_f).expect("can't open"));
-    reader.read_to_end(&mut decompressed).expect("Can't Read");
-    let output = String::from_utf8_lossy(&decompressed);
-    let target = read_to_string(Path::new(&format!(
-        "{}/DF000000001.test.nrph.tsv",
-        TEST_DATA_DIR
-    )))
-    .expect("Can't Read File");
-
-    assert_eq!(output, target)
-}

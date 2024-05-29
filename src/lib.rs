@@ -40,6 +40,7 @@ trait Formattable {
     fn to_json(&self) -> serde_json::Value;
     fn to_bed_fmt(&self) -> Vec<&str>;
     fn to_dl_fmt(&self, seq_name: &str, hmm_len: &str) -> Vec<String>;
+    fn to_filter_fmt(&self) -> Vec<String>;
     fn get_acc(&self) -> String;
 }
 
@@ -88,24 +89,6 @@ impl Formattable for Annotation {
         }
     }
 
-    fn to_json(&self) -> serde_json::Value {
-        json!({
-            "sequence": self.seq_acc,
-            "accession": self.fam_acc,
-            "bit_score": self.bit_score,
-            "e_value": self.e_value,
-            "seq_start": self.seq_start,
-            "seq_end": self.seq_end,
-            "strand": self.strand,
-            "ali_start": self.ali_start,
-            "ali_end": self.ali_end,
-            "model_start": self.model_start,
-            "model_end": self.model_end,
-            "bit_score": self.bit_score,
-            "e_value": self.e_value,
-        })
-    }
-
     fn to_bed_fmt(&self) -> Vec<&str> {
         vec![
             &self.seq_acc,
@@ -152,6 +135,24 @@ impl Formattable for Annotation {
         }
     }
 
+    fn to_json(&self) -> serde_json::Value {
+        json!({
+            "sequence": self.seq_acc,
+            "accession": self.fam_acc,
+            "bit_score": self.bit_score,
+            "e_value": self.e_value,
+            "seq_start": self.seq_start,
+            "seq_end": self.seq_end,
+            "strand": self.strand,
+            "ali_start": self.ali_start,
+            "ali_end": self.ali_end,
+            "model_start": self.model_start,
+            "model_end": self.model_end,
+            "bit_score": self.bit_score,
+            "e_value": self.e_value,
+        })
+    }
+
     fn to_dl_fmt(&self, seq_name: &str, hmm_len: &str) -> Vec<String> {
         vec![
             seq_name.to_string(),
@@ -168,6 +169,27 @@ impl Formattable for Annotation {
             self.seq_start.clone(),
             self.seq_end.clone(),
             self.seq_len.clone(),
+        ]
+    }
+
+    fn to_filter_fmt(&self) -> Vec<String> {
+        vec![
+            self.seq_acc.to_string(),
+            self.seq_start.to_string(),
+            self.seq_end.to_string(),
+            self.fam_acc.to_string(),
+            self.bit_score.to_string(),
+            self.strand.to_string(),
+            self.bias.to_string(),
+            self.ali_start.to_string(),
+            self.ali_end.to_string(),
+            self.model_start.to_string(),
+            self.model_end.to_string(),
+            self.e_value.to_string(),
+            self.nrph_hit.to_string(),
+            self.kimura_div.to_string(),
+            self.family_name.to_string(),
+            self.seq_len.to_string(),
         ]
     }
 
@@ -293,6 +315,25 @@ impl Formattable for BenchMarkAnnotation {
         ]
     }
 
+    fn to_filter_fmt(&self) -> Vec<String> {
+        vec![
+            self.seq_acc.to_string(),
+            self.seq_start.to_string(),
+            self.seq_end.to_string(),
+            self.fam_acc.to_string(),
+            self.bit_score.to_string(),
+            self.strand.to_string(),
+            self.bias.to_string(),
+            self.ali_start.to_string(),
+            self.ali_end.to_string(),
+            self.model_start.to_string(),
+            self.model_end.to_string(),
+            self.e_value.to_string(),
+            self.family_name.to_string(),
+            self.seq_len.to_string(),
+        ]
+    }
+
     fn get_acc(&self) -> String {
         self.fam_acc.clone()
     }
@@ -348,6 +389,16 @@ impl Formattable for MaskHit {
             self.seq_end.clone(),
             self.repeat_str.clone(),
             self.repeat_length.clone(),
+        ]
+    }
+
+    fn to_filter_fmt(&self) -> Vec<String> {
+        vec![
+            self.seq_acc.to_string(),
+            self.seq_start.to_string(),
+            self.seq_end.to_string(),
+            self.repeat_str.to_string(),
+            self.repeat_length.to_string(),
         ]
     }
 
@@ -410,6 +461,14 @@ impl FormattableLine {
         }
     }
 
+    fn to_filter_fmt(&self) -> Vec<String> {
+        match self {
+            FormattableLine::Annotation(annotation) => annotation.to_filter_fmt(),
+            FormattableLine::BenchMarkAnnotation(benchmark) => benchmark.to_filter_fmt(),
+            FormattableLine::MaskHit(mask_hit) => mask_hit.to_filter_fmt(),
+        }
+    }
+
     fn get_acc(&self) -> String {
         match self {
             FormattableLine::Annotation(annotation) => annotation.get_acc(),
@@ -468,6 +527,7 @@ pub fn bgzf_filter(
         .expect("Unable to write line");
 
     let mut hmm_len = "0".to_string();
+    let mut seq_data: Value = json!(null);
     if dl_fmt {
         hmm_len = match json_query(
             &assembly,
@@ -479,22 +539,23 @@ pub fn bgzf_filter(
             Ok(len) => len,
             Err(e) => panic!("{}", e),
         };
+        let in_str = read_to_string(&format!(
+            "{}/{}/{}/{}{}",
+            &data_dir, &assembly, &SEQUENCE_DIR, &assembly, &SEQUENCE_FILE
+        ))
+        .expect("Could Not Read String");
+        let seq_json: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
+        seq_data = seq_json
+            .get("data")
+            .expect(&format!("Sequence Info For {} Not Found", &fam))
+            .to_owned();
     }
-    let in_str = read_to_string(&format!(
-        "{}/{}/{}/{}{}",
-        &data_dir, &assembly, &SEQUENCE_DIR, &assembly, &SEQUENCE_FILE
-    ))
-    .expect("Could Not Read String");
-    let seq_json: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
-    let seq_data = seq_json
-        .get("data")
-        .expect(&format!("Sequence Info For {} Not Found", &fam));
 
     let mut seq_name;
     let mut output;
     for result in reader.lines() {
         let line = result?;
-        let mut fields: Vec<_> = line.split_whitespace().collect();
+        let fields: Vec<_> = line.split_whitespace().collect();
         let formatted_line = FormattableLine::from_bed(&fields, data_type);
         if term.is_none()
             || (fields.len() >= position - 1
@@ -513,7 +574,8 @@ pub fn bgzf_filter(
                     .expect("Couldn't Cast To Str");
                 output = formatted_line.to_dl_fmt(seq_name, &hmm_len);
             } else {
-                output = fields.drain(..14).map(|f| f.to_string()).collect(); // TODO readjust this!
+                // output = fields.drain(..16).map(|f| f.to_string()).collect(); // TODO readjust this!
+                output = formatted_line.to_filter_fmt()
             }
             writer
                 .write_all(format!("{}\n", &output.join("\t")).as_bytes())
@@ -584,40 +646,6 @@ pub fn prep_beds(
     Ok(())
 }
 
-pub fn process_json(in_file: &String, key: &String, outfile: &Option<String>) -> Result<()> {
-    if !Path::new(&in_file).exists() {
-        eprintln!("{} Not Found", &in_file);
-        std::process::exit(1)
-    }
-    let in_f = File::open(in_file).expect("Could Not Open Input File");
-
-    let in_data: Value = serde_json::from_reader(in_f)?;
-
-    let mut out_data = HashMap::new();
-    if let Some(items) = in_data[2]["data"].as_array() {
-        for item in items {
-            let mut new_item = item.clone().as_object().unwrap().to_owned();
-            new_item.remove(key);
-            out_data.insert(item[key].to_string().replace("\"", ""), new_item);
-        }
-    }
-    let json = json!({
-        "assembly": in_data[1]["name"],
-        "version": in_data[0]["version"],
-        "data": out_data
-    });
-
-    let output = serde_json::to_string(&json)?;
-    let mut writer: Box<dyn Write> = match outfile {
-        Some(outfile) => Box::new(File::create(&outfile).expect("Could Not Open Output File")),
-        None => Box::new(stdout()),
-    };
-    writer
-        .write_all(format!("{}\n", output).as_bytes())
-        .expect("Unable to write JSON");
-    Ok(())
-}
-
 pub fn prepare_assembly(
     assembly: &String,
     data_directory: Option<&str>,
@@ -679,6 +707,7 @@ pub fn prepare_assembly(
             ("needed", needed.to_string()),
         ]);
         planner.insert(element, info);
+        println!("\t{} needed: {}", element, needed);
     }
 
     for element in DATA_ELEMENTS {
@@ -702,7 +731,7 @@ pub fn prepare_assembly(
                 copy(
                     source,
                     format!(
-                        "{}/{}-{}",
+                        "{}/{}{}",
                         target,
                         assembly,
                         file_to_source(element).unwrap()
@@ -856,6 +885,40 @@ pub fn json_query(
         .get("data")
         .and_then(|data| data.get(key).and_then(|item| item.get(target)))
         .expect("Key Target Pair Not Found");
-    let ret = val.as_str().expect("Can't String to str");
-    return Ok(ret.to_string());
+    return Ok(val.to_string().replace("\"", ""));
 }
+
+// OLD Methods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// pub fn process_json(in_file: &String, key: &String, outfile: &Option<String>) -> Result<()> {
+//     if !Path::new(&in_file).exists() {
+//         eprintln!("{} Not Found", &in_file);
+//         std::process::exit(1)
+//     }
+//     let in_f = File::open(in_file).expect("Could Not Open Input File");
+
+//     let in_data: Value = serde_json::from_reader(in_f)?;
+
+//     let mut out_data = HashMap::new();
+//     if let Some(items) = in_data[2]["data"].as_array() {
+//         for item in items {
+//             let mut new_item = item.clone().as_object().unwrap().to_owned();
+//             new_item.remove(key);
+//             out_data.insert(item[key].to_string().replace("\"", ""), new_item);
+//         }
+//     }
+//     let json = json!({
+//         "assembly": in_data[1]["name"],
+//         "version": in_data[0]["version"],
+//         "data": out_data
+//     });
+
+//     let output = serde_json::to_string(&json)?;
+//     let mut writer: Box<dyn Write> = match outfile {
+//         Some(outfile) => Box::new(File::create(&outfile).expect("Could Not Open Output File")),
+//         None => Box::new(stdout()),
+//     };
+//     writer
+//         .write_all(format!("{}\n", output).as_bytes())
+//         .expect("Unable to write JSON");
+//     Ok(())
+// }

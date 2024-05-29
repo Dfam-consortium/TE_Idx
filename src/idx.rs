@@ -479,7 +479,7 @@ impl ContigIndex {
                     let mut reader = File::open(&bgz_file).map(bgzf::Reader::new).unwrap();
                     reader
                         .seek(bgzf::VirtualPosition::from(range.bgzf_pos))
-                        .unwrap();
+                        .expect("Could Not Seek");
                     let mut line = String::new();
                     reader.read_line(&mut line).unwrap();
                     if filter_line(&line, &q_family, &q_nrph) {
