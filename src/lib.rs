@@ -193,7 +193,6 @@ pub struct BenchMarkAnnotation {
     seq_end: String,     // Dfamseq sequence end
     seq_len: String,     // The length of the Dfamseq
     cigar: String,       // CIGAR string of sequence alignment
-    kimura_div: String, // Kimura percent divergence ( only in full_region, not in benchmark_region )
 }
 
 impl Formattable for BenchMarkAnnotation {
@@ -214,7 +213,6 @@ impl Formattable for BenchMarkAnnotation {
             seq_end: tsv_line[12].to_string(),
             seq_len: tsv_line[13].to_string(),
             cigar: tsv_line[14].to_string(),
-            kimura_div: tsv_line[15].to_string(),
         }
     }
 
@@ -250,7 +248,6 @@ impl Formattable for BenchMarkAnnotation {
             &self.model_start,
             &self.model_end,
             &self.e_value,
-            &self.kimura_div,
             &self.family_name,
             &self.seq_len,
             &self.cigar,
@@ -271,7 +268,6 @@ impl Formattable for BenchMarkAnnotation {
             model_start: bed_line[9].to_string(),
             model_end: bed_line[10].to_string(),
             e_value: bed_line[11].to_string(),
-            kimura_div: bed_line[12].to_string(),
             family_name: bed_line[13].to_string(),
             seq_len: bed_line[14].to_string(),
             cigar: bed_line[15].to_string(),
@@ -559,6 +555,7 @@ pub fn prep_beds(
     let mut current_acc = "".to_string();
     let mut out_f = tempfile()?;
     let mut out_writer = bgzf::MultithreadedWriter::with_worker_count(worker_count, out_f);
+    let mut seen_accs = Vec::new();
     for result in lines {
         let line = result?;
         if !&line.starts_with('#') {
@@ -566,7 +563,13 @@ pub fn prep_beds(
             let output = FormattableLine::from_export_tsv(&fields, data_type);
             let out_acc = output.get_acc();
             if out_acc != current_acc {
+                if seen_accs.contains(&out_acc) {
+                    panic!("Input TSV is not sorted in accession order")
+                } else {
+                    seen_accs.push(out_acc.clone());
+                }
                 // assume accession order TODO confirm this
+                println!("\t{out_acc}");
                 current_acc = out_acc;
                 out_f = File::create(format!("{target_dir}/{current_acc}.bed.bgz",))
                     .expect("Could Not Open Output File");
@@ -696,22 +699,17 @@ pub fn prepare_assembly(
             }
             let source = planner.get(element).unwrap().get("source").unwrap();
             if source.ends_with(".json") {
-                copy(source, format!("{}/{}", target, source)).expect("Could Not Copy JSON");
-                // let key = match element {
-                //     MOD_LEN_DIR => "family_accession",
-                //     SEQUENCE_DIR => "accession",
-                //     _ => "accession",
-                // };
-                // let outfile = format!(
-                //     "{}/{}-{}{}",
-                //     target,
-                //     assembly,
-                //     "processed",
-                //     file_to_source(element).unwrap().to_string()
-                // );
-                // process_json(source, &key.to_string(), &Some(outfile))
-                //     .expect(&format!("Processing {} JSON Failed", element));
-                // println!("   {} Prep Complete", element);
+                copy(
+                    source,
+                    format!(
+                        "{}/{}-{}",
+                        target,
+                        assembly,
+                        file_to_source(element).unwrap()
+                    ),
+                )
+                .expect("Could Not Copy JSON");
+                println!("   {} Prep Complete", element);
             } else if source.ends_with(".tsv") {
                 println!("   Splitting And Compressing BED Files For {}", element);
                 prep_beds(assembly, source, &element.to_string(), Some(data_dir))
@@ -808,11 +806,6 @@ pub fn idx_query(
         true,
     );
 
-    // let formatter = match data_type.as_str() {
-    //     ASSEMBLY_DIR => build_annotation,
-    //     MASKS_DIR => build_mask,
-    //     _ => panic!("Invalid formatter type"),
-    // };
     let mut formatted = Vec::new();
     match &results {
         Err(e) => {
@@ -835,12 +828,7 @@ pub fn idx_query(
         }
         Ok(json_str) => {
             return Ok(json_str);
-        } // Ok(json_str) => {
-          //     stdout()
-          //         .write_all(json_str.as_bytes())
-          //         .expect("Unable to write line");
-          //     exit(0)
-          // }
+        }
     }
 }
 
