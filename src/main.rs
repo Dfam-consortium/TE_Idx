@@ -7,6 +7,7 @@ use te_idx::json_query;
 use te_idx::prep_beds;
 use te_idx::prepare_assembly;
 use te_idx::read_family_assembly_annotations;
+use te_idx::get_chrom_id;
 mod idx;
 
 use te_idx::{DATA_DIR, INDEX_DATA_TYPES, JSON_DATA_TYPES};
@@ -130,6 +131,14 @@ pub enum Commands {
         #[arg(long, short)]
         outfile: Option<String>,
     },
+    GetChromID {
+        /// Name of assembly/assembly folder
+        #[arg(short, long, verbatim_doc_comment)]
+        assembly: String,
+        /// Query to get ID for
+        #[arg(long, short)]
+        query: String,
+    },
 }
 
 fn main() {
@@ -205,6 +214,7 @@ fn main() {
         }
         Some(Commands::PrepareAssembly { assembly }) => prepare_assembly(assembly, None, None)
             .expect(format!("Assembly Prep for {} Failed", &assembly).as_str()),
+        Some(Commands::GetChromID { assembly , query}) => {println!("{}", get_chrom_id(assembly, query));},
         None => {}
     }
 }

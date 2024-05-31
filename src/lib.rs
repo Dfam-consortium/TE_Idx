@@ -707,7 +707,7 @@ pub fn prepare_assembly(
             ("needed", needed.to_string()),
         ]);
         planner.insert(element, info);
-        println!("\t{} needed: {}", element, needed);
+        println!("\tQueued {}: {}", element, needed);
     }
 
     for element in DATA_ELEMENTS {
@@ -841,7 +841,6 @@ pub fn idx_query(
             panic!("Index Search Failed - {}", e);
         }
         Ok(l) if l.as_slice().is_empty() => {
-            println!("No Results Found");
             return Ok("[]".to_string());
         }
         Ok(l) => {
@@ -874,8 +873,7 @@ pub fn json_query(
         &data_dir, &assembly, &data_type, &assembly, &data_type
     );
     if !Path::new(&target_file).exists() {
-        eprintln!("{} Not Found", &target_file);
-        std::process::exit(1)
+        panic!("{} Not Found", &target_file);
     }
 
     let in_str = read_to_string(&target_file).expect("Could Not Read String");
@@ -886,6 +884,33 @@ pub fn json_query(
         .and_then(|data| data.get(key).and_then(|item| item.get(target)))
         .expect("Key Target Pair Not Found");
     return Ok(val.to_string().replace("\"", ""));
+}
+
+pub fn get_chrom_id(assembly: &String, query: &String) -> String { // TODO write test
+    let target_file = format!(
+        "{}/{}/{}/{}-{}.json",
+        &DATA_DIR, &assembly, "sequences",  &assembly, "sequences"
+    );
+    if !Path::new(&target_file).exists() {
+        eprintln!("{} Not Found", &target_file);
+        std::process::exit(1)
+    }
+    let in_str = read_to_string(&target_file).expect("Could Not Read String");
+    let in_json: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
+    let data = in_json.get("data").expect("No Data");
+    if let Some(data) = data.as_object(){
+        for (acc, val) in data {
+            if let Some(vals) = val.as_object() {
+                let id = vals.get("id").expect("Oh no"); 
+                if &id.to_string().replace("\"", "") == query {
+                    return acc.to_string();
+                }
+            }
+        }
+        panic!("Sequence ID Not Found")
+    } else {
+        panic!("Something Didn't Work")
+    }
 }
 
 // OLD Methods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
