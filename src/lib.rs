@@ -886,10 +886,11 @@ pub fn json_query(
     return Ok(val.to_string().replace("\"", ""));
 }
 
-pub fn get_chrom_id(assembly: &String, query: &String) -> String { // TODO write test
+pub fn get_chrom_id(assembly: &String, query: &String, data_directory: Option<&str>) -> String {
+    let data_dir = data_directory.unwrap_or(DATA_DIR);
     let target_file = format!(
         "{}/{}/{}/{}-{}.json",
-        &DATA_DIR, &assembly, "sequences",  &assembly, "sequences"
+        &data_dir, &assembly, "sequences", &assembly, "sequences"
     );
     if !Path::new(&target_file).exists() {
         eprintln!("{} Not Found", &target_file);
@@ -898,10 +899,10 @@ pub fn get_chrom_id(assembly: &String, query: &String) -> String { // TODO write
     let in_str = read_to_string(&target_file).expect("Could Not Read String");
     let in_json: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
     let data = in_json.get("data").expect("No Data");
-    if let Some(data) = data.as_object(){
+    if let Some(data) = data.as_object() {
         for (acc, val) in data {
             if let Some(vals) = val.as_object() {
-                let id = vals.get("id").expect("Oh no"); 
+                let id = vals.get("id").expect("Oh no");
                 if &id.to_string().replace("\"", "") == query {
                     return acc.to_string();
                 }

@@ -6,7 +6,7 @@ use std::io::{BufRead, BufReader};
 use std::path::Path;
 use te_idx::idx::{build_idx, prep_idx};
 use te_idx::{
-    bgzf_filter, idx_query, json_query, prep_beds, prepare_assembly,
+    bgzf_filter, get_chrom_id, idx_query, json_query, prep_beds, prepare_assembly,
     read_family_assembly_annotations, ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR, MOD_LEN_DIR,
     SEQUENCE_DIR,
 };
@@ -361,6 +361,16 @@ fn test_read_family_assembly_annotation_nrph() {
     let reader = bgzf::Reader::new(File::open(out_f).expect("can't open"));
     let line_count = reader.lines().count();
     assert_eq!(line_count, 59911);
+}
+
+#[test]
+fn test_get_chrom_id() {
+    let assembly = &TEST_ASSEMBLY.to_string();
+    let data_directory = Some(TEST_DATA_DIR);
+    let query = &"chr5".to_string();
+
+    let val = get_chrom_id(assembly, query, data_directory);
+    assert_eq!(val, "54");
 }
 
 // OLD

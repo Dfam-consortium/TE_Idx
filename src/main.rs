@@ -2,12 +2,12 @@ use clap::builder::PossibleValuesParser;
 use clap::{Parser, Subcommand};
 
 use te_idx::bgzf_filter;
+use te_idx::get_chrom_id;
 use te_idx::idx_query;
 use te_idx::json_query;
 use te_idx::prep_beds;
 use te_idx::prepare_assembly;
 use te_idx::read_family_assembly_annotations;
-use te_idx::get_chrom_id;
 mod idx;
 
 use te_idx::{DATA_DIR, INDEX_DATA_TYPES, JSON_DATA_TYPES};
@@ -214,7 +214,9 @@ fn main() {
         }
         Some(Commands::PrepareAssembly { assembly }) => prepare_assembly(assembly, None, None)
             .expect(format!("Assembly Prep for {} Failed", &assembly).as_str()),
-        Some(Commands::GetChromID { assembly , query}) => {println!("{}", get_chrom_id(assembly, query));},
+        Some(Commands::GetChromID { assembly, query }) => {
+            println!("{}", get_chrom_id(assembly, query, None));
+        }
         None => {}
     }
 }
