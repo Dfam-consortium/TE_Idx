@@ -219,6 +219,11 @@ pub struct BenchMarkAnnotation {
 
 impl Formattable for BenchMarkAnnotation {
     fn from_export_tsv(tsv_line: &Vec<&str>) -> Self {
+        let cigar = if tsv_line.len() >= 15 {
+            tsv_line[14].to_string()
+        } else {
+            String::new()
+        };
         Self {
             seq_acc: tsv_line[0].to_string(),
             fam_acc: tsv_line[1].to_string(),
@@ -234,7 +239,7 @@ impl Formattable for BenchMarkAnnotation {
             seq_start: tsv_line[11].to_string(),
             seq_end: tsv_line[12].to_string(),
             seq_len: tsv_line[13].to_string(),
-            cigar: tsv_line[14].to_string(),
+            cigar,
         }
     }
 
@@ -555,7 +560,7 @@ pub fn bgzf_filter(
     let mut output;
     for result in reader.lines() {
         let line = result?;
-        let fields: Vec<_> = line.split_whitespace().collect();
+        let fields: Vec<_> = line.split("\t").collect();
         let formatted_line = FormattableLine::from_bed(&fields, data_type);
         if term.is_none()
             || (fields.len() >= position - 1
@@ -621,7 +626,7 @@ pub fn prep_beds(
     for result in lines {
         let line = result?;
         if !&line.starts_with('#') {
-            let fields: Vec<_> = line.split_whitespace().collect();
+            let fields: Vec<_> = line.split("\t").collect();
             let output = FormattableLine::from_export_tsv(&fields, data_type);
             let out_acc = output.get_acc();
             if out_acc != current_acc {
@@ -845,7 +850,7 @@ pub fn idx_query(
         }
         Ok(l) => {
             for i in 0..l.len() {
-                let fields = l[i].split_whitespace().collect::<Vec<&str>>();
+                let fields = l[i].split("\t").collect::<Vec<&str>>();
                 formatted.push(FormattableLine::from_bed(&fields, data_type).to_json());
             }
         }
