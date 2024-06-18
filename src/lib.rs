@@ -895,7 +895,7 @@ pub fn get_chrom_id(assembly: &String, query: &String, data_directory: Option<&s
     let data_dir = data_directory.unwrap_or(DATA_DIR);
     let target_file = format!(
         "{}/{}/{}/{}-{}.json",
-        &data_dir, &assembly, "sequences", &assembly, "sequences"
+        &data_dir, &assembly, SEQUENCE_DIR, &assembly, SEQUENCE_DIR
     );
     if !Path::new(&target_file).exists() {
         eprintln!("{} Not Found", &target_file);
