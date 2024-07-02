@@ -1,5 +1,6 @@
 use clap::builder::PossibleValuesParser;
 use clap::{Parser, Subcommand};
+use std::path::Path;
 
 use te_idx::bgzf_filter;
 use te_idx::get_chrom_id;
@@ -10,11 +11,20 @@ use te_idx::prepare_assembly;
 use te_idx::read_family_assembly_annotations;
 mod idx;
 
-use te_idx::{DATA_DIR, INDEX_DATA_TYPES, JSON_DATA_TYPES};
+use te_idx::{DATA_DIR, EXPORT_DIR, INDEX_DATA_TYPES, JSON_DATA_TYPES};
+
 
 #[derive(Parser)]
 #[command(author, version, about)]
 pub struct Cli {
+    /// Name of assembly folder, default is /usr/local/Dfam-warehouse/releases/annotation
+    #[clap(short, long, verbatim_doc_comment)]
+    pub data_dir: Option<String>,
+
+    /// Name of export folder, default is /usr/local/Dfam-warehouse/releases/annotation_exports
+    #[clap(short, long, verbatim_doc_comment)]
+    pub exp_dir: Option<String>,
+
     #[command(subcommand)]
     pub command: Option<Commands>,
 }
@@ -144,6 +154,24 @@ pub enum Commands {
 fn main() {
     let cli = Cli::parse();
 
+    let data_directory = match cli.data_dir{
+        Some(dir) => dir,
+        None => DATA_DIR.to_string(),
+    };
+    
+    let export_directory = match cli.exp_dir{
+        Some(dir) => dir,
+        None => EXPORT_DIR.to_string(),
+    };
+
+    if !Path::new(&data_directory).exists() {
+        panic!("Data Directory \"{}\" Does Not Exist. A data path must be supplied if not run on dfam", &data_directory);
+    };
+
+    if !Path::new(&export_directory).exists() {
+        panic!("Export Directory \"{}\" Does Not Exist. An export path must be supplied if not run on dfam", &export_directory);
+    };
+
     match &cli.command {
         Some(Commands::BgzfFilter {
             assembly,
@@ -155,7 +183,7 @@ fn main() {
             web_fmt,
         }) => {
             bgzf_filter(
-                assembly, data_type, fam, position, term, outfile, *web_fmt, None,
+                assembly, data_type, fam, position, term, outfile, *web_fmt, &data_directory,
             )
             .expect("Filter Failed");
         }
@@ -164,7 +192,7 @@ fn main() {
             data_type,
         }) => {
             let (filenames, bgz_dir, mut contig_index, index_file) =
-                match idx::prep_idx(&format!("{}/{}", &DATA_DIR, &assembly), data_type) {
+                match idx::prep_idx(&format!("{}/{}", &data_directory, &assembly), data_type) {
                     Ok(res) => res,
                     Err(e) => panic!(
                         "Search Prep Failed, Assembly or Data Type May Not Exist - {:?}",
@@ -178,7 +206,7 @@ fn main() {
             assembly,
             in_tsv,
             data_type,
-        }) => match prep_beds(assembly, in_tsv, data_type, None) {
+        }) => match prep_beds(assembly, in_tsv, data_type, &data_directory) {
             Ok(()) => println!("Bed Files Created - {}", data_type),
             Err(e) => panic!("{:?}", e),
         },
@@ -191,7 +219,7 @@ fn main() {
             family,
             nrph,
         }) => {
-            let result = idx_query(assembly, data_type, chrom, *start, *end, family, nrph, None)
+            let result = idx_query(assembly, data_type, chrom, *start, *end, family, nrph, &data_directory)
                 .expect("Index Query Failed");
             println!("{}", result)
         }
@@ -201,7 +229,7 @@ fn main() {
             key,
             target,
         }) => {
-            let ans = json_query(assembly, data_type, key, target, None).expect("JSON Read Failed");
+            let ans = json_query(assembly, data_type, key, target, &data_directory).expect("JSON Read Failed");
             println!("{}", ans)
         }
         Some(Commands::ReadFamilyAssemblyAnnotations {
@@ -210,12 +238,12 @@ fn main() {
             nrph,
             outfile,
         }) => {
-            let _res = read_family_assembly_annotations(id, assembly_id, nrph, outfile, None);
+            let _res = read_family_assembly_annotations(id, assembly_id, nrph, outfile, &data_directory);
         }
-        Some(Commands::PrepareAssembly { assembly }) => prepare_assembly(assembly, None, None)
+        Some(Commands::PrepareAssembly { assembly }) => prepare_assembly(assembly, &data_directory, &export_directory)
             .expect(format!("Assembly Prep for {} Failed", &assembly).as_str()),
         Some(Commands::GetChromID { assembly, query }) => {
-            println!("{}", get_chrom_id(assembly, query, None));
+            println!("{}", get_chrom_id(assembly, query, &data_directory));
         }
         None => {}
     }

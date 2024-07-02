@@ -10,8 +10,8 @@ use tempfile::tempfile;
 
 pub mod idx;
 
-pub const DATA_DIR: &'static str = "/home/agray/te_idx/data"; // TODO replace with config
-pub const EXPORT_DIR: &'static str = "/home/agray/te_idx/exports"; // TODO replace with config
+pub const DATA_DIR: &'static str = "/usr/local/Dfam-warehouse/releases/annotations";
+pub const EXPORT_DIR: &'static str = "/usr/local/Dfam-warehouse/releases/annotations_exports";
 
 pub const ASSEMBLY_DIR: &'static str = "assembly_alignments";
 pub const ASSEMBLY_FILE: &'static str = "-byacc-full_region.tsv";
@@ -491,10 +491,10 @@ pub fn bgzf_filter(
     term: &Option<String>,
     outfile: &Option<String>,
     dl_fmt: bool,
-    data_directory: Option<&str>,
+    data_directory: &String,
 ) -> Result<()> {
-    let data_dir = data_directory.unwrap_or(DATA_DIR);
-    let assembly_path: String = format!("{}/{}/{}", &data_dir, &assembly, &data_type);
+    
+    let assembly_path: String = format!("{}/{}/{}", &data_directory, &assembly, &data_type);
     if !Path::new(&assembly_path).exists() {
         panic!("Data \"{}\" Does Not Exist", assembly_path);
     }
@@ -539,14 +539,14 @@ pub fn bgzf_filter(
             &MOD_LEN_DIR.to_string(),
             &fam.to_string(),
             &"length".to_string(),
-            Some(data_dir),
+            data_directory,
         ) {
             Ok(len) => len,
             Err(e) => panic!("{}", e),
         };
         let in_str = read_to_string(&format!(
             "{}/{}/{}/{}{}",
-            &data_dir, &assembly, &SEQUENCE_DIR, &assembly, &SEQUENCE_FILE
+            &data_directory, &assembly, &SEQUENCE_DIR, &assembly, &SEQUENCE_FILE
         ))
         .expect("Could Not Read String");
         let seq_json: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
@@ -595,14 +595,14 @@ pub fn prep_beds(
     assembly: &String,
     in_tsv: &String,
     data_type: &String,
-    data_directory: Option<&str>,
+    data_directory: &String,
 ) -> Result<()> {
-    let data_dir = data_directory.unwrap_or(DATA_DIR);
+    
     if !Path::new(&in_tsv).exists() {
         panic!("Input TSV \"{}\" Not Found", &in_tsv);
     }
 
-    let db_dir = format!("{}/{}", &data_dir, &assembly);
+    let db_dir = format!("{}/{}", &data_directory, &assembly);
     let target_dir = format!("{}/{}", &db_dir, &data_type);
     if !Path::new(&db_dir).exists() {
         create_dir_all(&db_dir)?;
@@ -653,22 +653,21 @@ pub fn prep_beds(
 
 pub fn prepare_assembly(
     assembly: &String,
-    data_directory: Option<&str>,
-    export_directory: Option<&str>,
+    data_directory: &String,
+    export_directory: &String,
 ) -> Result<()> {
-    let data_dir = data_directory.unwrap_or(DATA_DIR);
-    let export_dir = export_directory.unwrap_or(EXPORT_DIR);
-    if !Path::new(&data_dir).exists() {
-        eprintln!("{} Not Found", &data_dir);
+    
+    if !Path::new(&data_directory).exists() {
+        eprintln!("{} Not Found", &data_directory);
         std::process::exit(1)
     }
-    if !Path::new(&export_dir).exists() {
-        eprintln!("{} Not Found", &export_dir);
+    if !Path::new(&export_directory).exists() {
+        eprintln!("{} Not Found", &export_directory);
         std::process::exit(1)
     }
 
-    let export_dir = format!("{}/{}", &export_dir, &assembly);
-    let working_dir = format!("{}/{}", &data_dir, &assembly);
+    let export_dir = format!("{}/{}", &export_directory, &assembly);
+    let working_dir = format!("{}/{}", &data_directory, &assembly);
     if !Path::new(&export_dir).exists() {
         eprintln!("Assembly Export Not Found - {}", &export_dir);
         std::process::exit(1)
@@ -746,7 +745,7 @@ pub fn prepare_assembly(
                 println!("   {} Prep Complete", element);
             } else if source.ends_with(".tsv") {
                 println!("   Splitting And Compressing BED Files For {}", element);
-                prep_beds(assembly, source, &element.to_string(), Some(data_dir))
+                prep_beds(assembly, source, &element.to_string(), &data_directory)
                     .expect("BED File Prep Failed");
                 println!("   Indexing {}", element);
                 let (filenames, bgz_dir, mut contig_index, index_file) =
@@ -768,10 +767,10 @@ pub fn read_family_assembly_annotations(
     assembly_id: &String,
     nrph: &bool,
     outfile: &Option<String>,
-    data_directory: Option<&str>,
+    data_directory: &String,
 ) -> Result<()> {
-    let data_dir = data_directory.unwrap_or(DATA_DIR);
-    let assembly_path: String = format!("{}/{}", &data_dir, &assembly_id);
+    
+    let assembly_path: String = format!("{}/{}", &data_directory, &assembly_id);
     if !Path::new(&assembly_path).exists() {
         panic!("Assembly \"{}\" Does Not Exist", assembly_path);
     }
@@ -789,7 +788,7 @@ pub fn read_family_assembly_annotations(
         &term,
         outfile,
         true,
-        Some(data_dir),
+        &data_directory,
     ) {
         Ok(()) => return Ok(()),
         Err(err) => {
@@ -806,10 +805,10 @@ pub fn idx_query(
     end: u64,
     family: &Option<String>,
     nrph: &bool,
-    data_directory: Option<&str>,
+    data_directory: &String,
 ) -> Result<String> {
-    let data_dir = data_directory.unwrap_or(DATA_DIR);
-    let assembly_path: String = format!("{}/{}", &data_dir, &assembly);
+    
+    let assembly_path: String = format!("{}/{}", &data_directory, &assembly);
     // confirm assembly_id and ensure that it accessable
     if !Path::new(&assembly_path).exists() {
         panic!("Assembly \"{}\" Does Not Exist", assembly_path);
@@ -870,12 +869,12 @@ pub fn json_query(
     data_type: &String,
     key: &String,
     target: &String,
-    data_directory: Option<&str>,
+    data_directory: &String,
 ) -> Result<String> {
-    let data_dir = data_directory.unwrap_or(DATA_DIR);
+    
     let target_file = format!(
         "{}/{}/{}/{}-{}.json",
-        &data_dir, &assembly, &data_type, &assembly, &data_type
+        &data_directory, &assembly, &data_type, &assembly, &data_type
     );
     if !Path::new(&target_file).exists() {
         panic!("{} Not Found", &target_file);
@@ -891,11 +890,11 @@ pub fn json_query(
     return Ok(val.to_string().replace("\"", ""));
 }
 
-pub fn get_chrom_id(assembly: &String, query: &String, data_directory: Option<&str>) -> String {
-    let data_dir = data_directory.unwrap_or(DATA_DIR);
+pub fn get_chrom_id(assembly: &String, query: &String, data_directory: &String) -> String {
+    
     let target_file = format!(
         "{}/{}/{}/{}-{}.json",
-        &data_dir, &assembly, SEQUENCE_DIR, &assembly, SEQUENCE_DIR
+        &data_directory, &assembly, SEQUENCE_DIR, &assembly, SEQUENCE_DIR
     );
     if !Path::new(&target_file).exists() {
         eprintln!("{} Not Found", &target_file);

@@ -34,7 +34,7 @@ fn test_bgzf_filter_nrph() {
     let term: Option<String> = Some("1".to_string());
     let outfile = Some(f_name.to_string());
     let dl_fmt = false;
-    let data_directory = Some(TEST_DATA_DIR);
+    let data_directory = TEST_DATA_DIR.to_string();
 
     // Test for NRPH filter
     match bgzf_filter(
@@ -45,7 +45,7 @@ fn test_bgzf_filter_nrph() {
         &term,
         &outfile,
         dl_fmt,
-        data_directory,
+        &data_directory,
     ) {
         Ok(()) => {
             let orig_count = BufReader::new(
@@ -80,7 +80,7 @@ fn test_bgzf_filter_dl_fmt() {
     let term = Some("14.7".to_string());
     let outfile = Some(f_name.to_string());
     let dl_fmt = true;
-    let data_directory = Some(TEST_DATA_DIR);
+    let data_directory = TEST_DATA_DIR.to_string();
 
     // Test for download format
     match bgzf_filter(
@@ -91,7 +91,7 @@ fn test_bgzf_filter_dl_fmt() {
         &term,
         &outfile,
         dl_fmt,
-        data_directory,
+        &data_directory,
     ) {
         Ok(()) => {
             let orig_count = BufReader::new(
@@ -169,7 +169,7 @@ fn test_idx_query() {
     let end = 100000;
     let family: &Option<String> = &None;
     let nrph = &false;
-    let data_directory = Some(TEST_DATA_DIR);
+    let data_directory = TEST_DATA_DIR.to_string();
 
     let res1 = idx_query(
         assembly,
@@ -179,7 +179,7 @@ fn test_idx_query() {
         end,
         family,
         nrph,
-        data_directory,
+        &data_directory,
     )
     .expect("Index Query Failed");
     let vals1: Vec<HashMap<String, String>> = from_str(&res1).expect("Cannot Deserialize");
@@ -195,7 +195,7 @@ fn test_idx_query_fam() {
     let end = 100000;
     let family: &Option<String> = &Some("DF000000001".to_string());
     let nrph = &false;
-    let data_directory = Some(TEST_DATA_DIR);
+    let data_directory = TEST_DATA_DIR.to_string();
 
     let res = idx_query(
         assembly,
@@ -205,7 +205,7 @@ fn test_idx_query_fam() {
         end,
         family,
         nrph,
-        data_directory,
+        &data_directory,
     )
     .expect("Index Query Failed");
     println!("{:?}", res);
@@ -223,7 +223,7 @@ fn test_idx_query_nrph() {
     let family: &Option<String> = &Some("DF000000001".to_string());
 
     let nrph = &true;
-    let data_directory = Some(TEST_DATA_DIR);
+    let data_directory = TEST_DATA_DIR.to_string();
 
     let res = idx_query(
         assembly,
@@ -233,7 +233,7 @@ fn test_idx_query_nrph() {
         end,
         family,
         nrph,
-        data_directory,
+        &data_directory,
     )
     .expect("Index Query Failed");
     let vals: Vec<HashMap<String, String>> = from_str(&res).expect("Cannot Deserialize");
@@ -246,10 +246,10 @@ fn test_json_query() {
     let data_type = &SEQUENCE_DIR.to_string();
     let key = &"1".to_string();
     let target = &"length".to_string();
-    let data_directory = Some(TEST_DATA_DIR);
+    let data_directory = TEST_DATA_DIR.to_string();
 
     let ans =
-        json_query(assembly, data_type, key, target, data_directory).expect("JSON Read Failed");
+        json_query(assembly, data_type, key, target, &data_directory).expect("JSON Read Failed");
     assert_eq!(ans, "248956422");
 }
 
@@ -260,13 +260,13 @@ fn test_prep_beds() {
     let assembly = &TEST_ASSEMBLY.to_string();
     let in_tsv = format!("{}/{}/test_ex-mask.tsv", TEST_EXPORT_DIR, TEST_ASSEMBLY);
     let data_type = &MASKS_DIR.to_string();
-    let data_directory = working_directory.path().to_str();
+    let data_directory = working_directory.path().to_str().unwrap().to_string();
 
-    match prep_beds(assembly, &in_tsv, data_type, data_directory) {
+    match prep_beds(assembly, &in_tsv, data_type, &data_directory) {
         Ok(()) => {
             let mask_dir = format!(
                 "{}/{}/{}",
-                data_directory.unwrap(),
+                data_directory,
                 &TEST_ASSEMBLY,
                 &data_type
             );
@@ -293,14 +293,14 @@ fn test_prep_beds() {
 #[test]
 fn test_prepare_assembly() {
     let working_directory = gen_working_dir();
-    let test_data_dir = Some(working_directory.path().to_str().unwrap());
+    let test_data_dir = working_directory.path().to_str().unwrap();
 
     let assembly = &TEST_ASSEMBLY.to_string();
-    let data_directory = test_data_dir;
-    let export_directory = Some(TEST_EXPORT_DIR);
+    let data_directory = test_data_dir.to_string();
+    let export_directory = TEST_EXPORT_DIR.to_string();
 
-    let _ = prepare_assembly(assembly, data_directory, export_directory);
-    let assembly_dir = format!("{}/{}", data_directory.unwrap(), TEST_ASSEMBLY);
+    let _ = prepare_assembly(assembly, &data_directory, &export_directory);
+    let assembly_dir = format!("{}/{}", data_directory, TEST_ASSEMBLY);
 
     let align_dir = &format!("{}/{}", assembly_dir, ASSEMBLY_DIR);
     let mut align_contents = Path::new(&align_dir).read_dir().expect("Couldn't Read Dir");
@@ -337,9 +337,9 @@ fn test_read_family_assembly_annotation() {
     let assembly_id = &TEST_ASSEMBLY.to_string();
     let nrph = &false;
     let outfile = &Some(out_f.path().to_str().unwrap().to_string());
-    let data_directory = Some(TEST_DATA_DIR);
+    let data_directory = TEST_DATA_DIR.to_string();
 
-    let _ = read_family_assembly_annotations(id, assembly_id, nrph, outfile, data_directory);
+    let _ = read_family_assembly_annotations(id, assembly_id, nrph, outfile, &data_directory);
 
     let reader = bgzf::Reader::new(File::open(out_f).expect("can't open"));
     let line_count = reader.lines().count();
@@ -354,9 +354,9 @@ fn test_read_family_assembly_annotation_nrph() {
     let assembly_id = &TEST_ASSEMBLY.to_string();
     let nrph = &true;
     let outfile = &Some(out_f.path().to_str().unwrap().to_string());
-    let data_directory = Some(TEST_DATA_DIR);
+    let data_directory = TEST_DATA_DIR.to_string();
 
-    let _ = read_family_assembly_annotations(id, assembly_id, nrph, outfile, data_directory);
+    let _ = read_family_assembly_annotations(id, assembly_id, nrph, outfile, &data_directory);
 
     let reader = bgzf::Reader::new(File::open(out_f).expect("can't open"));
     let line_count = reader.lines().count();
@@ -366,10 +366,10 @@ fn test_read_family_assembly_annotation_nrph() {
 #[test]
 fn test_get_chrom_id() {
     let assembly = &TEST_ASSEMBLY.to_string();
-    let data_directory = Some(TEST_DATA_DIR);
+    let data_directory = TEST_DATA_DIR.to_string();
     let query = &"chr5".to_string();
 
-    let val = get_chrom_id(assembly, query, data_directory);
+    let val = get_chrom_id(assembly, query, &data_directory);
     assert_eq!(val, "54");
 }
 
