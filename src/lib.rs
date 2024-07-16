@@ -532,7 +532,6 @@ pub fn bgzf_filter(
         .expect("Unable to write line");
 
     let mut hmm_len = "0".to_string();
-    let mut seq_data: Value = json!(null);
     if dl_fmt {
         hmm_len = match json_query(
             &assembly,
@@ -544,19 +543,8 @@ pub fn bgzf_filter(
             Ok(len) => len,
             Err(e) => panic!("{}", e),
         };
-        let in_str = read_to_string(&format!(
-            "{}/{}/{}/{}{}",
-            &data_directory, &assembly, &SEQUENCE_DIR, &assembly, &SEQUENCE_FILE
-        ))
-        .expect("Could Not Read String");
-        let seq_json: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
-        seq_data = seq_json
-            .get("data")
-            .expect(&format!("Sequence Info For {} Not Found", &fam))
-            .to_owned();
     }
 
-    let mut seq_name;
     let mut output;
     for result in reader.lines() {
         let line = result?;
@@ -569,15 +557,7 @@ pub fn bgzf_filter(
         {
             if dl_fmt {
                 let chrom_id = &fields[0].to_string();
-                let seq_details = seq_data
-                    .get(chrom_id)
-                    .expect(&format!("Sequence {} Not Found", chrom_id));
-                seq_name = seq_details
-                    .get(&"id".to_string())
-                    .expect(&format!("Name Not Found For {}", chrom_id))
-                    .as_str()
-                    .expect("Couldn't Cast To Str");
-                output = formatted_line.to_dl_fmt(seq_name, &hmm_len);
+                output = formatted_line.to_dl_fmt(chrom_id, &hmm_len);
             } else {
                 // output = fields.drain(..16).map(|f| f.to_string()).collect(); // TODO readjust this!
                 output = formatted_line.to_filter_fmt()
@@ -890,35 +870,35 @@ pub fn json_query(
     return Ok(val.to_string().replace("\"", ""));
 }
 
-pub fn get_chrom_id(assembly: &String, query: &String, data_directory: &String) -> String {
-    
-    let target_file = format!(
-        "{}/{}/{}/{}-{}.json",
-        &data_directory, &assembly, SEQUENCE_DIR, &assembly, SEQUENCE_DIR
-    );
-    if !Path::new(&target_file).exists() {
-        eprintln!("{} Not Found", &target_file);
-        std::process::exit(1)
-    }
-    let in_str = read_to_string(&target_file).expect("Could Not Read String");
-    let in_json: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
-    let data = in_json.get("data").expect("No Data");
-    if let Some(data) = data.as_object() {
-        for (acc, val) in data {
-            if let Some(vals) = val.as_object() {
-                let id = vals.get("id").expect("Oh no");
-                if &id.to_string().replace("\"", "") == query {
-                    return acc.to_string();
-                }
-            }
-        }
-        panic!("Sequence ID Not Found")
-    } else {
-        panic!("Something Didn't Work")
-    }
-}
-
 // OLD Methods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// pub fn get_chrom_id(assembly: &String, query: &String, data_directory: &String) -> String {
+    
+//     let target_file = format!(
+//         "{}/{}/{}/{}-{}.json",
+//         &data_directory, &assembly, SEQUENCE_DIR, &assembly, SEQUENCE_DIR
+//     );
+//     if !Path::new(&target_file).exists() {
+//         eprintln!("{} Not Found", &target_file);
+//         std::process::exit(1)
+//     }
+//     let in_str = read_to_string(&target_file).expect("Could Not Read String");
+//     let in_json: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
+//     let data = in_json.get("data").expect("No Data");
+//     if let Some(data) = data.as_object() {
+//         for (acc, val) in data {
+//             if let Some(vals) = val.as_object() {
+//                 let id = vals.get("id").expect("Oh no");
+//                 if &id.to_string().replace("\"", "") == query {
+//                     return acc.to_string();
+//                 }
+//             }
+//         }
+//         panic!("Sequence ID Not Found")
+//     } else {
+//         panic!("Something Didn't Work")
+//     }
+// }
+
 // pub fn process_json(in_file: &String, key: &String, outfile: &Option<String>) -> Result<()> {
 //     if !Path::new(&in_file).exists() {
 //         eprintln!("{} Not Found", &in_file);

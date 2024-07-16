@@ -3,7 +3,7 @@ use clap::{Parser, Subcommand};
 use std::path::Path;
 
 use te_idx::bgzf_filter;
-use te_idx::get_chrom_id;
+// use te_idx::get_chrom_id;
 use te_idx::idx_query;
 use te_idx::json_query;
 use te_idx::prep_beds;
@@ -141,14 +141,6 @@ pub enum Commands {
         #[arg(long, short)]
         outfile: Option<String>,
     },
-    GetChromID {
-        /// Name of assembly/assembly folder
-        #[arg(short, long, verbatim_doc_comment)]
-        assembly: String,
-        /// Query to get ID for
-        #[arg(long, short)]
-        query: String,
-    },
 }
 
 fn main() {
@@ -242,9 +234,6 @@ fn main() {
         }
         Some(Commands::PrepareAssembly { assembly }) => prepare_assembly(assembly, &data_directory, &export_directory)
             .expect(format!("Assembly Prep for {} Failed", &assembly).as_str()),
-        Some(Commands::GetChromID { assembly, query }) => {
-            println!("{}", get_chrom_id(assembly, query, &data_directory));
-        }
         None => {}
     }
 }
@@ -264,6 +253,18 @@ fn main() {
 //     outfile: Option<String>,
 // },
 
+ // GetChromID {
+    //     /// Name of assembly/assembly folder
+    //     #[arg(short, long, verbatim_doc_comment)]
+    //     assembly: String,
+    //     /// Query to get ID for
+    //     #[arg(long, short)]
+    //     query: String,
+    // },
+
+// Some(Commands::GetChromID { assembly, query }) => {
+        //     println!("{}", get_chrom_id(assembly, query, &data_directory));
+        // }
 // Some(Commands::ProcessJSON {
 //     in_file,
 //     key,

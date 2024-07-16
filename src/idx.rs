@@ -395,7 +395,10 @@ impl ContigIndex {
         }
 
         // TODO: Return if cannot identify contig
-        let q_contig_idx = *self.contig_lookup.get(q_contig).unwrap();
+        let q_contig_idx: u32 = match self.contig_lookup.get(q_contig){
+            Some(id) => *id,
+            None => panic!("{}", format!("Contig {q_contig} Not Found")),
+        };
 
         let mut results: Vec<String> = Vec::new();
 

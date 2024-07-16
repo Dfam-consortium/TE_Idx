@@ -6,14 +6,15 @@ use std::io::{BufRead, BufReader};
 use std::path::Path;
 use te_idx::idx::{build_idx, prep_idx};
 use te_idx::{
-    bgzf_filter, get_chrom_id, idx_query, json_query, prep_beds, prepare_assembly,
+    bgzf_filter, idx_query, json_query, prep_beds, prepare_assembly,
     read_family_assembly_annotations, ASSEMBLY_DIR, BENCHMARK_DIR, MASKS_DIR, MOD_LEN_DIR,
     SEQUENCE_DIR,
 };
+// get_chrom_id,
 use tempfile::{NamedTempFile, TempDir};
 
 pub const TEST_DIR: &'static str = "/home/agray/te_idx/tests";
-pub const TEST_DATA_DIR: &'static str = "/home/agray/te_idx/tests/data";
+pub const TEST_DATA_DIR: &'static str = "/home/agray/te_idx/tests/test_data";
 pub const TEST_EXPORT_DIR: &'static str = "/home/agray/te_idx/tests/test_exports";
 
 pub const TEST_ASSEMBLY: &'static str = "test_ex";
@@ -61,7 +62,7 @@ fn test_bgzf_filter_nrph() {
                 .lines()
                 .count();
             // check that filtered file is smaller and contains expected lines
-            assert_eq!(filter_count, 5975);
+            assert_eq!(filter_count, 20959);
             assert_ne!(orig_count, filter_count);
         }
         Err(e) => panic!("{}", e),
@@ -115,14 +116,14 @@ fn test_bgzf_filter_dl_fmt() {
                 .unwrap_or_else(|| Ok("".to_string()))
                 .expect("No Line");
             let toplines = format!("{}\n{}", first, second);
-            let target = "#sequence name\tmodel accession\tmodel name\tbit score\te-value\thmm start\thmm end\thmm length\tstrand\talignment start\talignment end\tenvelope start\tenvelope end\tsequence length\nchr1\tDF000000001\tMIR\t11.0\t290.0\t37\t206\t262\t-\t89176700\t89176576\t89176720\t89176556\t248956422";
+            let target = "#sequence name\tmodel accession\tmodel name\tbit score\te-value\thmm start\thmm end\thmm length\tstrand\talignment start\talignment end\tenvelope start\tenvelope end\tsequence length\nchr10\tDF000000001\tMIR\t104.0\t1.3e-26\t55\t262\t262\t-\t77348007\t77347809\t77348025\t77347809\t133797422";
             // check that header and first line are correct
             assert_eq!(toplines, target);
 
             // check that filtered file is smaller and contains expected lines
             let filter_count = filter_lines.count();
             assert_ne!(orig_count, filter_count);
-            assert_eq!(filter_count, 96);
+            assert_eq!(filter_count, 301);
         }
         Err(e) => panic!("{}", e),
     }
@@ -142,11 +143,11 @@ fn test_build_idx() {
                 e
             ),
         };
-    assert_eq!(filenames.len(), 341);
-    assert_eq!(bgz_dir, "/home/agray/te_idx/tests/data/test_ex/masks");
+    assert_eq!(filenames.len(), 19);
+    assert_eq!(bgz_dir, "/home/agray/te_idx/tests/test_data/test_ex/masks");
     assert_eq!(
         index_file,
-        "/home/agray/te_idx/tests/data/test_ex/masks_idx.dat"
+        "/home/agray/te_idx/tests/test_data/test_ex/masks_idx.dat"
     );
 
     let working_directory = gen_working_dir();
@@ -164,7 +165,7 @@ fn test_build_idx() {
 fn test_idx_query() {
     let assembly = &TEST_ASSEMBLY.to_string();
     let data_type = &ASSEMBLY_DIR.to_string();
-    let chrom = &1.to_string();
+    let chrom = &"chr10".to_string();
     let start = 10000;
     let end = 100000;
     let family: &Option<String> = &None;
@@ -183,14 +184,14 @@ fn test_idx_query() {
     )
     .expect("Index Query Failed");
     let vals1: Vec<HashMap<String, String>> = from_str(&res1).expect("Cannot Deserialize");
-    assert_eq!(vals1.len(), 22);
+    assert_eq!(vals1.len(), 4);
 }
 
 #[test]
 fn test_idx_query_fam() {
     let assembly = &TEST_ASSEMBLY.to_string();
     let data_type = &ASSEMBLY_DIR.to_string();
-    let chrom = &1.to_string();
+    let chrom = &"chr10".to_string();
     let start = 10000;
     let end = 100000;
     let family: &Option<String> = &Some("DF000000001".to_string());
@@ -210,14 +211,14 @@ fn test_idx_query_fam() {
     .expect("Index Query Failed");
     println!("{:?}", res);
     let vals: Vec<HashMap<String, String>> = from_str(&res).expect("Cannot Deserialize");
-    assert_eq!(vals.len(), 15);
+    assert_eq!(vals.len(), 4);
 }
 
 #[test]
 fn test_idx_query_nrph() {
     let assembly = &TEST_ASSEMBLY.to_string();
     let data_type = &ASSEMBLY_DIR.to_string();
-    let chrom = &1.to_string();
+    let chrom = &"chr10".to_string();
     let start = 10000;
     let end = 100000;
     let family: &Option<String> = &Some("DF000000001".to_string());
@@ -237,14 +238,14 @@ fn test_idx_query_nrph() {
     )
     .expect("Index Query Failed");
     let vals: Vec<HashMap<String, String>> = from_str(&res).expect("Cannot Deserialize");
-    assert_eq!(vals.len(), 15);
+    assert_eq!(vals.len(), 4);
 }
 
 #[test]
 fn test_json_query() {
     let assembly = &TEST_ASSEMBLY.to_string();
     let data_type = &SEQUENCE_DIR.to_string();
-    let key = &"1".to_string();
+    let key = &"chr1".to_string();
     let target = &"length".to_string();
     let data_directory = TEST_DATA_DIR.to_string();
 
@@ -343,7 +344,7 @@ fn test_read_family_assembly_annotation() {
 
     let reader = bgzf::Reader::new(File::open(out_f).expect("can't open"));
     let line_count = reader.lines().count();
-    assert_eq!(line_count, 60001);
+    assert_eq!(line_count, 195256);
 }
 
 #[test]
@@ -360,20 +361,20 @@ fn test_read_family_assembly_annotation_nrph() {
 
     let reader = bgzf::Reader::new(File::open(out_f).expect("can't open"));
     let line_count = reader.lines().count();
-    assert_eq!(line_count, 59911);
-}
-
-#[test]
-fn test_get_chrom_id() {
-    let assembly = &TEST_ASSEMBLY.to_string();
-    let data_directory = TEST_DATA_DIR.to_string();
-    let query = &"chr5".to_string();
-
-    let val = get_chrom_id(assembly, query, &data_directory);
-    assert_eq!(val, "54");
+    assert_eq!(line_count, 195024);
 }
 
 // OLD
+// #[test]
+// fn test_get_chrom_id() {
+//     let assembly = &TEST_ASSEMBLY.to_string();
+//     let data_directory = TEST_DATA_DIR.to_string();
+//     let query = &"chr5".to_string();
+
+//     let val = get_chrom_id(assembly, query, &data_directory);
+//     assert_eq!(val, "54");
+// }
+
 // #[test]
 // fn test_process_json() {
 //     let out_f = NamedTempFile::new_in(TEST_DATA_DIR).expect("Couldn't Open Output File");
