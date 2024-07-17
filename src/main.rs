@@ -13,7 +13,6 @@ mod idx;
 
 use te_idx::{DATA_DIR, EXPORT_DIR, INDEX_DATA_TYPES, JSON_DATA_TYPES};
 
-
 #[derive(Parser)]
 #[command(author, version, about)]
 pub struct Cli {
@@ -25,6 +24,10 @@ pub struct Cli {
     #[clap(short, long, verbatim_doc_comment)]
     pub exp_dir: Option<String>,
 
+    /// Name of assembly/assembly folder
+    #[arg(short, long, verbatim_doc_comment)]
+    assembly: String,
+
     #[command(subcommand)]
     pub command: Option<Commands>,
 }
@@ -33,9 +36,6 @@ pub struct Cli {
 pub enum Commands {
     /// Search an individual .bed.bgz file for matches in a specified column
     BgzfFilter {
-        /// Name of assembly/assembly folder
-        #[arg(short, long, verbatim_doc_comment)]
-        assembly: String,
         /// Type of data to be indexed/searched
         #[arg(short, long, verbatim_doc_comment)]
         #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
@@ -58,9 +58,6 @@ pub enum Commands {
     },
     /// Build file for grouped .bed.bgz files
     BuildIdx {
-        /// Name of assembly/assembly folder
-        #[arg(short, long, verbatim_doc_comment)]
-        assembly: String,
         /// Type of data to be indexed/searched
         #[arg(short, long, verbatim_doc_comment)]
         #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
@@ -68,9 +65,6 @@ pub enum Commands {
     },
     /// Split TSV files into compressed BED files by accession
     PrepBeds {
-        /// Name of assembly/assembly folder
-        #[arg(short, long, verbatim_doc_comment)]
-        assembly: String,
         /// Input file from buildFullRegion.py. Should be in accession order
         #[arg(short, long, verbatim_doc_comment)]
         in_tsv: String,
@@ -80,16 +74,9 @@ pub enum Commands {
         data_type: String,
     },
     /// Given an assembly name, check for and process all present exports
-    PrepareAssembly {
-        /// Name of assembly/assembly folder
-        #[arg(short, long, verbatim_doc_comment)]
-        assembly: String,
-    },
+    PrepareAssembly {},
     /// Search indexed BED files for all hits within a range
     IdxQuery {
-        /// Name of assembly/assembly folder
-        #[arg(short, long, verbatim_doc_comment)]
-        assembly: String,
         /// Type of data to be searched
         #[arg(short, long, verbatim_doc_comment)]
         #[clap(value_parser = PossibleValuesParser::new(INDEX_DATA_TYPES), required(true))]
@@ -112,9 +99,6 @@ pub enum Commands {
     },
     /// Retrieve information from a processed JSON file
     JsonQuery {
-        /// Name of assembly/assembly folder
-        #[arg(short, long, verbatim_doc_comment)]
-        assembly: String,
         /// Type of data to be searched
         #[arg(short, long, verbatim_doc_comment)]
         #[clap(value_parser = PossibleValuesParser::new(JSON_DATA_TYPES), required(true))]
@@ -131,9 +115,6 @@ pub enum Commands {
         /// Family Accession
         #[arg(short, long, verbatim_doc_comment)]
         id: String,
-        /// Name of assembly/assembly folder
-        #[arg(short, long, verbatim_doc_comment)]
-        assembly_id: String,
         /// Only Return NRPH hits
         #[arg(short, long, verbatim_doc_comment)]
         nrph: bool,
@@ -146,18 +127,23 @@ pub enum Commands {
 fn main() {
     let cli = Cli::parse();
 
-    let data_directory = match cli.data_dir{
+    let data_directory = match cli.data_dir {
         Some(dir) => dir,
         None => DATA_DIR.to_string(),
     };
-    
-    let export_directory = match cli.exp_dir{
+
+    let export_directory = match cli.exp_dir {
         Some(dir) => dir,
         None => EXPORT_DIR.to_string(),
     };
 
+    let assembly = cli.assembly;
+
     if !Path::new(&data_directory).exists() {
-        panic!("Data Directory \"{}\" Does Not Exist. A data path must be supplied if not run on dfam", &data_directory);
+        panic!(
+            "Data Directory \"{}\" Does Not Exist. A data path must be supplied if not run on dfam",
+            &data_directory
+        );
     };
 
     if !Path::new(&export_directory).exists() {
@@ -166,7 +152,6 @@ fn main() {
 
     match &cli.command {
         Some(Commands::BgzfFilter {
-            assembly,
             data_type,
             fam,
             position,
@@ -175,14 +160,18 @@ fn main() {
             web_fmt,
         }) => {
             bgzf_filter(
-                assembly, data_type, fam, position, term, outfile, *web_fmt, &data_directory,
+                &assembly,
+                data_type,
+                fam,
+                position,
+                term,
+                outfile,
+                *web_fmt,
+                &data_directory,
             )
             .expect("Filter Failed");
         }
-        Some(Commands::BuildIdx {
-            assembly,
-            data_type,
-        }) => {
+        Some(Commands::BuildIdx { data_type }) => {
             let (filenames, bgz_dir, mut contig_index, index_file) =
                 match idx::prep_idx(&format!("{}/{}", &data_directory, &assembly), data_type) {
                     Ok(res) => res,
@@ -194,16 +183,13 @@ fn main() {
             idx::build_idx(&filenames, &bgz_dir, &mut contig_index, &index_file)
                 .expect("Indexing Failed")
         }
-        Some(Commands::PrepBeds {
-            assembly,
-            in_tsv,
-            data_type,
-        }) => match prep_beds(assembly, in_tsv, data_type, &data_directory) {
-            Ok(()) => println!("Bed Files Created - {}", data_type),
-            Err(e) => panic!("{:?}", e),
-        },
+        Some(Commands::PrepBeds { in_tsv, data_type }) => {
+            match prep_beds(&assembly, in_tsv, data_type, &data_directory) {
+                Ok(()) => println!("Bed Files Created - {}", data_type),
+                Err(e) => panic!("{:?}", e),
+            }
+        }
         Some(Commands::IdxQuery {
-            assembly,
             data_type,
             chrom,
             start,
@@ -211,29 +197,36 @@ fn main() {
             family,
             nrph,
         }) => {
-            let result = idx_query(assembly, data_type, chrom, *start, *end, family, nrph, &data_directory)
-                .expect("Index Query Failed");
+            let result = idx_query(
+                &assembly,
+                data_type,
+                chrom,
+                *start,
+                *end,
+                family,
+                nrph,
+                &data_directory,
+            )
+            .expect("Index Query Failed");
             println!("{}", result)
         }
         Some(Commands::JsonQuery {
-            assembly,
             data_type,
             key,
             target,
         }) => {
-            let ans = json_query(assembly, data_type, key, target, &data_directory).expect("JSON Read Failed");
+            let ans = json_query(&assembly, data_type, key, target, &data_directory)
+                .expect("JSON Read Failed");
             println!("{}", ans)
         }
-        Some(Commands::ReadFamilyAssemblyAnnotations {
-            id,
-            assembly_id,
-            nrph,
-            outfile,
-        }) => {
-            let _res = read_family_assembly_annotations(id, assembly_id, nrph, outfile, &data_directory);
+        Some(Commands::ReadFamilyAssemblyAnnotations { id, nrph, outfile }) => {
+            let _res =
+                read_family_assembly_annotations(id, &assembly, nrph, outfile, &data_directory);
         }
-        Some(Commands::PrepareAssembly { assembly }) => prepare_assembly(assembly, &data_directory, &export_directory)
-            .expect(format!("Assembly Prep for {} Failed", &assembly).as_str()),
+        Some(Commands::PrepareAssembly {}) => {
+            prepare_assembly(&assembly, &data_directory, &export_directory)
+                .expect(format!("Assembly Prep for {} Failed", &assembly).as_str())
+        }
         None => {}
     }
 }
@@ -253,18 +246,18 @@ fn main() {
 //     outfile: Option<String>,
 // },
 
- // GetChromID {
-    //     /// Name of assembly/assembly folder
-    //     #[arg(short, long, verbatim_doc_comment)]
-    //     assembly: String,
-    //     /// Query to get ID for
-    //     #[arg(long, short)]
-    //     query: String,
-    // },
+// GetChromID {
+//     /// Name of assembly/assembly folder
+//     #[arg(short, long, verbatim_doc_comment)]
+//     assembly: String,
+//     /// Query to get ID for
+//     #[arg(long, short)]
+//     query: String,
+// },
 
 // Some(Commands::GetChromID { assembly, query }) => {
-        //     println!("{}", get_chrom_id(assembly, query, &data_directory));
-        // }
+//     println!("{}", get_chrom_id(assembly, query, &data_directory));
+// }
 // Some(Commands::ProcessJSON {
 //     in_file,
 //     key,

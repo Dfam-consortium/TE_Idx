@@ -395,7 +395,7 @@ impl ContigIndex {
         }
 
         // TODO: Return if cannot identify contig
-        let q_contig_idx: u32 = match self.contig_lookup.get(q_contig){
+        let q_contig_idx: u32 = match self.contig_lookup.get(q_contig) {
             Some(id) => *id,
             None => panic!("{}", format!("Contig {q_contig} Not Found")),
         };

@@ -493,7 +493,6 @@ pub fn bgzf_filter(
     dl_fmt: bool,
     data_directory: &String,
 ) -> Result<()> {
-    
     let assembly_path: String = format!("{}/{}/{}", &data_directory, &assembly, &data_type);
     if !Path::new(&assembly_path).exists() {
         panic!("Data \"{}\" Does Not Exist", assembly_path);
@@ -577,7 +576,6 @@ pub fn prep_beds(
     data_type: &String,
     data_directory: &String,
 ) -> Result<()> {
-    
     if !Path::new(&in_tsv).exists() {
         panic!("Input TSV \"{}\" Not Found", &in_tsv);
     }
@@ -636,7 +634,6 @@ pub fn prepare_assembly(
     data_directory: &String,
     export_directory: &String,
 ) -> Result<()> {
-    
     if !Path::new(&data_directory).exists() {
         eprintln!("{} Not Found", &data_directory);
         std::process::exit(1)
@@ -749,7 +746,6 @@ pub fn read_family_assembly_annotations(
     outfile: &Option<String>,
     data_directory: &String,
 ) -> Result<()> {
-    
     let assembly_path: String = format!("{}/{}", &data_directory, &assembly_id);
     if !Path::new(&assembly_path).exists() {
         panic!("Assembly \"{}\" Does Not Exist", assembly_path);
@@ -787,7 +783,6 @@ pub fn idx_query(
     nrph: &bool,
     data_directory: &String,
 ) -> Result<String> {
-    
     let assembly_path: String = format!("{}/{}", &data_directory, &assembly);
     // confirm assembly_id and ensure that it accessable
     if !Path::new(&assembly_path).exists() {
@@ -851,7 +846,6 @@ pub fn json_query(
     target: &String,
     data_directory: &String,
 ) -> Result<String> {
-    
     let target_file = format!(
         "{}/{}/{}/{}-{}.json",
         &data_directory, &assembly, &data_type, &assembly, &data_type
@@ -872,7 +866,7 @@ pub fn json_query(
 
 // OLD Methods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // pub fn get_chrom_id(assembly: &String, query: &String, data_directory: &String) -> String {
-    
+
 //     let target_file = format!(
 //         "{}/{}/{}/{}-{}.json",
 //         &data_directory, &assembly, SEQUENCE_DIR, &assembly, SEQUENCE_DIR

@@ -265,12 +265,7 @@ fn test_prep_beds() {
 
     match prep_beds(assembly, &in_tsv, data_type, &data_directory) {
         Ok(()) => {
-            let mask_dir = format!(
-                "{}/{}/{}",
-                data_directory,
-                &TEST_ASSEMBLY,
-                &data_type
-            );
+            let mask_dir = format!("{}/{}/{}", data_directory, &TEST_ASSEMBLY, &data_type);
             // check that new folder was created and contains expected number of files
             assert_eq!(true, Path::new(&mask_dir).exists());
             assert_eq!(
