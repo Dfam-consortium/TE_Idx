@@ -536,7 +536,7 @@ pub fn bgzf_filter(
             &assembly,
             &MOD_LEN_DIR.to_string(),
             &fam.to_string(),
-            &"length".to_string(),
+            &Some("length".to_string()),
             data_directory,
         ) {
             Ok(len) => len,
@@ -843,7 +843,7 @@ pub fn json_query(
     assembly: &String,
     data_type: &String,
     key: &String,
-    target: &String,
+    target: &Option<String>,
     data_directory: &String,
 ) -> Result<String> {
     let target_file = format!(
@@ -856,12 +856,29 @@ pub fn json_query(
 
     let in_str = read_to_string(&target_file).expect("Could Not Read String");
     let in_data: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
+    let data = in_data.get("data").unwrap();
 
-    let val = in_data
-        .get("data")
-        .and_then(|data| data.get(key).and_then(|item| item.get(target)))
-        .expect("Key Target Pair Not Found");
-    return Ok(val.to_string().replace("\"", ""));
+    let mut val = None;
+    let ret_val =Value::String("1".to_string());
+    match target {
+        Some(target) => {
+            val = data.get(key).and_then(|item| item.get(target))
+        },
+        None => {
+            if let Value::Object(map) = data {
+                if map.contains_key(key) {
+                    val = Some(&ret_val)
+                }
+            }
+        }
+    }
+
+    match val {
+        Some(val) => {
+            return Ok(val.to_string().replace("\"", ""));
+        },
+        None => return Ok("-1".to_string())
+    }
 }
 
 // OLD Methods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

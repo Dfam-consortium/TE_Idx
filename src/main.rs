@@ -108,7 +108,7 @@ pub enum Commands {
         key: String,
         /// Target Attribute to return
         #[arg(short, long, verbatim_doc_comment)]
-        target: String,
+        target: Option<String>,
     },
     /// Read all or NRPH only family annotations for an assembly
     ReadFamilyAssemblyAnnotations {
