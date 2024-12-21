@@ -374,8 +374,12 @@ impl ContigIndex {
         q_family: &Option<String>,
         q_nrph: bool,
     ) -> Result<Vec<String>, Box<dyn Error>> {
-        fn filter_line(line: &String, q_family: &Option<String>, q_nrph: &bool) -> bool {
+        fn filter_line(line: &String, q_start: &u64, q_family: &Option<String>, q_nrph: &bool) -> bool {
             let fields = line.split_whitespace().collect::<Vec<&str>>();
+            let end: u64 = fields[2].parse().unwrap();
+            if end - 1 < *q_start {
+                return false;
+            }
             if q_family.is_some() {
                 let acc: &str = fields[3].split(".").collect::<Vec<&str>>()[0];
                 if q_family.as_ref().unwrap() != acc {
@@ -485,7 +489,7 @@ impl ContigIndex {
                         .expect("Could Not Seek");
                     let mut line = String::new();
                     reader.read_line(&mut line).unwrap();
-                    if filter_line(&line, &q_family, &q_nrph) {
+                    if filter_line(&line, &q_start, &q_family, &q_nrph) {
                         results.push(line);
                         hits += 1;
                     }
@@ -526,7 +530,7 @@ impl ContigIndex {
                                         .unwrap();
                                     let mut line = String::new();
                                     reader.read_line(&mut line).unwrap();
-                                    if filter_line(&line, &q_family, &q_nrph) {
+                                    if filter_line(&line, &q_start, &q_family, &q_nrph) {
                                         results.push(line);
                                         hits += 1;
                                     }
