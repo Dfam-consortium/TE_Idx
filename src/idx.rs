@@ -474,7 +474,17 @@ impl ContigIndex {
                         break;
                     }
                 }
+                // q_family = Some("DF000000005")
+                // self.bgz_files[range.bed_idx as usize].name = "DF000000263.bed.bgz"
+                // ContigRange { bed_idx: 218, start_bp: 44990894, end_bp: 44990556, bgzf_pos: 249641047067 }
                 for range in ranges.iter().rev() {
+                    // If a family is specified in the query, it is only necessary to consider
+                    // hits to a specific bed_idx file.  This is a short-circuit optimization.
+                    if let Some(q_family) = q_family {
+                        if ! self.bgz_files[range.bed_idx as usize].name.contains(q_family) {
+                            continue
+                        }
+                    }
                     // This is surprisingly fast despite having to open/abandon a bgzf file per
                     // annotation.  Pre-grouping the annotations by family/start might speed up
                     // retreival, however then it would need to be resorted by contig/start for
@@ -514,6 +524,15 @@ impl ContigIndex {
                                 if range_data[r_idx as usize].start_bp < (tile_start_bp as u64) {
                                     continue;
                                 }
+                                
+                                // If a family is specified in the query, it is only necessary to consider
+                                // hits to a specific bed_idx file.  This is a short-circuit optimization.
+                                if let Some(q_family) = q_family {
+                                    if ! self.bgz_files[range_data[r_idx as usize].bed_idx as usize].name.contains(q_family) {
+                                        continue
+                                     }
+                                }
+ 
                                 if range_data[r_idx as usize].start_bp < q_end {
                                     let bgz_file = format!(
                                         "{}/{}",
@@ -914,7 +933,6 @@ pub fn search_idx(
             fsfile
         );
     }
-
     let mut i_file = File::open(index_file).unwrap();
     debug!("Searching...");
     let results = contig_index.search(&mut i_file, &bgz_dir, &q_contig, start, end, family, nrph);
