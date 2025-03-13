@@ -253,15 +253,19 @@ fn test_json_query() {
         json_query(assembly, data_type, key, target, &data_directory).expect("JSON Read Failed");
     assert_eq!(ans, "248956422");
 
-    let just_key = 
+    let just_key =
         json_query(assembly, data_type, key, &None, &data_directory).expect("JSON Read Failed");
     assert_eq!(&just_key, "1");
 
-    let bad_key = 
-        json_query(assembly, data_type, &"bad".to_string(), &None, &data_directory).expect("JSON Read Failed");
+    let bad_key = json_query(
+        assembly,
+        data_type,
+        &"bad".to_string(),
+        &None,
+        &data_directory,
+    )
+    .expect("JSON Read Failed");
     assert_eq!(&bad_key, "-1");
-
-
 }
 
 #[test]

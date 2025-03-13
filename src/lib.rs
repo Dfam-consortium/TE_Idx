@@ -7,6 +7,7 @@ use std::io::{stdout, BufRead, BufReader, Result, Write};
 use std::num::NonZeroUsize;
 use std::path::Path;
 use tempfile::tempfile;
+use walkdir::WalkDir;
 
 pub mod idx;
 
@@ -859,11 +860,9 @@ pub fn json_query(
     let data = in_data.get("data").unwrap();
 
     let mut val = None;
-    let ret_val =Value::String("1".to_string());
+    let ret_val = Value::String("1".to_string());
     match target {
-        Some(target) => {
-            val = data.get(key).and_then(|item| item.get(target))
-        },
+        Some(target) => val = data.get(key).and_then(|item| item.get(target)),
         None => {
             if let Value::Object(map) = data {
                 if map.contains_key(key) {
@@ -876,9 +875,108 @@ pub fn json_query(
     match val {
         Some(val) => {
             return Ok(val.to_string().replace("\"", ""));
-        },
-        None => return Ok("-1".to_string())
+        }
+        None => return Ok("-1".to_string()),
     }
+}
+
+// pub fn fam_with_nrph(
+//     assembly: &String,
+//     data_type: &String,
+//     fam: &String,
+//     position: &usize,
+//     term: &Option<String>,
+//     outfile: &Option<String>,
+//     dl_fmt: bool,
+//     data_directory: &String,
+// ) -> Result<String> {
+//     // return  Ok("");
+// }
+
+pub fn assembly_data(
+    assembly: &String,
+    data_directory: &String,
+    summary: &bool,
+    annotations: &bool,
+    benchmarks: &bool,
+    masks: &bool,
+    chromosomes: &bool,
+) -> Result<()> {
+    let assembly_path: String = format!("{}/{}", &data_directory, &assembly);
+    // confirm assembly_id and ensure that it accessable
+    if !Path::new(&assembly_path).exists() {
+        panic!("Assembly \"{}\" Does Not Exist", assembly_path);
+    }
+
+    let annotation_files: Vec<_> = WalkDir::new(format!("{}/{}", &assembly_path, ASSEMBLY_DIR))
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .collect();
+    let benchmark_files: Vec<_> = WalkDir::new(format!("{}/{}", &assembly_path, BENCHMARK_DIR))
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .collect();
+    let mask_files: Vec<_> = WalkDir::new(format!("{}/{}", &assembly_path, MASKS_DIR))
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .collect();
+
+    let in_str = read_to_string(format!(
+        "{}/{}/{}{}",
+        &assembly_path, SEQUENCE_DIR, &assembly, SEQUENCE_FILE
+    ))
+    .expect("Could Not Read String");
+    let in_data: Value = serde_json::from_str(&in_str).expect("JSON was not well-formatted");
+    let chrom_data: Vec<_> = in_data
+        .get("data")
+        .unwrap()
+        .as_object()
+        .unwrap()
+        .keys()
+        .collect();
+
+    println!("Assembly: {}", assembly_path);
+    if *summary {
+        println!("Annotation Files Count: {}", &annotation_files.len());
+        println!("Benchark Files Count: {}", benchmark_files.len());
+        println!("Simple Repeat Files Count: {}", mask_files.len());
+        println!("Chromosomes Count: {}", &chrom_data.len());
+        println!("");
+    }
+
+    if *annotations {
+        println!("Annotation Files:");
+        for file in annotation_files {
+            println!("{}", file.file_name().to_string_lossy());
+        }
+        println!("");
+    }
+
+    if *benchmarks {
+        println!("Benchmark Files:");
+        for file in benchmark_files {
+            println!("{}", file.file_name().to_string_lossy());
+        }
+        println!("");
+    }
+
+    if *masks {
+        println!("Mask Files:");
+        for file in mask_files {
+            println!("{}", file.file_name().to_string_lossy());
+        }
+        println!("");
+    }
+
+    if *chromosomes {
+        println!("Sequence Names:");
+        for chrom in chrom_data {
+            println!("{}", chrom);
+        }
+        println!("");
+    }
+
+    return Ok(());
 }
 
 // OLD Methods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -374,7 +374,12 @@ impl ContigIndex {
         q_family: &Option<String>,
         q_nrph: bool,
     ) -> Result<Vec<String>, Box<dyn Error>> {
-        fn filter_line(line: &String, q_start: &u64, q_family: &Option<String>, q_nrph: &bool) -> bool {
+        fn filter_line(
+            line: &String,
+            q_start: &u64,
+            q_family: &Option<String>,
+            q_nrph: &bool,
+        ) -> bool {
             let fields = line.split_whitespace().collect::<Vec<&str>>();
             let end: u64 = fields[2].parse().unwrap();
             if end - 1 < *q_start {

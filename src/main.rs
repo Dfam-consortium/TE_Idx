@@ -4,6 +4,7 @@ use std::path::Path;
 
 use te_idx::bgzf_filter;
 // use te_idx::get_chrom_id;
+use te_idx::assembly_data;
 use te_idx::idx_query;
 use te_idx::json_query;
 use te_idx::prep_beds;
@@ -122,6 +123,24 @@ pub enum Commands {
         #[arg(long, short)]
         outfile: Option<String>,
     },
+    /// Display information about the given assembly
+    MetaData {
+        /// Show Summary Stats
+        #[arg(long, short)]
+        summary: bool,
+        /// Show Annotated Files
+        #[arg(long, short)]
+        annotations: bool,
+        /// Show Benchmark Files
+        #[arg(long, short)]
+        benchmarks: bool,
+        /// Show Short Repeat Files
+        #[arg(long, short)]
+        masks: bool,
+        /// Show Chromosome IDs
+        #[arg(long, short)]
+        chromosomes: bool,
+    },
 }
 
 fn main() {
@@ -226,6 +245,23 @@ fn main() {
         Some(Commands::PrepareAssembly {}) => {
             prepare_assembly(&assembly, &data_directory, &export_directory)
                 .expect(format!("Assembly Prep for {} Failed", &assembly).as_str())
+        }
+        Some(Commands::MetaData {
+            summary,
+            annotations,
+            benchmarks,
+            masks,
+            chromosomes,
+        }) => {
+            let _assem = assembly_data(
+                &assembly,
+                &data_directory,
+                summary,
+                annotations,
+                benchmarks,
+                masks,
+                chromosomes,
+            );
         }
         None => {}
     }
