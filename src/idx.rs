@@ -486,8 +486,11 @@ impl ContigIndex {
                     // If a family is specified in the query, it is only necessary to consider
                     // hits to a specific bed_idx file.  This is a short-circuit optimization.
                     if let Some(q_family) = q_family {
-                        if ! self.bgz_files[range.bed_idx as usize].name.contains(q_family) {
-                            continue
+                        if !self.bgz_files[range.bed_idx as usize]
+                            .name
+                            .contains(q_family)
+                        {
+                            continue;
                         }
                     }
                     // This is surprisingly fast despite having to open/abandon a bgzf file per
@@ -529,15 +532,18 @@ impl ContigIndex {
                                 if range_data[r_idx as usize].start_bp < (tile_start_bp as u64) {
                                     continue;
                                 }
-                                
+
                                 // If a family is specified in the query, it is only necessary to consider
                                 // hits to a specific bed_idx file.  This is a short-circuit optimization.
                                 if let Some(q_family) = q_family {
-                                    if ! self.bgz_files[range_data[r_idx as usize].bed_idx as usize].name.contains(q_family) {
-                                        continue
-                                     }
+                                    if !self.bgz_files[range_data[r_idx as usize].bed_idx as usize]
+                                        .name
+                                        .contains(q_family)
+                                    {
+                                        continue;
+                                    }
                                 }
- 
+
                                 if range_data[r_idx as usize].start_bp < q_end {
                                     let bgz_file = format!(
                                         "{}/{}",
