@@ -4,12 +4,14 @@ use std::path::Path;
 
 use te_idx::bgzf_filter;
 // use te_idx::get_chrom_id;
+use te_idx::all_annotations;
 use te_idx::assembly_data;
 use te_idx::idx_query;
 use te_idx::json_query;
 use te_idx::prep_beds;
 use te_idx::prepare_assembly;
 use te_idx::read_family_assembly_annotations;
+
 mod idx;
 
 use te_idx::{DATA_DIR, EXPORT_DIR, INDEX_DATA_TYPES, JSON_DATA_TYPES};
@@ -141,6 +143,12 @@ pub enum Commands {
         #[arg(long, short)]
         chromosomes: bool,
     },
+    /// Outputs all annotations in assembly in filter format. Essentailly the source TSV
+    AllAnnotations {
+        /// Path to file to save filtered data. Should end in .bed.bgz
+        #[arg(long, short, verbatim_doc_comment)]
+        outfile: Option<String>,
+    },
 }
 
 fn main() {
@@ -262,6 +270,9 @@ fn main() {
                 masks,
                 chromosomes,
             );
+        }
+        Some(Commands::AllAnnotations { outfile }) => {
+            let _res = all_annotations(&assembly, outfile, &data_directory);
         }
         None => {}
     }

@@ -880,18 +880,39 @@ pub fn json_query(
     }
 }
 
-// pub fn fam_with_nrph(
-//     assembly: &String,
-//     data_type: &String,
-//     fam: &String,
-//     position: &usize,
-//     term: &Option<String>,
-//     outfile: &Option<String>,
-//     dl_fmt: bool,
-//     data_directory: &String,
-// ) -> Result<String> {
-//     // return  Ok("");
-// }
+pub fn all_annotations(
+    assembly: &String,
+    outfile: &Option<String>,
+    data_directory: &String,
+) -> Result<()> {
+    let assembly_path: String = format!("{}/{}", &data_directory, &assembly);
+    // confirm assembly_id and ensure that it accessable
+    if !Path::new(&assembly_path).exists() {
+        panic!("Assembly \"{}\" Does Not Exist", assembly_path);
+    }
+    let annotation_files: Vec<_> = WalkDir::new(format!("{}/{}", &assembly_path, ASSEMBLY_DIR))
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .collect();
+
+    for file in annotation_files {
+        let file = &file.file_name().to_str().unwrap().to_string();
+        if file.ends_with(".bed.bgz") {
+            bgzf_filter(
+                assembly,
+                &ASSEMBLY_DIR.to_string(),
+                &file.split(".").collect::<Vec<&str>>()[0].to_string(),
+                &1,
+                &None,
+                outfile,
+                false,
+                data_directory,
+            )
+            .expect("Filter Failed");
+        }
+    }
+    return Ok(());
+}
 
 pub fn assembly_data(
     assembly: &String,
