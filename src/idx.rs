@@ -16,6 +16,7 @@ use std::time::SystemTime;
 // static MY_LOGGER: MyLogger = MyLogger;
 pub const TILE_SIZE: u32 = 16384;
 
+#[allow(dead_code)]
 struct MyLogger;
 
 impl log::Log for MyLogger {

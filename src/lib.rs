@@ -69,24 +69,24 @@ pub struct Annotation {
 impl Formattable for Annotation {
     fn from_export_tsv(tsv_line: &Vec<&str>) -> Self {
         Self {
-            seq_acc: tsv_line[0].to_string(),
-            fam_acc: tsv_line[1].to_string(),
-            family_name: tsv_line[2].to_string(),
-            bit_score: tsv_line[3].to_string(),
-            e_value: tsv_line[4].to_string(),
-            bias: tsv_line[5].to_string(),
-            model_start: tsv_line[6].to_string(),
-            model_end: tsv_line[7].to_string(),
-            strand: tsv_line[8].to_string(),
-            ali_start: tsv_line[9].to_string(),
-            ali_end: tsv_line[10].to_string(),
-            seq_start: tsv_line[11].to_string(),
-            seq_end: tsv_line[12].to_string(),
-            seq_len: tsv_line[13].to_string(),
-            cigar: tsv_line[14].to_string(),
-            kimura_div: tsv_line[15].to_string(),
-            nrph_hit: tsv_line[16].to_string(),
-            caf: tsv_line[17].to_string(),
+            seq_acc: tsv_line[0].trim().to_string(),
+            fam_acc: tsv_line[1].trim().to_string(),
+            family_name: tsv_line[2].trim().to_string(),
+            bit_score: tsv_line[3].trim().to_string(),
+            e_value: tsv_line[4].trim().to_string(),
+            bias: tsv_line[5].trim().to_string(),
+            model_start: tsv_line[6].trim().to_string(),
+            model_end: tsv_line[7].trim().to_string(),
+            strand: tsv_line[8].trim().to_string(),
+            ali_start: tsv_line[9].trim().to_string(),
+            ali_end: tsv_line[10].trim().to_string(),
+            seq_start: tsv_line[11].trim().to_string(),
+            seq_end: tsv_line[12].trim().to_string(),
+            seq_len: tsv_line[13].trim().to_string(),
+            cigar: tsv_line[14].trim().to_string(),
+            kimura_div: tsv_line[15].trim().to_string(),
+            nrph_hit: tsv_line[16].trim().to_string(),
+            caf: tsv_line[17].trim().to_string(),
         }
     }
 
@@ -221,25 +221,25 @@ pub struct BenchMarkAnnotation {
 impl Formattable for BenchMarkAnnotation {
     fn from_export_tsv(tsv_line: &Vec<&str>) -> Self {
         let cigar = if tsv_line.len() >= 15 {
-            tsv_line[14].to_string()
+            tsv_line[14].trim().to_string()
         } else {
             String::new()
         };
         Self {
-            seq_acc: tsv_line[0].to_string(),
-            fam_acc: tsv_line[1].to_string(),
-            family_name: tsv_line[2].to_string(),
-            bit_score: tsv_line[3].to_string(),
-            e_value: tsv_line[4].to_string(),
-            bias: tsv_line[5].to_string(),
-            model_start: tsv_line[6].to_string(),
-            model_end: tsv_line[7].to_string(),
-            strand: tsv_line[8].to_string(),
-            ali_start: tsv_line[9].to_string(),
-            ali_end: tsv_line[10].to_string(),
-            seq_start: tsv_line[11].to_string(),
-            seq_end: tsv_line[12].to_string(),
-            seq_len: tsv_line[13].to_string(),
+            seq_acc: tsv_line[0].trim().to_string(),
+            fam_acc: tsv_line[1].trim().to_string(),
+            family_name: tsv_line[2].trim().to_string(),
+            bit_score: tsv_line[3].trim().to_string(),
+            e_value: tsv_line[4].trim().to_string(),
+            bias: tsv_line[5].trim().to_string(),
+            model_start: tsv_line[6].trim().to_string(),
+            model_end: tsv_line[7].trim().to_string(),
+            strand: tsv_line[8].trim().to_string(),
+            ali_start: tsv_line[9].trim().to_string(),
+            ali_end: tsv_line[10].trim().to_string(),
+            seq_start: tsv_line[11].trim().to_string(),
+            seq_end: tsv_line[12].trim().to_string(),
+            seq_len: tsv_line[13].trim().to_string(),
             cigar,
         }
     }
@@ -357,11 +357,11 @@ struct MaskHit {
 impl Formattable for MaskHit {
     fn from_export_tsv(tsv_line: &Vec<&str>) -> Self {
         Self {
-            seq_acc: tsv_line[0].to_string(),
-            seq_start: tsv_line[1].to_string(),
-            seq_end: tsv_line[2].to_string(),
-            repeat_str: tsv_line[3].to_string(),
-            repeat_length: tsv_line[4].to_string(),
+            seq_acc: tsv_line[0].trim().to_string(),
+            seq_start: tsv_line[1].trim().to_string(),
+            seq_end: tsv_line[2].trim().to_string(),
+            repeat_str: tsv_line[3].trim().to_string(),
+            repeat_length: tsv_line[4].trim().to_string(),
         }
     }
     fn to_json(&self) -> serde_json::Value {
