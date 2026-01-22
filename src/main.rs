@@ -173,10 +173,6 @@ fn main() {
         );
     };
 
-    if !Path::new(&export_directory).exists() {
-        panic!("Export Directory \"{}\" Does Not Exist. An export path must be supplied if not run on dfam", &export_directory);
-    };
-
     match &cli.command {
         Some(Commands::BgzfFilter {
             data_type,
@@ -251,6 +247,9 @@ fn main() {
                 read_family_assembly_annotations(id, &assembly, nrph, outfile, &data_directory);
         }
         Some(Commands::PrepareAssembly {}) => {
+            if !Path::new(&export_directory).exists() {
+                panic!("Export Directory \"{}\" Does Not Exist. An export path must be supplied if not run on dfam", &export_directory);
+            };
             prepare_assembly(&assembly, &data_directory, &export_directory)
                 .expect(format!("Assembly Prep for {} Failed", &assembly).as_str())
         }
